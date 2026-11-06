@@ -8,7 +8,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#0b0f19">
-  <title>DuoSpend v0.06 — Household Receipt & Expense Tracker</title>
+  <title>DuoSpend v0.07 — Household Receipt & Expense Tracker</title>
 
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -170,6 +170,35 @@
       50% { top: 96%; opacity: 1; }
       100% { top: 0%; opacity: 0.2; }
     }
+  
+    /* Enforced #ffffff font-color for required buttons in all themes (Item 6 & 7) */
+    #btn-add-expense-manual,
+    #btn-scan-receipt,
+    #btn-settle-up,
+    #btn-reset-filters,
+    #chart-mode-toggle-group button.active-chart-mode,
+    #chart-mode-toggle-group button.bg-brand-600 {
+      color: #ffffff !important;
+    }
+
+    #btn-reset-filters {
+      background-color: #334155 !important;
+      color: #ffffff !important;
+      border-color: #475569 !important;
+    }
+    #btn-reset-filters:hover {
+      background-color: #1e293b !important;
+      color: #ffffff !important;
+    }
+
+    /* Restored Left Border Accents on Member Cards (Item 5) */
+    #card-person1-paid {
+      border-left: 4px solid #06b6d4 !important;
+    }
+    #card-person2-paid {
+      border-left: 4px solid #ec4899 !important;
+    }
+
   </style>
 </head>
 
@@ -193,7 +222,7 @@
             <div id="brand-title-row" class="flex items-center gap-2">
               <span class="font-extrabold text-xl tracking-tight text-slate-900 dark:text-white">Duo<span class="text-brand-500">Spend</span></span>
               <span id="app-version-badge"
-                class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-brand-50 text-brand-600 border border-brand-200 dark:bg-slate-800 dark:text-brand-400 dark:border-brand-500/30">v0.06</span>
+                class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-brand-50 text-brand-600 border border-brand-200 dark:bg-slate-800 dark:text-brand-400 dark:border-brand-500/30">v0.07</span>
             </div>
             <p id="brand-subtitle" class="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">Receipt scanning & balanced expense splitting</p>
           </div>
@@ -283,7 +312,7 @@
             </div>
             <div>
               <span class="text-xl sm:text-2xl font-extrabold text-white">Duo<span class="text-brand-500">Spend</span></span>
-              <span class="text-xs font-bold px-2 py-0.5 rounded-full bg-brand-50 text-brand-600 border border-brand-200 dark:bg-slate-800 dark:text-brand-400 dark:border-brand-500/30 ml-1">v0.06</span>
+              <span class="text-xs font-bold px-2 py-0.5 rounded-full bg-brand-50 text-brand-600 border border-brand-200 dark:bg-slate-800 dark:text-brand-400 dark:border-brand-500/30 ml-1">v0.07</span>
             </div>
           </div>
           <button onclick="closeAllModals()"
@@ -295,7 +324,7 @@
         <!-- Google User Account & Security Section -->
         <div id="menu-account-card" class="glass-card rounded-2xl p-4 border border-slate-800 space-y-3">
           <div class="flex items-center justify-end text-xs">
-            <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-semibold flex items-center gap-1.5" id="account-status-badge">
+            <span class="text-[10px] px-1 py-0.5 text-emerald-400 font-semibold flex items-center gap-1.5" id="account-status-badge">
               <i class="fa-brands fa-google text-red-400"></i> Connected
             </span>
           </div>
@@ -373,10 +402,6 @@
               title="Export all receipts and invoices as JSON">
               <i class="fa-solid fa-receipt text-amber-500"></i> <span id="text-btn-invoice-json">Invoices JSON</span>
             </button>
-            <button onclick="loadSampleData()"
-              class="col-span-2 px-3 py-2.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 dark:bg-indigo-950/60 dark:hover:bg-indigo-900/60 dark:border-indigo-700/40 dark:text-indigo-300 font-semibold flex items-center justify-center gap-2 transition cursor-pointer shadow-sm">
-              <i class="fa-solid fa-wand-magic-sparkles text-amber-400"></i> <span id="text-btn-demo">Demo Receipts</span>
-            </button>
           </div>
           <input type="file" id="json-import-input" accept=".json,application/json" class="hidden"
             onchange="handleJSONImport(event)">
@@ -424,7 +449,7 @@
           <i class="fa-regular fa-copyright text-brand-400"></i>
           <span id="menu-credits-text">created by <strong class="text-white font-semibold">Marc Bailey 2026</strong></span>
         </div>
-        <div class="text-xs text-slate-500 mt-1">DuoSpend v0.06 — Android Ready Architecture</div>
+        <div class="text-xs text-slate-500 mt-1">DuoSpend v0.07 — Android Ready Architecture</div>
       </div>
 
     </div>
@@ -459,7 +484,7 @@
 
       <!-- Person 1 Paid Card (Tappable for Person 1 breakdown popup) -->
       <div id="card-person1-paid" onclick="openMemberExpensesModal('p1')"
-        class="glass-card rounded-2xl p-4 sm:p-5 relative overflow-hidden border-l-4 border-l-cyan-500 min-w-0 cursor-pointer hover:border-cyan-500/50 transition"
+        class="glass-card rounded-2xl p-4 sm:p-5 relative overflow-hidden border-l-4 !border-l-cyan-500 min-w-0 cursor-pointer hover:border-cyan-500/50 transition"
         title="Tap to view Marc's expense details">
         <div id="card-person1-header" class="flex items-center justify-between text-slate-400 mb-1">
           <span id="person1-card-label" class="text-xs uppercase tracking-wider font-semibold">Marc Paid</span>
@@ -472,14 +497,14 @@
         <div id="person1-total-paid-amount" class="text-2xl sm:text-3xl font-extrabold text-cyan-400 mt-1">€0.00</div>
         <div id="card-person1-footer"
           class="text-xs text-slate-400 mt-3 pt-3 border-t border-slate-800 flex justify-between">
-          <span id="text-out-of-pocket-p1">Actual out-of-pocket</span>
+          
           <span id="person1-spend-percentage" class="font-semibold text-slate-300">0%</span>
         </div>
       </div>
 
       <!-- Person 2 Paid Card (Tappable for Person 2 breakdown popup) -->
       <div id="card-person2-paid" onclick="openMemberExpensesModal('p2')"
-        class="glass-card rounded-2xl p-4 sm:p-5 relative overflow-hidden border-l-4 border-l-pink-500 min-w-0 cursor-pointer hover:border-pink-500/50 transition"
+        class="glass-card rounded-2xl p-4 sm:p-5 relative overflow-hidden border-l-4 !border-l-pink-500 min-w-0 cursor-pointer hover:border-pink-500/50 transition"
         title="Tap to view Rocio's expense details">
         <div id="card-person2-header" class="flex items-center justify-between text-slate-400 mb-1">
           <span id="person2-card-label" class="text-xs uppercase tracking-wider font-semibold">Rocio Paid</span>
@@ -492,14 +517,14 @@
         <div id="person2-total-paid-amount" class="text-2xl sm:text-3xl font-extrabold text-pink-400 mt-1">€0.00</div>
         <div id="card-person2-footer"
           class="text-xs text-slate-400 mt-3 pt-3 border-t border-slate-800 flex justify-between">
-          <span id="text-out-of-pocket-p2">Actual out-of-pocket</span>
+          
           <span id="person2-spend-percentage" class="font-semibold text-slate-300">0%</span>
         </div>
       </div>
 
       <!-- Who Owes Who Settlement Card with Settle Up Action -->
       <div id="settlement-card"
-        class="glass-card rounded-2xl p-4 sm:p-5 relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950/60 border border-indigo-500/30 min-w-0 flex flex-col justify-between">
+        class="hidden glass-card rounded-2xl p-4 sm:p-5 relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950/60 border border-indigo-500/30 min-w-0 flex flex-col justify-between">
         <div>
           <div id="settlement-card-header" class="flex items-center justify-between text-slate-400 mb-1">
             <span id="text-settlement-title"
@@ -666,10 +691,6 @@
         </div>
         <h3 id="text-empty-title" class="text-sm font-semibold text-slate-300">No expenses found</h3>
         <p id="text-empty-desc" class="text-xs text-slate-500 max-w-sm mx-auto mt-1">Scan a receipt or click "Add Expense" above to start logging household purchases.</p>
-        <button onclick="loadSampleData()"
-          class="mt-4 px-3 py-1.5 text-xs rounded-xl bg-brand-600/20 text-brand-400 hover:bg-brand-600/30 border border-brand-500/30 font-medium cursor-pointer">
-          <span id="text-empty-load-sample">Load Sample Receipts</span>
-        </button>
       </div>
 
       <!-- Footer Stats (Item 2: clearAllExpenses removed) -->
@@ -1433,9 +1454,7 @@
       loadSettings();
       loadExpensesFromStorage();
       loadSettlementsFromStorage();
-      if (expenses.length === 0) {
-        seedDefaultHouseholdData();
-      }
+      
       applyTranslations();
       updateHouseholdUI();
       refreshDashboard();
@@ -1535,8 +1554,6 @@
       document.getElementById('menu-credits-text').innerHTML = `${t.createdCredits} <strong class="text-white font-semibold">Marc Bailey 2026</strong>`;
 
       document.getElementById('text-card-total-spend').innerText = t.totalSpend;
-      document.getElementById('text-out-of-pocket-p1').innerText = t.actualOutOfPocket;
-      document.getElementById('text-out-of-pocket-p2').innerText = t.actualOutOfPocket;
       document.getElementById('text-settlement-title').innerHTML = `<i class="fa-solid fa-scale-balanced text-brand-400"></i> ${t.splitSettlement}`;
       document.getElementById('badge-settlement-fairshare').innerText = t.fairShare;
       document.getElementById('text-btn-settle').innerText = t.settleUp || 'Settle Up';
@@ -1556,7 +1573,7 @@
       document.getElementById('text-btn-import-json').innerText = t.importJSON;
       const invBtn = document.getElementById('text-btn-invoice-json');
       if (invBtn) invBtn.innerText = t.invoicesJSON || 'Invoices JSON';
-      document.getElementById('text-btn-demo').innerText = t.demoReceipts;
+      
       document.getElementById('ledger-search-input').placeholder = t.searchPlaceholder;
       document.getElementById('text-btn-clear-filters').innerText = t.clearFilters;
 
@@ -1570,7 +1587,7 @@
 
       document.getElementById('text-empty-title').innerText = t.noExpenses;
       document.getElementById('text-empty-desc').innerText = t.noExpensesDesc;
-      document.getElementById('text-empty-load-sample').innerText = t.loadSamplesBtn;
+      
 
       document.getElementById('receipt-modal-title-text').innerText = t.addExpenseTitle;
       document.getElementById('receipt-modal-subtitle-text').innerText = t.addExpenseSubtitle;
@@ -1952,7 +1969,7 @@
 
       const exportPayload = {
         app: 'DuoSpend',
-        version: 'v0.06',
+        version: 'v0.07',
         exportType: 'invoices_and_receipts',
         exportTimestamp: new Date().toISOString(),
         totalExpensesCount: invoices.length,
@@ -2076,68 +2093,9 @@
       localStorage.setItem(SETTLEMENTS_KEY, JSON.stringify(settlements));
     }
 
-    function seedDefaultHouseholdData() {
-      expenses = [
-        {
-          id: 'exp_' + Date.now() + '_1',
-          date: getTodayOffset(0),
-          merchant: 'AlCash Supermercado',
-          category: 'Groceries',
-          amount: 54.30,
-          purchaser: 'p1',
-          split: 'home_account',
-          notes: 'Fruta fresca, arroz, aceite de oliva y lácteos'
-        },
-        {
-          id: 'exp_' + Date.now() + '_2',
-          date: getTodayOffset(-1),
-          merchant: 'Lidl',
-          category: 'Groceries',
-          amount: 38.65,
-          purchaser: 'p2',
-          split: 'home_account',
-          notes: 'Productos de panadería, verduras y café'
-        },
-        {
-          id: 'exp_' + Date.now() + '_3',
-          date: getTodayOffset(-3),
-          merchant: 'Mercadona',
-          category: 'Groceries',
-          amount: 47.90,
-          purchaser: 'p1',
-          split: '50/50',
-          notes: 'Salmón fresco, pasta y quesos'
-        },
-        {
-          id: 'exp_' + Date.now() + '_4',
-          date: getTodayOffset(-4),
-          merchant: 'Aldi',
-          category: 'Groceries',
-          amount: 26.50,
-          purchaser: 'p2',
-          split: 'home_account',
-          notes: 'Artículos de limpieza y yogures'
-        },
-        {
-          id: 'exp_' + Date.now() + '_5',
-          date: getTodayOffset(-5),
-          merchant: 'Deza',
-          category: 'Groceries',
-          amount: 32.10,
-          purchaser: 'p1',
-          split: 'home_account',
-          notes: 'Carne y productos locales'
-        }
-      ];
-      saveExpensesToStorage();
-    }
+    
 
-    function loadSampleData() {
-      seedDefaultHouseholdData();
-      refreshDashboard();
-      closeAllModals();
-      showToast(TRANSLATIONS[currentLang].demoReceipts + ' loaded!');
-    }
+    
 
     // MODAL & RECEIPT PRESETS INTERACTION
     function openReceiptModal(mode = 'manual', editId = null) {
@@ -2281,28 +2239,28 @@
       let p1FairShare = 0;
       let p2FairShare = 0;
 
-      // Settlement Math
+      // Actual Amount Paid & Fair Share Calculations (Item 1)
       expenses.forEach(e => {
         const amt = parseFloat(e.amount) || 0;
         total += amt;
 
-        if (e.split === 'home_account') {
-          return; // No personal debtor balances
-        }
-
+        // Actual amount paid by each person (regardless of split policy)
         if (e.purchaser === 'p1') {
           p1Paid += amt;
-        } else {
+        } else if (e.purchaser === 'p2') {
           p2Paid += amt;
         }
 
-        if (e.split === '50/50') {
-          p1FairShare += amt * 0.5;
-          p2FairShare += amt * 0.5;
-        } else if (e.split === '100_P1') {
-          p1FairShare += amt;
-        } else if (e.split === '100_P2') {
-          p2FairShare += amt;
+        // Only calculate debtor fair share if NOT from shared home account
+        if (e.split !== 'home_account') {
+          if (e.split === '50/50') {
+            p1FairShare += amt * 0.5;
+            p2FairShare += amt * 0.5;
+          } else if (e.split === '100_P1') {
+            p1FairShare += amt;
+          } else if (e.split === '100_P2') {
+            p2FairShare += amt;
+          }
         }
       });
 
@@ -2341,17 +2299,17 @@
       if (Math.abs(p1Net) < 0.05) {
         verdictEl.innerHTML = `<span class="text-emerald-400"><i class="fa-solid fa-check-circle mr-1"></i> ${t.allSquaredUp}</span>`;
         detailEl.innerText = `${household.p1Name} & ${household.p2Name} ${t.exactFairShareMsg}`;
-        card.className = "glass-card rounded-2xl p-4 sm:p-5 relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-900 to-emerald-950/40 border border-emerald-500/30 min-w-0 flex flex-col justify-between";
+        card.className = "hidden glass-card rounded-2xl p-4 sm:p-5 relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-900 to-emerald-950/40 border border-emerald-500/30 min-w-0 flex flex-col justify-between";
       } else if (p1Net > 0) {
         const debt = p1Net.toFixed(2);
         verdictEl.innerHTML = `<span class="text-pink-400">${household.p2Name}</span> ${t.owesText} <span class="text-cyan-400">${cur}${debt}</span>`;
         detailEl.innerText = `${household.p2Name} ${t.transferText} ${cur}${debt} to ${household.p1Name} ${t.toEqualize}`;
-        card.className = "glass-card rounded-2xl p-4 sm:p-5 relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-900 to-pink-950/40 border border-pink-500/30 min-w-0 flex flex-col justify-between";
+        card.className = "hidden glass-card rounded-2xl p-4 sm:p-5 relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-900 to-pink-950/40 border border-pink-500/30 min-w-0 flex flex-col justify-between";
       } else {
         const debt = Math.abs(p1Net).toFixed(2);
         verdictEl.innerHTML = `<span class="text-cyan-400">${household.p1Name}</span> ${t.owesText} <span class="text-pink-400">${cur}${debt}</span>`;
         detailEl.innerText = `${household.p1Name} ${t.transferText} ${cur}${debt} to ${household.p2Name} ${t.toEqualize}`;
-        card.className = "glass-card rounded-2xl p-4 sm:p-5 relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-900 to-cyan-950/40 border border-cyan-500/30 min-w-0 flex flex-col justify-between";
+        card.className = "hidden glass-card rounded-2xl p-4 sm:p-5 relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-900 to-cyan-950/40 border border-cyan-500/30 min-w-0 flex flex-col justify-between";
       }
     }
 
@@ -2604,16 +2562,16 @@
       const bPurchaser = document.getElementById('btn-chart-mode-purchaser');
 
       [bCategory, bMerchant, bPurchaser].forEach(b => {
-        b.className = 'px-3 py-1 rounded-lg text-slate-400 hover:text-white transition cursor-pointer';
+        b.className = 'px-3 py-1 rounded-lg text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition cursor-pointer';
+        b.classList.remove('active-chart-mode', 'bg-brand-600', '!text-white');
       });
 
-      if (mode === 'category') {
-        bCategory.className = 'px-3 py-1 rounded-lg text-white bg-brand-600 font-medium transition cursor-pointer';
-      } else if (mode === 'merchant') {
-        bMerchant.className = 'px-3 py-1 rounded-lg text-white bg-brand-600 font-medium transition cursor-pointer';
-      } else {
-        bPurchaser.className = 'px-3 py-1 rounded-lg text-white bg-brand-600 font-medium transition cursor-pointer';
-      }
+      let activeBtn = bCategory;
+      if (mode === 'merchant') activeBtn = bMerchant;
+      else if (mode === 'purchaser') activeBtn = bPurchaser;
+
+      activeBtn.className = 'px-3 py-1 rounded-lg bg-brand-600 !text-white font-medium transition cursor-pointer shadow-sm active-chart-mode';
+      activeBtn.style.color = '#ffffff';
 
       renderBarChart();
     }
@@ -3123,7 +3081,7 @@
     function exportToJSON() {
       const backupData = {
         app: 'DuoSpend',
-        version: 'v0.06',
+        version: 'v0.07',
         exportedAt: new Date().toISOString(),
         household,
         settlements,
@@ -3132,7 +3090,7 @@
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
       const downloadAnchor = document.createElement('a');
       downloadAnchor.setAttribute("href", dataStr);
-      downloadAnchor.setAttribute("download", `DuoSpend_Backup_v0.06_${new Date().toISOString().split('T')[0]}.json`);
+      downloadAnchor.setAttribute("download", `DuoSpend_Backup_v0.07_${new Date().toISOString().split('T')[0]}.json`);
       document.body.appendChild(downloadAnchor);
       downloadAnchor.click();
       downloadAnchor.remove();

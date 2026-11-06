@@ -8,88 +8,73 @@ Git Repository: [https://github.com/DaidalusX78/DuoSpend.git](https://github.com
 - [ ] **1. Test Receipt Import Feature**: Test physical receipt photo capture on device using the camera and smart OCR.
 - [ ] **2. Logo & Assets**: Create custom logo, including `favicon.ico` and PNG favicons.
 - [ ] **3. Real-Time Multi-Device Sync**: Firebase Firestore setup and implementation.
+- [ ] **4. Live Google Account Login**: Integrate Google Identity Services (GIS) / Firebase Auth for active login.
+- [ ] **5. Android Studio Package Structure**: Break up single-page asset into clean project structure for Android Studio importation.
+- [ ] **6. Split Settlement Card**: Re-enable and configure settlement card display when ready.
+
+---
+
+## Version v0.07 (Released November 2026)
+
+### Key Fixes & UI Enhancements:
+- [x] **1. Actual Amount Paid Calculation Fixed**:
+  - Resolved calculation bug in `calculateMetricsAndSettlement()` where expenses split as "Home Account" were prematurely returning and skipping the personal paid totals.
+  - `#person1-total-paid-amount` and `#person2-total-paid-amount` now correctly sum **all** actual expenses paid by each member (including Home Account and shared expenses), accurately reflecting their out-of-pocket spend and percentages.
+- [x] **2. Removed Redundant Out-of-Pocket Label**:
+  - Deleted `#text-out-of-pocket-p1` and `#text-out-of-pocket-p2` ("Actual out-of-pocket") from member cards, leaving a clean percentage indicator right-aligned in the card footer.
+- [x] **3. Cleaned Account Status Badge**:
+  - Removed background color (`bg-emerald-500/20`) from `#account-status-badge`, leaving a clean emerald text/icon indicator.
+- [x] **4. Removed All Demo & Sample Receipts**:
+  - Completely removed mock seeded demo expenses, `loadSampleData()`, and `seedDefaultHouseholdData()`.
+  - DuoSpend now starts with a completely clean, empty ledger for real personal receipts.
+- [x] **5. Restored Member Card Left Border Accents**:
+  - Restored distinct left border accents (`border-left: 4px solid #06b6d4` for Marc and `border-left: 4px solid #ec4899` for Rocio) with `!important` to prevent CSS glass-card styling overrides.
+- [x] **6. High-Contrast White Font Color (#ffffff) in Light Mode**:
+  - Enforced `#ffffff` font color (`!important`) across all key action buttons in light and dark mode:
+    - `#btn-add-expense-manual`
+    - `#btn-scan-receipt`
+    - `#btn-settle-up`
+    - `#btn-reset-filters`
+- [x] **7. Active Chart Mode Button White Text (#ffffff)**:
+  - Enforced `#ffffff` font color on selected and highlighted chart mode buttons in `#chart-mode-toggle-group`.
+- [x] **8. Temporarily Hidden Settlement Card**:
+  - Hidden `#settlement-card` for the moment and adjusted the hero KPI grid to a balanced 3-column layout (`Total Spend`, `Marc Paid`, `Rocio Paid`).
+- [x] **9. Version Control**: Bumped codebase and documentation to `v0.07`.
 
 ---
 
 ## Version v0.06 (Released November 2026)
 
 ### Key Improvements & Enhancements:
-- [x] **1. Inline Header & Hamburger Menu**:
-  - Re-anchored `#hamburger-menu-wrapper` inline with `#brand-logo-section` on the right with proper spacing and padding matching the main content cards.
-  - Added dedicated mobile hamburger button (`#btn-hamburger-menu-mobile`) inline with the brand logo on mobile header, keeping action buttons neatly positioned beneath.
-- [x] **2. Real Client-Side Receipt OCR (Tesseract.js & Smart Parser)**:
-  - Replaced random data generation with **real on-device OCR** powered by Tesseract.js.
-  - Added smart parsing engine detecting:
-    - **Merchant**: Automatic detection of top retail & supermarkets (Mercadona, Lidl, Aldi, AlCash, Deza, Carrefour, Dia, Repsol, Cepsa, etc.) or header text.
-    - **Total Amount**: Prioritized regex detection of `TOTAL`, `TOTAL (€)`, `IMPORTE`, `A PAGAR`, `TARJETA`, or highest monetary figure.
-    - **Date**: Formats detected `DD/MM/YYYY` into standard `YYYY-MM-DD`.
-    - **Category**: Classifies into Food Shopping, Eating Out, Fuel, Clothes, or Other.
-    - **Notes**: Extracts line-item snippets.
-  - Added visual scanning overlay modal with live percentage progress bar.
-  - Added captured receipt thumbnail preview inside the expense entry form so users can easily inspect and verify their photo.
-  - **Never** injects fake random numbers: if an amount is ambiguous, leaves the field ready and focused with the receipt photo right above it.
-- [x] **3. Removed Duplicate Subheading**:
-  - Deleted `#subheading-ledger-desc` ("Search expenses.") as it was redundant beneath `#heading-ledger-title` ("Expenses Search").
-- [x] **4. High-Contrast Drawer Button Design & Light/Dark Theming**:
-  - Replicated `#btn-theme-toggle` styling (clear borders, high-contrast text, smooth hover states) across all drawer buttons in both Dark and Light modes.
-  - Updated all elements in light mode:
-    - `app-version-badge` and drawer version badge: `bg-brand-50 text-brand-600 border border-brand-200 dark:bg-slate-800 dark:text-brand-400 dark:border-brand-500/30`.
-    - `exportToCSV()`, `exportToJSON()`, `triggerJSONImport()`, and `loadSampleData()`.
-    - Added `invoiceToJSON()`: Exports itemized receipts and invoices to a formatted JSON file.
-    - `resetFilters()` button: Styled with clean light/dark mode classes.
-    - `ledger-footer-toolbar`: Polished border and text contrast.
-- [x] **5. Streamlined Drawer Account Header**:
-  - Removed bulky "Google Account & Security" header text, leaving a sleek, compact status badge: `<span id="account-status-badge"><i class="fa-brands fa-google text-red-400"></i> Connected</span>`.
-- [x] **6. Simplified Theme Mode Text**:
-  - `#text-theme-mode` now displays exclusively `"Light Mode"` and `"Dark Mode"` (and `"Modo Claro"` / `"Modo Oscuro"` in Spanish).
-- [x] **7. Google Account Status Clarification**:
-  - Clarified that Google Login is currently an interactive frontend prototype. Outlined integration steps for live Google Identity Services / Firebase Authentication.
-- [x] **8. Intuitive Full-Row Receipt Viewer**:
-  - Removed the standalone receipt button from ledger rows.
-  - Made the **entire row** of each expense record clickable (`onclick="viewReceiptImage('${item.id}')"`), opening the full receipt photo viewer modal.
-  - Preserved Edit and Delete buttons with `event.stopPropagation()`. Applied across main ledger, member breakdown modal, and category breakdown modal.
+- [x] **1. Inline Header & Hamburger Menu**: Re-anchored `#hamburger-menu-wrapper` inline with `#brand-logo-section` on the right with proper spacing and padding matching the main content cards. Added mobile hamburger button (`#btn-hamburger-menu-mobile`) inline with the brand logo.
+- [x] **2. Real Client-Side Receipt OCR (Tesseract.js & Smart Parser)**: Replaced random data generation with **real on-device OCR** powered by Tesseract.js. Added smart regex parsing for merchant, total amount, date, and category. Added scanning progress overlay and form thumbnail preview.
+- [x] **3. Removed Duplicate Subheading**: Deleted `#subheading-ledger-desc` ("Search expenses.").
+- [x] **4. High-Contrast Drawer Button Design & Light/Dark Theming**: Replicated `#btn-theme-toggle` styling across all drawer buttons in both Dark and Light modes. Added `invoiceToJSON()` export utility.
+- [x] **5. Streamlined Drawer Account Header**: Removed bulky header text, leaving a sleek status badge.
+- [x] **6. Simplified Theme Mode Text**: `#text-theme-mode` now displays exclusively `"Light Mode"` and `"Dark Mode"`.
+- [x] **7. Google Account Status Clarification**: Clarified interactive prototype state and provided roadmap for GIS / Firebase Auth.
+- [x] **8. Intuitive Full-Row Receipt Viewer**: Removed standalone icon; entire ledger rows are now clickable to view receipts with `event.stopPropagation()` on edit/delete.
 - [x] **9. Version Control**: Updated codebase to `v0.06`.
 
 ---
 
 ## Version v0.05 (Released November 2026)
 
-### Accessibility & Form Field Associations:
-- [x] **1. Form Field `<label>` Associations**: Resolved all 10+ browser DevTools / WCAG accessibility issues (`A <label> isn’t associated with a form field`).
-  - Added explicit `for="..."` attributes linking every `<label>` to its respective `<input>`, `<select>`, and `<textarea>` controls across all forms and modals (Expense Details, Household Settings, Settle Up, and radio selectors).
-  - Tapping or clicking any label now automatically transfers focus and toggles form controls seamlessly.
-- [x] **2. Version Bump**: Updated application title, brand badges, drawer badges, and code metadata to `v0.05`.
+- [x] Form Field `<label>` associations resolved across all 13 forms and modals to eliminate 10+ browser DevTools / WCAG accessibility issues.
+- [x] Version control bump to `v0.05`.
 
 ---
 
 ## Version v0.04 (Released November 2026)
 
-### Key Features & Architectural Improvements:
-- [x] **1. Android App Conversion Readiness**: Structured as a clean, self-contained single-page application (SPA) optimized for Android Studio `WebView` embedding. Added Android/PWA meta tags (`mobile-web-app-capable`, `theme-color`, flexible viewport).
-- [x] **2. Calendar Month Ledger View**: Removed legacy `clearAllExpenses()` button; default ledger display now shows the active calendar month (clearing the visual ledger on the 1st of each month while retaining historic records in storage). Added a dynamic Month/Year selector dropdown to browse historical months or view All time.
-- [x] **3. Drawer Menu Far Right**: Re-anchored the off-canvas drawer menu to the far right with a slide-in panel.
-- [x] **4. Select Chevron Padding**: Added `padding-right` (`pr-9` / `pr-8`) to all custom select dropdowns (`#expense-category-select`, `#expense-split-policy-select`, `#ledger-month-filter`, etc.) preventing text from overlapping down arrows.
-- [x] **5. Updated Expense Categories**: Aligned categories to:
-  - Food Shopping (`Groceries`)
-  - Eating Out (`Dining Out`)
-  - Fuel (`Transit`)
-  - Clothes (`Clothes`)
-  - Other (`Other`)
-- [x] **6. Multi-Device Sync Explanation**: Clarified `localStorage` device-local limitations and outlined cloud sync paths (Firebase Firestore / Supabase / Google Drive) for multi-device sync.
-- [x] **7. Google Account & Security**: Added Google Account card in the drawer menu displaying user profile, sign-in/sign-out controls, App Lock simulation toggle, and Cloud Sync indicators.
-- [x] **8. Right-Hand Drawer Overlay**: Positioned `#hamburger-drawer-overlay` on the right side with 75% screen width and 25% blurred backdrop.
-- [x] **9. Day / Night Mode**: Added smooth theme toggle in the drawer menu with custom inline SVG sun and moon icons, persisting user theme preference in `localStorage`.
-- [x] **10. Streamlined Scan Button**: Updated `#text-btn-scan` to "Scan" (removed "Receipt" for cleaner mobile button proportions).
-- [x] **11. Receipt Image Viewer**: Added receipt preview icon button to each table row and mobile card in the ledger, allowing users to view the captured photo in a zoomable modal.
-- [x] **12. Relocated Export/Import**: Moved CSV export, JSON export, and JSON import buttons from the main ledger toolbar into the drawer menu under "Data & Backup".
-- [x] **13. Visual Payer Highlight**: Added left border color indicator (`border-l-4 border-cyan-500` for Person 1, `border-pink-500` for Person 2, `border-indigo-500` for Home Account) on every ledger record.
-- [x] **14. Renamed Ledger Titles**: Changed `#heading-ledger-title` to "Expenses Search" and `#subheading-ledger-desc` to "Search expenses."
-- [x] **15. Member Expenses Modal**: Tapping `#card-person1-paid` or `#card-person2-paid` opens a dedicated breakdown modal displaying all expenses for that member, formatted like the ledger table with a month filter dropdown.
-- [x] **16. Settle Up Flow**: Added interactive "Settle Up" modal to `#card-settlement-balance` to record debt payments (e.g., Bizum, Cash, Bank Transfer), updating balances and recording audit logs.
-- [x] **17. Dynamic Initial Badges**: Automatically displays `MB` for Marc, `RJ` for Rocio, `EB` for Elisa, with custom badge initial and accent color overrides in Household Settings.
-- [x] **18. Default Category Bar Chart & Tap Breakdown**: Set category breakdown as the default bar chart mode. Tapping any bar opens a popup modal with all expenses for that category in the current month.
-- [x] **19. Universal Modal Dismissal**: Enabled closing all modals and popups via the close button, "X" icon, pressing `Escape`, or tapping anywhere on the darkened backdrop.
-- [x] **20. Active Bilingual Translations**: Enabled complete Spanish (Castellano) and English translations for categories, `#ledger-category-filter`, and `#ledger-purchaser-filter`.
+- [x] Android Studio WebView optimization and mobile meta tags.
+- [x] Current calendar month default view (clears visual ledger from 1st of each month with historic month dropdown).
+- [x] Right-side drawer menu layout (75% width, 25% blurred backdrop).
+- [x] Right-padding on select chevron down arrows.
+- [x] Streamlined expense categories (Food Shopping, Eating Out, Fuel, Clothes, Other).
+- [x] Settle Up modal and payment logging.
+- [x] Dynamic member badges (MB, RJ, EB).
+- [x] Default category bar chart with interactive tap breakdown.
 
 ---
 
@@ -99,17 +84,8 @@ Git Repository: [https://github.com/DaidalusX78/DuoSpend.git](https://github.com
 - [x] Direct device camera photo capture on Scan button.
 - [x] Main file renamed to `duospend.html`.
 - [x] JSON data import with schema validation.
-- [x] Multi-currency support (EUR € default, USD, GBP, CHF, JPY, CAD, AUD, PLN).
-- [x] Expanded off-canvas drawer menu (75% width, blurred 25% backdrop).
-- [x] Viewport zoom stability fixes in Chrome Live Server.
-- [x] Relocated hamburger menu to header right.
-- [x] Unified header action button sizing (+25% font size).
-- [x] Combined household pill and settings button.
-- [x] Fast presets for top 5 merchants (AlCash, Lidl, Aldi, Mercadona, Deza).
-- [x] "Home Account" split policy as default.
-- [x] Added merchant spending distribution chart.
+- [x] Multi-currency support (EUR € default).
 - [x] Spanish (Castellano) language switcher with SVG flags and persistence.
-- [x] Version control numbering.
 
 ---
 
