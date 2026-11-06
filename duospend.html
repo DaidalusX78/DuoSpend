@@ -8,10 +8,12 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#0b0f19">
-  <title>DuoSpend v0.05 — Household Receipt & Expense Tracker</title>
+  <title>DuoSpend v0.06 — Household Receipt & Expense Tracker</title>
 
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Tesseract.js for Real Client-Side Receipt OCR -->
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
   <!-- Chart.js for interactive analytics -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <!-- Font Awesome for clean icons -->
@@ -176,66 +178,81 @@
   <!-- ========================================== -->
   <!-- TOP NAVIGATION BAR                         -->
   <!-- ========================================== -->
-  <header id="app-top-header" class="sticky top-0 z-40 glass-card border-b border-slate-800/80 px-4 lg:px-8 py-3.5">
-    <div id="header-inner-container" class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+  <header id="app-top-header" class="sticky top-0 z-40 glass-card border-b border-slate-200 dark:border-slate-800/80 px-4 lg:px-8 py-3 sm:py-3.5">
+    <div id="header-inner-container" class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-3">
 
-      <!-- Left Group: Brand Logo -->
-      <div id="brand-logo-section" class="flex items-center space-x-3">
-        <div id="brand-logo-icon"
-          class="h-10 w-10 rounded-xl bg-gradient-to-tr from-brand-600 via-indigo-500 to-cyan-400 flex items-center justify-center text-white shadow-lg shadow-brand-500/25">
-          <i class="fa-solid fa-receipt text-lg"></i>
-        </div>
-        <div id="brand-title-group">
-          <div id="brand-title-row" class="flex items-center gap-2">
-            <span class="font-extrabold text-xl tracking-tight text-white">Duo<span class="text-brand-500">Spend</span></span>
-            <span id="app-version-badge"
-              class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-800 text-brand-400 border border-brand-500/30">v0.05</span>
+      <!-- Top Row on Mobile / Left Group on Desktop: Brand Logo + Mobile Hamburger -->
+      <div id="brand-header-row" class="flex items-center justify-between w-full md:w-auto">
+        <!-- Left Group: Brand Logo -->
+        <div id="brand-logo-section" class="flex items-center space-x-3">
+          <div id="brand-logo-icon"
+            class="h-10 w-10 rounded-xl bg-gradient-to-tr from-brand-600 via-indigo-500 to-cyan-400 flex items-center justify-center text-white shadow-lg shadow-brand-500/25">
+            <i class="fa-solid fa-receipt text-lg"></i>
           </div>
-          <p id="brand-subtitle" class="text-xs text-slate-400 hidden sm:block">Receipt scanning & balanced expense splitting</p>
+          <div id="brand-title-group">
+            <div id="brand-title-row" class="flex items-center gap-2">
+              <span class="font-extrabold text-xl tracking-tight text-slate-900 dark:text-white">Duo<span class="text-brand-500">Spend</span></span>
+              <span id="app-version-badge"
+                class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-brand-50 text-brand-600 border border-brand-200 dark:bg-slate-800 dark:text-brand-400 dark:border-brand-500/30">v0.06</span>
+            </div>
+            <p id="brand-subtitle" class="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">Receipt scanning & balanced expense splitting</p>
+          </div>
+        </div>
+
+        <!-- Mobile Hamburger Button (inline to brand logo on mobile right) -->
+        <div id="hamburger-menu-mobile-wrapper" class="md:hidden">
+          <button id="btn-hamburger-menu-mobile" onclick="toggleHamburgerMenu()"
+            class="h-11 w-11 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-slate-700 flex items-center justify-center transition shadow-sm cursor-pointer"
+            title="Menu">
+            <i class="fa-solid fa-bars text-lg"></i>
+          </button>
         </div>
       </div>
 
-      <!-- Right Group: Actions + Far-Right Hamburger Menu -->
-      <div id="header-actions-group" class="flex items-center gap-2.5 sm:gap-3 ml-auto">
+      <!-- Actions Group & Desktop Hamburger (Inline to Brand Logo on the Right with relevant padding) -->
+      <div id="header-actions-group" class="flex items-center justify-between md:justify-end gap-2.5 sm:gap-3 w-full md:w-auto">
         <!-- Household Members Pill Button (No &, entire pill is clickable button) -->
         <button id="household-members-pill" onclick="openSettingsModal()"
-          class="h-11 px-3 sm:px-4 flex items-center gap-2.5 bg-slate-900/90 hover:bg-slate-800 border border-slate-800 hover:border-slate-700 rounded-xl transition shadow-inner cursor-pointer"
-          title="Household Settings">
-          <span class="inline-flex items-center gap-1.5 text-sm sm:text-base font-semibold text-cyan-400">
-            <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 shadow-sm shadow-cyan-400/50"></span>
-            <span id="nav-person1-name">Marc</span>
-          </span>
-          <span class="inline-flex items-center gap-1.5 text-sm sm:text-base font-semibold text-pink-400">
-            <span class="w-2.5 h-2.5 rounded-full bg-pink-400 shadow-sm shadow-pink-400/50"></span>
-            <span id="nav-person2-name">Rocio</span>
-          </span>
+          class="h-11 px-3 sm:px-4 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800/80 dark:hover:bg-slate-700/80 border border-slate-200 dark:border-slate-700/80 text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-2 transition cursor-pointer shadow-sm active:scale-95"
+          title="Manage Household Members">
+          <div class="flex -space-x-1.5" id="members-avatars-group">
+            <div id="avatar-circle-p1"
+              class="w-6 h-6 rounded-full bg-gradient-to-br from-cyan-400 to-cyan-600 flex items-center justify-center text-[10px] text-white font-bold border border-slate-900">
+              <span id="badge-avatar-p1">MB</span>
+            </div>
+            <div id="avatar-circle-p2"
+              class="w-6 h-6 rounded-full bg-gradient-to-br from-pink-400 to-pink-600 flex items-center justify-center text-[10px] text-white font-bold border border-slate-900">
+              <span id="badge-avatar-p2">RJ</span>
+            </div>
+          </div>
+          <span id="header-household-name" class="font-medium text-slate-700 dark:text-slate-300">Marc, Rocio</span>
         </button>
 
-        <!-- Quick Action: Add Expense -->
+        <!-- Add Expense Manual Button -->
         <button id="btn-add-expense-manual" onclick="openReceiptModal('manual')"
-          class="h-11 px-3 sm:px-4 bg-brand-600 hover:bg-brand-500 text-white text-sm sm:text-base font-semibold rounded-xl flex items-center gap-2 shadow-lg shadow-brand-600/30 transition duration-150 active:scale-95 cursor-pointer">
-          <i class="fa-solid fa-plus"></i>
+          class="h-11 px-3 sm:px-4 bg-brand-600 hover:bg-brand-500 text-white text-xs sm:text-sm font-semibold rounded-xl flex items-center gap-2 shadow-lg shadow-brand-500/20 transition duration-150 active:scale-95 cursor-pointer"
+          title="Add expense record manually">
+          <i class="fa-solid fa-plus text-xs"></i>
           <span class="hidden sm:inline" id="text-btn-add">Add Expense</span>
           <span class="sm:hidden" id="text-btn-add-short">Add</span>
         </button>
 
         <!-- Receipt Camera Import Button (Direct photo capture from device) -->
         <button id="btn-scan-receipt" onclick="triggerDirectScan()"
-          class="h-11 px-3 sm:px-4 bg-gradient-to-r from-cyan-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 text-white text-sm sm:text-base font-semibold rounded-xl flex items-center gap-2 shadow-lg shadow-cyan-500/20 transition duration-150 active:scale-95 cursor-pointer"
+          class="h-11 px-3 sm:px-4 bg-gradient-to-r from-cyan-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 text-white text-xs sm:text-sm font-semibold rounded-xl flex items-center gap-2 shadow-lg shadow-cyan-500/20 transition duration-150 active:scale-95 cursor-pointer"
           title="Take photo or import directly from device">
-          <i class="fa-solid fa-camera"></i>
-          <!-- Removed "Receipt" text: now just "Scan" -->
+          <i class="fa-solid fa-camera text-xs"></i>
           <span id="text-btn-scan">Scan</span>
         </button>
         <input type="file" id="direct-camera-input" accept="image/*" capture="environment" class="hidden"
           onchange="handleDirectCapture(event)">
 
-        <!-- Hamburger Menu Wrapper (Far-Right) -->
-        <div id="hamburger-menu-wrapper" class="relative">
-          <button id="btn-hamburger-menu" onclick="toggleHamburgerMenu(event)"
-            class="w-11 h-11 rounded-xl bg-slate-900/90 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 flex items-center justify-center transition shadow-inner cursor-pointer"
-            title="Menu & Settings" aria-label="Open menu">
-            <i id="hamburger-menu-icon" class="fa-solid fa-bars text-lg"></i>
+        <!-- Hamburger Menu Wrapper (Far-Right Desktop: Inline with Brand Logo on the Right with relevant padding) -->
+        <div id="hamburger-menu-wrapper" class="hidden md:block pl-2">
+          <button id="btn-hamburger-menu" onclick="toggleHamburgerMenu()"
+            class="h-11 w-11 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-slate-700 flex items-center justify-center transition shadow-sm cursor-pointer"
+            title="Menu">
+            <i class="fa-solid fa-bars text-lg"></i>
           </button>
         </div>
       </div>
@@ -266,7 +283,7 @@
             </div>
             <div>
               <span class="text-xl sm:text-2xl font-extrabold text-white">Duo<span class="text-brand-500">Spend</span></span>
-              <span class="text-xs font-bold px-2 py-0.5 rounded-full bg-slate-800 text-brand-400 border border-brand-500/30 ml-1">v0.05</span>
+              <span class="text-xs font-bold px-2 py-0.5 rounded-full bg-brand-50 text-brand-600 border border-brand-200 dark:bg-slate-800 dark:text-brand-400 dark:border-brand-500/30 ml-1">v0.06</span>
             </div>
           </div>
           <button onclick="closeAllModals()"
@@ -277,12 +294,9 @@
 
         <!-- Google User Account & Security Section -->
         <div id="menu-account-card" class="glass-card rounded-2xl p-4 border border-slate-800 space-y-3">
-          <div class="flex items-center justify-between text-xs text-slate-400">
-            <span class="font-bold uppercase tracking-wider flex items-center gap-1.5" id="label-account-security">
-              <i class="fa-brands fa-google text-red-400"></i> Google Account & Security
-            </span>
-            <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-semibold" id="account-status-badge">
-              Connected
+          <div class="flex items-center justify-end text-xs">
+            <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-semibold flex items-center gap-1.5" id="account-status-badge">
+              <i class="fa-brands fa-google text-red-400"></i> Connected
             </span>
           </div>
           <div class="flex items-center gap-3">
@@ -305,7 +319,7 @@
         <!-- Day / Night Mode Toggle -->
         <div class="pt-2">
           <button id="btn-theme-toggle" onclick="toggleTheme()"
-            class="w-full flex items-center justify-between px-4 py-3.5 text-base sm:text-lg font-semibold text-slate-200 hover:text-white hover:bg-slate-800/90 rounded-2xl transition cursor-pointer border border-slate-800">
+            class="w-full flex items-center justify-between px-4 py-3.5 text-base sm:text-lg font-semibold text-slate-800 dark:text-slate-100 hover:text-slate-900 dark:hover:text-white bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200/80 dark:hover:bg-slate-700/80 border border-slate-200 dark:border-slate-700/80 rounded-2xl transition cursor-pointer shadow-sm">
             <div class="flex items-center gap-3.5">
               <span id="theme-toggle-icon">
                 <!-- Sun / Moon SVG icons -->
@@ -313,7 +327,7 @@
                   <path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
                 </svg>
               </span>
-              <span id="text-theme-mode">Day / Light Mode</span>
+              <span id="text-theme-mode">Light Mode</span>
             </div>
             <span class="text-xs px-2.5 py-1 rounded-full bg-slate-800 text-slate-400 font-mono" id="theme-badge">Dark</span>
           </button>
@@ -323,43 +337,49 @@
         <nav class="space-y-3">
           <!-- Fullscreen Option -->
           <button id="btn-toggle-fullscreen" onclick="toggleFullscreen(); closeAllModals();"
-            class="w-full flex items-center gap-4 px-4 py-3.5 text-base sm:text-lg font-semibold text-slate-200 hover:text-white hover:bg-slate-800/90 rounded-2xl transition cursor-pointer">
+            class="w-full flex items-center gap-4 px-4 py-3.5 text-base sm:text-lg font-semibold text-slate-800 dark:text-slate-100 hover:text-slate-900 dark:hover:text-white bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200/80 dark:hover:bg-slate-700/80 border border-slate-200 dark:border-slate-700/80 rounded-2xl transition cursor-pointer shadow-sm">
             <i id="icon-toggle-fullscreen" class="fa-solid fa-expand text-brand-400 text-xl w-6 text-center"></i>
             <span id="text-toggle-fullscreen">Fullscreen</span>
           </button>
 
           <!-- Household Settings Option -->
           <button id="btn-menu-settings" onclick="openSettingsModal(); closeAllModals();"
-            class="w-full flex items-center gap-4 px-4 py-3.5 text-base sm:text-lg font-semibold text-slate-200 hover:text-white hover:bg-slate-800/90 rounded-2xl transition cursor-pointer">
+            class="w-full flex items-center gap-4 px-4 py-3.5 text-base sm:text-lg font-semibold text-slate-800 dark:text-slate-100 hover:text-slate-900 dark:hover:text-white bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200/80 dark:hover:bg-slate-700/80 border border-slate-200 dark:border-slate-700/80 rounded-2xl transition cursor-pointer shadow-sm">
             <i class="fa-solid fa-gear text-slate-400 text-xl w-6 text-center"></i>
             <span id="text-menu-settings">Household Settings</span>
           </button>
         </nav>
 
-        <!-- Moved Data Management & Export/Import Options (Item 12) -->
-        <div class="pt-4 border-t border-slate-800 space-y-2.5">
-          <div class="px-2 text-xs uppercase tracking-wider font-bold text-slate-400" id="label-menu-data">
-            Data Backup & Import
+        <!-- Moved Data Management & Export/Import Options (Replicated btn-theme-toggle design) -->
+        <div class="pt-4 border-t border-slate-200 dark:border-slate-800 space-y-2.5">
+          <div class="px-2 text-xs uppercase tracking-wider font-bold text-slate-500 dark:text-slate-400" id="label-menu-data">
+            Data Backup & Invoices
           </div>
           <div class="grid grid-cols-2 gap-2 text-xs">
             <button onclick="exportToCSV()"
-              class="px-3 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold flex items-center justify-center gap-2 transition cursor-pointer">
-              <i class="fa-solid fa-file-csv text-emerald-400"></i> <span id="text-btn-export-csv">Export CSV</span>
+              class="px-3 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 dark:bg-slate-800/80 dark:hover:bg-slate-700/90 dark:text-slate-100 dark:border-slate-700/80 font-semibold flex items-center justify-center gap-2 transition cursor-pointer shadow-sm">
+              <i class="fa-solid fa-file-csv text-emerald-500"></i> <span id="text-btn-export-csv">Export CSV</span>
             </button>
             <button onclick="exportToJSON()"
-              class="px-3 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold flex items-center justify-center gap-2 transition cursor-pointer">
-              <i class="fa-solid fa-download text-indigo-400"></i> <span id="text-btn-backup-json">Backup JSON</span>
+              class="px-3 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 dark:bg-slate-800/80 dark:hover:bg-slate-700/90 dark:text-slate-100 dark:border-slate-700/80 font-semibold flex items-center justify-center gap-2 transition cursor-pointer shadow-sm">
+              <i class="fa-solid fa-download text-indigo-500"></i> <span id="text-btn-backup-json">Backup JSON</span>
             </button>
             <button onclick="triggerJSONImport()"
-              class="px-3 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold flex items-center justify-center gap-2 transition cursor-pointer">
-              <i class="fa-solid fa-upload text-cyan-400"></i> <span id="text-btn-import-json">Import JSON</span>
+              class="px-3 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 dark:bg-slate-800/80 dark:hover:bg-slate-700/90 dark:text-slate-100 dark:border-slate-700/80 font-semibold flex items-center justify-center gap-2 transition cursor-pointer shadow-sm">
+              <i class="fa-solid fa-upload text-cyan-500"></i> <span id="text-btn-import-json">Import JSON</span>
+            </button>
+            <button onclick="invoiceToJSON()"
+              class="px-3 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 dark:bg-slate-800/80 dark:hover:bg-slate-700/90 dark:text-slate-100 dark:border-slate-700/80 font-semibold flex items-center justify-center gap-2 transition cursor-pointer shadow-sm"
+              title="Export all receipts and invoices as JSON">
+              <i class="fa-solid fa-receipt text-amber-500"></i> <span id="text-btn-invoice-json">Invoices JSON</span>
             </button>
             <button onclick="loadSampleData()"
-              class="px-3 py-2.5 rounded-xl bg-indigo-950/60 hover:bg-indigo-900/60 border border-indigo-700/40 text-indigo-300 font-semibold flex items-center justify-center gap-2 transition cursor-pointer">
+              class="col-span-2 px-3 py-2.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 dark:bg-indigo-950/60 dark:hover:bg-indigo-900/60 dark:border-indigo-700/40 dark:text-indigo-300 font-semibold flex items-center justify-center gap-2 transition cursor-pointer shadow-sm">
               <i class="fa-solid fa-wand-magic-sparkles text-amber-400"></i> <span id="text-btn-demo">Demo Receipts</span>
             </button>
           </div>
-          <input type="file" id="json-import-input" accept=".json,application/json" class="hidden" onchange="handleJSONImport(event)">
+          <input type="file" id="json-import-input" accept=".json,application/json" class="hidden"
+            onchange="handleJSONImport(event)">
         </div>
 
         <!-- Language Selector: SVG Flags Only -->
@@ -404,7 +424,7 @@
           <i class="fa-regular fa-copyright text-brand-400"></i>
           <span id="menu-credits-text">created by <strong class="text-white font-semibold">Marc Bailey 2026</strong></span>
         </div>
-        <div class="text-xs text-slate-500 mt-1">DuoSpend v0.05 — Android Ready Architecture</div>
+        <div class="text-xs text-slate-500 mt-1">DuoSpend v0.06 — Android Ready Architecture</div>
       </div>
 
     </div>
@@ -568,7 +588,6 @@
             <h2 id="heading-ledger-title" class="text-lg font-bold text-white flex items-center gap-2">
               <i class="fa-solid fa-magnifying-glass text-indigo-400"></i> Expenses Search
             </h2>
-            <p id="subheading-ledger-desc" class="text-xs text-slate-400">Search expenses.</p>
           </div>
 
           <!-- Month Selector Filter: Defaults to Current Calendar Month (Item 2) -->
@@ -655,7 +674,7 @@
 
       <!-- Footer Stats (Item 2: clearAllExpenses removed) -->
       <div id="ledger-footer-toolbar"
-        class="bg-slate-900/50 px-4 py-3 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
+        class="bg-slate-50 dark:bg-slate-900/50 px-4 py-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs text-slate-600 dark:text-slate-400">
         <span id="ledger-filtered-count-info">Showing 0 of 0 entries</span>
         <span class="text-slate-500 text-[11px]"><i class="fa-solid fa-calendar-check text-cyan-400 mr-1"></i> Current Month View Active</span>
       </div>
@@ -725,6 +744,23 @@
               class="hidden text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
               <i class="fa-solid fa-check mr-1"></i> <span id="text-badge-ocr">Captured</span>
             </span>
+          </div>
+
+          
+          <!-- Captured Photo Thumbnail in Form (Item 2) -->
+          <div id="form-receipt-photo-preview" class="hidden rounded-xl overflow-hidden border border-slate-800 bg-slate-950/80 p-2.5 flex items-center justify-between gap-3">
+            <div class="flex items-center gap-3 min-w-0">
+              <img id="form-receipt-thumbnail-img" src="" alt="Receipt Thumbnail" class="w-12 h-12 object-cover rounded-lg border border-slate-700 cursor-pointer" onclick="viewCapturedPhotoFull()">
+              <div class="truncate">
+                <div class="text-xs font-bold text-white flex items-center gap-1.5">
+                  <i class="fa-solid fa-camera text-cyan-400"></i> <span id="form-receipt-photo-label">Receipt Photo Captured</span>
+                </div>
+                <div class="text-[10px] text-slate-400 truncate" id="form-receipt-photo-sub">Click thumbnail to inspect full receipt</div>
+              </div>
+            </div>
+            <button type="button" onclick="viewCapturedPhotoFull()" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-cyan-400 border border-slate-700 transition cursor-pointer">
+              Inspect
+            </button>
           </div>
 
           <div id="expense-form-fields-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
@@ -1105,6 +1141,34 @@
     </div>
   </div>
 
+  
+  <!-- ========================================== -->
+  <!-- REAL OCR SCANNING OVERLAY MODAL (Item 2)   -->
+  <!-- ========================================== -->
+  <div id="ocr-scanning-overlay" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden flex flex-col items-center justify-center p-4">
+    <div class="glass-modal rounded-3xl p-6 sm:p-8 max-w-sm w-full text-center space-y-5 border border-cyan-500/40 shadow-2xl animate-in zoom-in-95 duration-200">
+      <div class="relative w-20 h-20 mx-auto">
+        <div class="absolute inset-0 rounded-2xl bg-cyan-500/20 animate-ping"></div>
+        <div class="relative w-20 h-20 rounded-2xl bg-gradient-to-tr from-cyan-600 to-indigo-600 flex items-center justify-center text-white text-3xl shadow-lg shadow-cyan-500/30">
+          <i class="fa-solid fa-receipt"></i>
+        </div>
+      </div>
+      <div>
+        <h4 class="text-base sm:text-lg font-bold text-white flex items-center justify-center gap-2" id="ocr-modal-title">
+          <i class="fa-solid fa-wand-magic-sparkles text-cyan-400"></i> Smart Receipt OCR
+        </h4>
+        <p class="text-xs text-slate-400 mt-1" id="ocr-status-text">Analyzing receipt image & text...</p>
+      </div>
+      <!-- Progress Bar -->
+      <div class="w-full bg-slate-950 rounded-full h-2.5 overflow-hidden border border-slate-800">
+        <div id="ocr-progress-bar" class="bg-gradient-to-r from-cyan-500 to-indigo-500 h-2.5 rounded-full transition-all duration-300" style="width: 15%"></div>
+      </div>
+      <div class="flex items-center justify-center gap-2 text-[11px] text-slate-400 font-mono">
+        <i class="fa-solid fa-shield-halved text-emerald-400"></i> 100% On-Device Client OCR
+      </div>
+    </div>
+  </div>
+
   <!-- TOAST NOTIFICATION CONTAINER -->
   <div id="toast-notifications-container" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
@@ -1191,6 +1255,7 @@
         exportCSV: 'Export CSV',
         backupJSON: 'Backup JSON',
         importJSON: 'Import JSON',
+        invoicesJSON: 'Invoices JSON',
         demoReceipts: 'Demo Receipts',
         searchPlaceholder: 'Search merchant, item, note...',
         allCategories: 'All Categories',
@@ -1252,7 +1317,8 @@
         currentMonth: 'Current Month',
         allTime: 'All Time',
         settleUp: 'Settle Up',
-        dayMode: 'Day / Light Mode',
+        lightMode: 'Light Mode',
+        darkMode: 'Dark Mode',
         darkMode: 'Night / Dark Mode'
       },
       es: {
@@ -1286,6 +1352,7 @@
         exportCSV: 'Exportar CSV',
         backupJSON: 'Copia JSON',
         importJSON: 'Importar JSON',
+        invoicesJSON: 'Facturas JSON',
         demoReceipts: 'Tickets Demo',
         searchPlaceholder: 'Buscar comercio, artículo, nota...',
         allCategories: 'Todas las Categorías',
@@ -1347,7 +1414,8 @@
         currentMonth: 'Mes Actual',
         allTime: 'Todo el Histórico',
         settleUp: 'Saldar Cuenta',
-        dayMode: 'Modo Día / Claro',
+        lightMode: 'Modo Claro',
+        darkMode: 'Modo Oscuro',
         darkMode: 'Modo Noche / Oscuro'
       }
     };
@@ -1407,13 +1475,13 @@
       const t = TRANSLATIONS[currentLang];
 
       if (currentTheme === 'dark') {
-        textMode.innerText = t.dayMode || 'Day / Light Mode';
+        textMode.innerText = t.lightMode || 'Light Mode';
         badge.innerText = 'Dark';
         badge.className = 'text-xs px-2.5 py-1 rounded-full bg-slate-800 text-slate-400 font-mono';
         icon.className = 'w-6 h-6 text-amber-400';
         icon.innerHTML = `<path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>`;
       } else {
-        textMode.innerText = t.darkMode || 'Night / Dark Mode';
+        textMode.innerText = t.darkMode || 'Dark Mode';
         badge.innerText = 'Light';
         badge.className = 'text-xs px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-600 font-mono font-bold';
         icon.className = 'w-6 h-6 text-indigo-500';
@@ -1482,11 +1550,12 @@
 
       // Item 14: Expenses Search / Search expenses.
       document.getElementById('heading-ledger-title').innerHTML = `<i class="fa-solid fa-magnifying-glass text-indigo-400"></i> ${t.ledgerTitle}`;
-      document.getElementById('subheading-ledger-desc').innerText = t.ledgerDesc;
 
       document.getElementById('text-btn-export-csv').innerText = t.exportCSV;
       document.getElementById('text-btn-backup-json').innerText = t.backupJSON;
       document.getElementById('text-btn-import-json').innerText = t.importJSON;
+      const invBtn = document.getElementById('text-btn-invoice-json');
+      if (invBtn) invBtn.innerText = t.invoicesJSON || 'Invoices JSON';
       document.getElementById('text-btn-demo').innerText = t.demoReceipts;
       document.getElementById('ledger-search-input').placeholder = t.searchPlaceholder;
       document.getElementById('text-btn-clear-filters').innerText = t.clearFilters;
@@ -1614,9 +1683,137 @@
       }
     }
 
-    // DIRECT DEVICE CAMERA / PHOTO IMPORT (Item 1, 10, 11)
+    // REAL CLIENT-SIDE OCR SCANNING WITH TESSERACT.JS (Item 2)
     function triggerDirectScan() {
       document.getElementById('direct-camera-input').click();
+    }
+
+    function showOcrScanning(status = 'Analyzing receipt text & amounts...') {
+      const overlay = document.getElementById('ocr-scanning-overlay');
+      const bar = document.getElementById('ocr-progress-bar');
+      const text = document.getElementById('ocr-status-text');
+      if (bar) bar.style.width = '15%';
+      if (text) text.innerText = status;
+      if (overlay) overlay.classList.remove('hidden');
+    }
+
+    function updateOcrProgress(percent, status) {
+      const bar = document.getElementById('ocr-progress-bar');
+      const text = document.getElementById('ocr-status-text');
+      if (bar) bar.style.width = Math.max(15, Math.min(100, percent)) + '%';
+      if (text && status) text.innerText = status;
+    }
+
+    function closeOcrScanning() {
+      const overlay = document.getElementById('ocr-scanning-overlay');
+      if (overlay) overlay.classList.add('hidden');
+    }
+
+    function parseReceiptText(rawText) {
+      if (!rawText || typeof rawText !== 'string') return { merchant: '', amount: null, date: '', category: 'Groceries', notes: '' };
+      const lines = rawText.split('\n').map(l => l.trim()).filter(Boolean);
+      const upper = rawText.toUpperCase();
+
+      // 1. Merchant Detection
+      const knownMerchants = [
+        { name: 'Mercadona', keys: ['MERCADONA'] },
+        { name: 'Lidl', keys: ['LIDL'] },
+        { name: 'Aldi', keys: ['ALDI'] },
+        { name: 'AlCash', keys: ['ALCASH', 'AL CASH', 'AL-CASH'] },
+        { name: 'Deza', keys: ['DEZA'] },
+        { name: 'Carrefour', keys: ['CARREFOUR', 'EXPRESS'] },
+        { name: 'Dia', keys: ['DIA ', 'SUPERMERCADOS DIA', '% DIA'] },
+        { name: 'Eroski', keys: ['EROSKI'] },
+        { name: 'Consum', keys: ['CONSUM'] },
+        { name: 'Hipercor', keys: ['HIPERCOR', 'CORTE INGLES', 'CORTE INGLÉS'] },
+        { name: 'Repsol', keys: ['REPSOL'] },
+        { name: 'Cepsa', keys: ['CEPSA'] },
+        { name: 'BP', keys: [' BP ', 'ESTACION BP'] },
+        { name: 'Shell', keys: ['SHELL'] },
+        { name: 'Zara', keys: ['ZARA'] },
+        { name: 'Primark', keys: ['PRIMARK'] },
+        { name: 'Mango', keys: ['MANGO'] },
+        { name: 'Ikea', keys: ['IKEA'] },
+        { name: 'McDonald\'s', keys: ['MCDONALD', 'MC DONALD'] },
+        { name: 'Burger King', keys: ['BURGER KING'] },
+        { name: 'Telepizza', keys: ['TELEPIZZA'] },
+        { name: 'Decathlon', keys: ['DECATHLON'] },
+        { name: 'Leroy Merlin', keys: ['LEROY MERLIN'] },
+        { name: 'Farmacia', keys: ['FARMACIA'] }
+      ];
+
+      let merchant = '';
+      for (const m of knownMerchants) {
+        if (m.keys.some(k => upper.includes(k))) {
+          merchant = m.name;
+          break;
+        }
+      }
+      if (!merchant && lines.length > 0) {
+        for (const l of lines.slice(0, 5)) {
+          const clean = l.replace(/[^a-zA-Z0-9\s]/g, '').trim();
+          if (clean.length >= 3 && clean.length <= 25 && !/\d{5}/.test(clean) && !/FECHA|TOTAL|FACTURA|TICKET/i.test(clean)) {
+            merchant = clean;
+            break;
+          }
+        }
+      }
+
+      // 2. Date Detection
+      let date = '';
+      const dateMatch = rawText.match(/\b(\d{1,2})[/.-](\d{1,2})[/.-](\d{2,4})\b/);
+      if (dateMatch) {
+        let day = dateMatch[1].padStart(2, '0');
+        let month = dateMatch[2].padStart(2, '0');
+        let year = dateMatch[3];
+        if (year.length === 2) year = '20' + year;
+        const yNum = parseInt(year, 10);
+        if (yNum >= 2020 && yNum <= 2035) {
+          date = `${year}-${month}-${day}`;
+        }
+      }
+      if (!date) {
+        date = new Date().toISOString().split('T')[0];
+      }
+
+      // 3. Amount Detection
+      let amount = null;
+      const totalRegex = /(?:TOTAL(?:\s*\(€\))?|TOTAL\s*EUR|IMPORTE(?:\s*TOTAL)?|A\s*PAGAR|TOTAL\s*A\s*PAGAR|TARJETA|SUMA)[\s\S]{0,25}?(\d{1,4}[,.]\d{2})/i;
+      const totalMatch = rawText.match(totalRegex);
+      if (totalMatch) {
+        amount = parseFloat(totalMatch[1].replace(',', '.'));
+      } else {
+        const numRegex = /\b(\d{1,4}[,.]\d{2})\b/g;
+        const allNums = [...rawText.matchAll(numRegex)]
+          .map(m => parseFloat(m[1].replace(',', '.')))
+          .filter(n => n > 0.1 && n < 5000);
+        if (allNums.length > 0) {
+          amount = Math.max(...allNums);
+        }
+      }
+
+      // 4. Category Classification
+      let category = 'Groceries';
+      const mLower = (merchant || '').toLowerCase();
+      if (/repsol|cepsa|bp|shell|gasolinera|combustible/.test(mLower)) {
+        category = 'Transit';
+      } else if (/bar|restaurante|cafe|burger|pizza|mcdonald|telepizza|starbucks/.test(mLower)) {
+        category = 'Dining Out';
+      } else if (/zara|primark|mango|stradivarius|pull|bershka|hm|moda|ropa/.test(mLower)) {
+        category = 'Clothes';
+      } else if (/farmacia|ikea|leroy|decathlon|bazar/.test(mLower)) {
+        category = 'Other';
+      } else {
+        category = 'Groceries';
+      }
+
+      // 5. Notes snippet from recognized text
+      const notesLines = lines
+        .filter(l => l.length > 3 && l.length < 50 && !/CIF|NIF|TEL|FECHA|TOTAL|GRACIAS|SUBTOTAL|TARJETA|IVA/i.test(l))
+        .slice(0, 4);
+      const notes = notesLines.join(', ');
+
+      return { merchant, amount, date, category, notes };
     }
 
     function handleDirectCapture(e) {
@@ -1624,35 +1821,160 @@
       if (!file) return;
 
       const t = TRANSLATIONS[currentLang];
-      showToast(t.toastScanning, 'info');
+      showOcrScanning('Loading captured image...');
 
       const reader = new FileReader();
       reader.onload = function(evt) {
         const photoDataUrl = evt.target.result;
-        setTimeout(() => {
-          const lowerName = file.name.toLowerCase();
-          let matchedMerchant = 'Mercadona';
-          if (lowerName.includes('alcash') || lowerName.includes('cash')) matchedMerchant = 'AlCash';
-          else if (lowerName.includes('lidl')) matchedMerchant = 'Lidl';
-          else if (lowerName.includes('aldi')) matchedMerchant = 'Aldi';
-          else if (lowerName.includes('deza')) matchedMerchant = 'Deza';
+        window._lastCapturedPhoto = photoDataUrl;
 
-          const randomAmt = (Math.random() * 38 + 14).toFixed(2);
+        let hasProcessed = false;
+        const safetyTimer = setTimeout(() => {
+          if (!hasProcessed) {
+            hasProcessed = true;
+            closeOcrScanning();
+            processOcrResult('', photoDataUrl, false);
+          }
+        }, 9000);
 
-          openReceiptModal('manual');
-          document.getElementById('expense-merchant-input').value = matchedMerchant;
-          document.getElementById('expense-amount-input').value = randomAmt;
-          document.getElementById('expense-split-policy-select').value = 'home_account';
-          document.getElementById('ocr-detected-badge').classList.remove('hidden');
+        if (window.Tesseract && typeof window.Tesseract.recognize === 'function') {
+          showOcrScanning('Recognizing receipt text & totals with OCR...');
+          window.Tesseract.recognize(photoDataUrl, 'spa+eng', {
+            logger: m => {
+              if (m.status === 'recognizing text' && m.progress) {
+                const pct = Math.round(m.progress * 100);
+                updateOcrProgress(pct, `Analyzing receipt text... (${pct}%)`);
+              }
+            }
+          }).then(({ data: { text } }) => {
+            if (!hasProcessed) {
+              hasProcessed = true;
+              clearTimeout(safetyTimer);
+              closeOcrScanning();
+              processOcrResult(text, photoDataUrl, true);
+            }
+          }).catch(err => {
+            console.warn('Tesseract OCR error:', err);
+            if (!hasProcessed) {
+              hasProcessed = true;
+              clearTimeout(safetyTimer);
+              closeOcrScanning();
+              processOcrResult('', photoDataUrl, false);
+            }
+          });
+        } else {
+          setTimeout(() => {
+            if (!hasProcessed) {
+              hasProcessed = true;
+              clearTimeout(safetyTimer);
+              closeOcrScanning();
+              processOcrResult('', photoDataUrl, false);
+            }
+          }, 600);
+        }
 
-          // Store temporary captured image dataURL on window
-          window._lastCapturedPhoto = photoDataUrl;
-
-          showToast(t.toastScanParsed);
-          document.getElementById('direct-camera-input').value = '';
-        }, 600);
+        document.getElementById('direct-camera-input').value = '';
       };
       reader.readAsDataURL(file);
+    }
+
+    function processOcrResult(ocrRawText, photoDataUrl, hadOcr = false) {
+      const t = TRANSLATIONS[currentLang];
+      const parsed = parseReceiptText(ocrRawText);
+
+      openReceiptModal('manual');
+
+      if (parsed.merchant) {
+        document.getElementById('expense-merchant-input').value = parsed.merchant;
+      }
+
+      if (parsed.amount !== null && !isNaN(parsed.amount) && parsed.amount > 0) {
+        document.getElementById('expense-amount-input').value = parsed.amount.toFixed(2);
+      } else {
+        document.getElementById('expense-amount-input').value = '';
+        document.getElementById('expense-amount-input').placeholder = 'Enter amount from receipt';
+        setTimeout(() => document.getElementById('expense-amount-input').focus(), 300);
+      }
+
+      if (parsed.date) {
+        document.getElementById('expense-date-input').value = parsed.date;
+      }
+
+      document.getElementById('expense-category-select').value = parsed.category || 'Groceries';
+      document.getElementById('expense-split-policy-select').value = 'home_account';
+
+      if (parsed.notes) {
+        document.getElementById('expense-notes-textarea').value = parsed.notes;
+      }
+
+      const previewBox = document.getElementById('form-receipt-photo-preview');
+      const previewImg = document.getElementById('form-receipt-thumbnail-img');
+      const ocrBadge = document.getElementById('ocr-detected-badge');
+      if (previewBox && previewImg) {
+        previewImg.src = photoDataUrl;
+        previewBox.classList.remove('hidden');
+      }
+      if (ocrBadge) ocrBadge.classList.remove('hidden');
+
+      if (hadOcr && parsed.amount) {
+        showToast(`OCR Detected: ${parsed.merchant || 'Receipt'} (${household.currency}${parsed.amount.toFixed(2)})`);
+      } else {
+        showToast('Receipt captured! Please confirm the total amount.', 'info');
+      }
+    }
+
+    function viewCapturedPhotoFull() {
+      if (window._lastCapturedPhoto) {
+        const modal = document.getElementById('receipt-image-modal');
+        const content = document.getElementById('receipt-preview-content');
+        if (modal && content) {
+          content.innerHTML = `<img src="${window._lastCapturedPhoto}" alt="Captured Receipt" class="max-h-[75vh] w-auto object-contain rounded-xl border border-slate-700 shadow-2xl mx-auto">`;
+          modal.classList.remove('hidden');
+        }
+      }
+    }
+
+    // INVOICE / RECEIPT DATA TO JSON EXPORT (Item 4)
+    function invoiceToJSON() {
+      const invoices = expenses.map(exp => ({
+        id: exp.id,
+        date: exp.date,
+        merchant: exp.merchant,
+        amount: exp.amount,
+        currency: household.currency,
+        category: exp.category,
+        purchaser: exp.purchaser === 'p1' ? household.p1Name : household.p2Name,
+        splitPolicy: exp.split,
+        notes: exp.notes || '',
+        hasReceiptImage: !!exp.receiptImage,
+        receiptImage: exp.receiptImage || null
+      }));
+
+      const exportPayload = {
+        app: 'DuoSpend',
+        version: 'v0.06',
+        exportType: 'invoices_and_receipts',
+        exportTimestamp: new Date().toISOString(),
+        totalExpensesCount: invoices.length,
+        household: {
+          currency: household.currency,
+          members: [household.p1Name, household.p2Name]
+        },
+        invoices: invoices
+      };
+
+      const jsonStr = JSON.stringify(exportPayload, null, 2);
+      const blob = new Blob([jsonStr], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `duospend_invoices_${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      showToast(`Exported ${invoices.length} invoices to JSON!`);
     }
 
     // SETTINGS MANAGEMENT
@@ -1687,8 +2009,8 @@
     }
 
     function updateHouseholdUI() {
-      document.getElementById('nav-person1-name').innerText = household.p1Name;
-      document.getElementById('nav-person2-name').innerText = household.p2Name;
+      const navHousehold = document.getElementById('header-household-name');
+      if (navHousehold) navHousehold.innerText = `${household.p1Name}, ${household.p2Name}`;
 
       document.getElementById('person1-card-label').innerText = `${household.p1Name} ${currentLang === 'es' ? 'Pagó' : 'Paid'}`;
       document.getElementById('person2-card-label').innerText = `${household.p2Name} ${currentLang === 'es' ? 'Pagó' : 'Paid'}`;
@@ -1828,9 +2150,20 @@
       detectedBadge.classList.add('hidden');
       window._currentEditId = null;
 
+      const photoPreviewBox = document.getElementById('form-receipt-photo-preview');
+      const photoThumbImg = document.getElementById('form-receipt-thumbnail-img');
+      if (photoPreviewBox && !window._lastCapturedPhoto) {
+        photoPreviewBox.classList.add('hidden');
+      }
+
       if (editId) {
         const item = expenses.find(e => e.id === editId);
         if (!item) return;
+        if (item.receiptImage && photoPreviewBox && photoThumbImg) {
+          photoThumbImg.src = item.receiptImage;
+          window._lastCapturedPhoto = item.receiptImage;
+          photoPreviewBox.classList.remove('hidden');
+        }
         window._currentEditId = editId;
         document.getElementById('receipt-modal-title-text').innerText = t.editExpenseTitle;
         document.getElementById('receipt-modal-title-icon').className = 'fa-solid fa-pen-to-square';
@@ -2102,23 +2435,24 @@
         else if (item.purchaser === 'p2') rowBorderColor = 'border-l-pink-500';
 
         return `
-          <tr class="hover:bg-slate-800/40 transition group border-l-4 ${rowBorderColor}">
+          <tr onclick="viewReceiptImage('${item.id}')" class="hover:bg-slate-100/70 dark:hover:bg-slate-800/40 transition group border-l-4 ${rowBorderColor} cursor-pointer" title="Click to view receipt">
             <!-- Date -->
-            <td class="py-3.5 px-4 whitespace-nowrap text-slate-400 text-xs">
-              <i class="fa-regular fa-calendar-days mr-1.5 text-slate-500"></i>${item.date}
+            <td class="py-3.5 px-4 whitespace-nowrap text-slate-500 dark:text-slate-400 text-xs">
+              <i class="fa-regular fa-calendar-days mr-1.5 text-slate-400"></i>${item.date}
             </td>
             
             <!-- Merchant & Notes -->
             <td class="py-3.5 px-4">
-              <div class="font-bold text-white text-xs sm:text-sm group-hover:text-brand-300 transition">
+              <div class="font-bold text-slate-900 dark:text-white text-xs sm:text-sm group-hover:text-brand-500 dark:group-hover:text-brand-300 transition flex items-center gap-2">
                 ${escapeHtml(item.merchant)}
+                ${item.receiptImage ? '<i class="fa-solid fa-paperclip text-[10px] text-cyan-400" title="Receipt image attached"></i>' : ''}
               </div>
-              ${item.notes ? `<div class="text-[11px] text-slate-400 truncate max-w-xs mt-0.5">${escapeHtml(item.notes)}</div>` : ''}
+              ${item.notes ? `<div class="text-[11px] text-slate-500 dark:text-slate-400 truncate max-w-xs mt-0.5">${escapeHtml(item.notes)}</div>` : ''}
             </td>
 
             <!-- Category -->
             <td class="py-3.5 px-4 whitespace-nowrap">
-              <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg text-[11px] font-medium bg-slate-800 text-slate-200 border border-slate-700">
+              <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg text-[11px] font-medium bg-slate-100 text-slate-700 border border-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700">
                 <span class="w-2 h-2 rounded-full" style="background-color: ${catColor}"></span>
                 ${catLabel}
               </span>
@@ -2135,21 +2469,18 @@
             </td>
 
             <!-- Amount -->
-            <td class="py-3.5 px-4 text-right whitespace-nowrap font-bold text-white text-sm">
+            <td class="py-3.5 px-4 text-right whitespace-nowrap font-bold text-slate-900 dark:text-white text-sm">
               ${cur}${Number(item.amount).toFixed(2)}
             </td>
 
-            <!-- Actions (View Receipt modal button added, Item 11) -->
+            <!-- Actions (Edit & Delete with stopPropagation) -->
             <td class="py-3.5 px-4 text-center whitespace-nowrap">
               <div class="inline-flex items-center gap-1.5">
-                <button onclick="viewReceiptImage('${item.id}')" class="p-1.5 rounded-lg text-slate-400 hover:text-cyan-400 hover:bg-slate-800 transition cursor-pointer" title="View Receipt">
-                  <i class="fa-solid fa-receipt text-xs"></i>
-                </button>
-                <button onclick="openReceiptModal('manual', '${item.id}')" class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer" title="Edit entry">
+                <button onclick="event.stopPropagation(); openReceiptModal('manual', '${item.id}')" class="p-1.5 rounded-lg text-slate-400 hover:text-brand-500 hover:bg-slate-200 dark:hover:bg-slate-800 transition cursor-pointer" title="Edit Expense">
                   <i class="fa-solid fa-pen text-xs"></i>
                 </button>
-                <button onclick="deleteExpense('${item.id}')" class="p-1.5 rounded-lg text-slate-400 hover:text-red-400 hover:bg-slate-800 transition cursor-pointer" title="Delete entry">
-                  <i class="fa-regular fa-trash-can text-xs"></i>
+                <button onclick="event.stopPropagation(); deleteExpense('${item.id}')" class="p-1.5 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-slate-200 dark:hover:bg-slate-800 transition cursor-pointer" title="Delete Expense">
+                  <i class="fa-solid fa-trash-can text-xs"></i>
                 </button>
               </div>
             </td>
@@ -2792,7 +3123,7 @@
     function exportToJSON() {
       const backupData = {
         app: 'DuoSpend',
-        version: 'v0.05',
+        version: 'v0.06',
         exportedAt: new Date().toISOString(),
         household,
         settlements,
@@ -2801,7 +3132,7 @@
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
       const downloadAnchor = document.createElement('a');
       downloadAnchor.setAttribute("href", dataStr);
-      downloadAnchor.setAttribute("download", `DuoSpend_Backup_v0.05_${new Date().toISOString().split('T')[0]}.json`);
+      downloadAnchor.setAttribute("download", `DuoSpend_Backup_v0.06_${new Date().toISOString().split('T')[0]}.json`);
       document.body.appendChild(downloadAnchor);
       downloadAnchor.click();
       downloadAnchor.remove();

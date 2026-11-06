@@ -5,8 +5,50 @@ Git Repository: [https://github.com/DaidalusX78/DuoSpend.git](https://github.com
 ---
 
 ## //*** USER PENDING TASKS ***//
-- [ ] **1. Test Receipt Import Feature**: Test physical receipt photo capture on device using the camera.
+- [ ] **1. Test Receipt Import Feature**: Test physical receipt photo capture on device using the camera and smart OCR.
 - [ ] **2. Logo & Assets**: Create custom logo, including `favicon.ico` and PNG favicons.
+- [ ] **3. Real-Time Multi-Device Sync**: Firebase Firestore setup and implementation.
+
+---
+
+## Version v0.06 (Released November 2026)
+
+### Key Improvements & Enhancements:
+- [x] **1. Inline Header & Hamburger Menu**:
+  - Re-anchored `#hamburger-menu-wrapper` inline with `#brand-logo-section` on the right with proper spacing and padding matching the main content cards.
+  - Added dedicated mobile hamburger button (`#btn-hamburger-menu-mobile`) inline with the brand logo on mobile header, keeping action buttons neatly positioned beneath.
+- [x] **2. Real Client-Side Receipt OCR (Tesseract.js & Smart Parser)**:
+  - Replaced random data generation with **real on-device OCR** powered by Tesseract.js.
+  - Added smart parsing engine detecting:
+    - **Merchant**: Automatic detection of top retail & supermarkets (Mercadona, Lidl, Aldi, AlCash, Deza, Carrefour, Dia, Repsol, Cepsa, etc.) or header text.
+    - **Total Amount**: Prioritized regex detection of `TOTAL`, `TOTAL (€)`, `IMPORTE`, `A PAGAR`, `TARJETA`, or highest monetary figure.
+    - **Date**: Formats detected `DD/MM/YYYY` into standard `YYYY-MM-DD`.
+    - **Category**: Classifies into Food Shopping, Eating Out, Fuel, Clothes, or Other.
+    - **Notes**: Extracts line-item snippets.
+  - Added visual scanning overlay modal with live percentage progress bar.
+  - Added captured receipt thumbnail preview inside the expense entry form so users can easily inspect and verify their photo.
+  - **Never** injects fake random numbers: if an amount is ambiguous, leaves the field ready and focused with the receipt photo right above it.
+- [x] **3. Removed Duplicate Subheading**:
+  - Deleted `#subheading-ledger-desc` ("Search expenses.") as it was redundant beneath `#heading-ledger-title` ("Expenses Search").
+- [x] **4. High-Contrast Drawer Button Design & Light/Dark Theming**:
+  - Replicated `#btn-theme-toggle` styling (clear borders, high-contrast text, smooth hover states) across all drawer buttons in both Dark and Light modes.
+  - Updated all elements in light mode:
+    - `app-version-badge` and drawer version badge: `bg-brand-50 text-brand-600 border border-brand-200 dark:bg-slate-800 dark:text-brand-400 dark:border-brand-500/30`.
+    - `exportToCSV()`, `exportToJSON()`, `triggerJSONImport()`, and `loadSampleData()`.
+    - Added `invoiceToJSON()`: Exports itemized receipts and invoices to a formatted JSON file.
+    - `resetFilters()` button: Styled with clean light/dark mode classes.
+    - `ledger-footer-toolbar`: Polished border and text contrast.
+- [x] **5. Streamlined Drawer Account Header**:
+  - Removed bulky "Google Account & Security" header text, leaving a sleek, compact status badge: `<span id="account-status-badge"><i class="fa-brands fa-google text-red-400"></i> Connected</span>`.
+- [x] **6. Simplified Theme Mode Text**:
+  - `#text-theme-mode` now displays exclusively `"Light Mode"` and `"Dark Mode"` (and `"Modo Claro"` / `"Modo Oscuro"` in Spanish).
+- [x] **7. Google Account Status Clarification**:
+  - Clarified that Google Login is currently an interactive frontend prototype. Outlined integration steps for live Google Identity Services / Firebase Authentication.
+- [x] **8. Intuitive Full-Row Receipt Viewer**:
+  - Removed the standalone receipt button from ledger rows.
+  - Made the **entire row** of each expense record clickable (`onclick="viewReceiptImage('${item.id}')"`), opening the full receipt photo viewer modal.
+  - Preserved Edit and Delete buttons with `event.stopPropagation()`. Applied across main ledger, member breakdown modal, and category breakdown modal.
+- [x] **9. Version Control**: Updated codebase to `v0.06`.
 
 ---
 
