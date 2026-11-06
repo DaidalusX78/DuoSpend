@@ -14,67 +14,78 @@ Git Repository: [https://github.com/DaidalusX78/DuoSpend.git](https://github.com
 
 ---
 
-## Version v0.07 (Released November 2026)
+## Version v0.08 (Released November 2026)
 
 ### Key Fixes & UI Enhancements:
-- [x] **1. Actual Amount Paid Calculation Fixed**:
-  - Resolved calculation bug in `calculateMetricsAndSettlement()` where expenses split as "Home Account" were prematurely returning and skipping the personal paid totals.
-  - `#person1-total-paid-amount` and `#person2-total-paid-amount` now correctly sum **all** actual expenses paid by each member (including Home Account and shared expenses), accurately reflecting their out-of-pocket spend and percentages.
-- [x] **2. Removed Redundant Out-of-Pocket Label**:
-  - Deleted `#text-out-of-pocket-p1` and `#text-out-of-pocket-p2` ("Actual out-of-pocket") from member cards, leaving a clean percentage indicator right-aligned in the card footer.
-- [x] **3. Cleaned Account Status Badge**:
-  - Removed background color (`bg-emerald-500/20`) from `#account-status-badge`, leaving a clean emerald text/icon indicator.
-- [x] **4. Removed All Demo & Sample Receipts**:
-  - Completely removed mock seeded demo expenses, `loadSampleData()`, and `seedDefaultHouseholdData()`.
-  - DuoSpend now starts with a completely clean, empty ledger for real personal receipts.
-- [x] **5. Restored Member Card Left Border Accents**:
-  - Restored distinct left border accents (`border-left: 4px solid #06b6d4` for Marc and `border-left: 4px solid #ec4899` for Rocio) with `!important` to prevent CSS glass-card styling overrides.
-- [x] **6. High-Contrast White Font Color (#ffffff) in Light Mode**:
-  - Enforced `#ffffff` font color (`!important`) across all key action buttons in light and dark mode:
-    - `#btn-add-expense-manual`
-    - `#btn-scan-receipt`
-    - `#btn-settle-up`
-    - `#btn-reset-filters`
-- [x] **7. Active Chart Mode Button White Text (#ffffff)**:
-  - Enforced `#ffffff` font color on selected and highlighted chart mode buttons in `#chart-mode-toggle-group`.
-- [x] **8. Temporarily Hidden Settlement Card**:
-  - Hidden `#settlement-card` for the moment and adjusted the hero KPI grid to a balanced 3-column layout (`Total Spend`, `Marc Paid`, `Rocio Paid`).
-- [x] **9. Version Control**: Bumped codebase and documentation to `v0.07`.
+- [x] **1. Light Mode #ffffff Text Enforced**:
+  - Enforced `#ffffff` text (`!important`) on all `closeAllModals()` buttons.
+  - Enforced `#ffffff` text on 50/50 shared split badge (`!text-white bg-slate-800`).
+  - Enforced `#ffffff` text on Home Account split badge (`!text-white bg-indigo-950/60`).
+- [x] **2. Resolved `<label for>` Console Error**:
+  - Fixed mismatch between `<label for="settle-payment-method-select">` and `<select id="settle-payment-method-select">`, eliminating the Chrome console error `"Incorrect use of <label for=FORM_ELEMENT>"`.
+- [x] **3. Clean Empty State Icon**:
+  - Removed the grey background from `#ledger-empty-state-icon` in light mode (`bg-transparent dark:bg-slate-800/60`).
+- [x] **4. Eliminated [Violation] 1400ms Thread Freeze**:
+  - Replaced synchronous thread-blocking `window.confirm()` in `deleteExpense` with an instant non-blocking deletion accompanied by a modern **"Undo"** action toast (0ms execution, zero lag, full recovery).
+- [x] **5. "Back to Main Screen" Navigation**:
+  - Updated `#btn-menu-settings` to a **"Back to Main Screen"** button (`<i class="fa-solid fa-house"></i>`) that smoothly closes the drawer menu and brings the user back to the main dashboard.
+- [x] **6. Equal Flag Sizes (UK & Spain)**:
+  - Fixed size discrepancy between `#btn-lang-en` and `#btn-lang-es` by standardizing both button wrappers to identical `w-12 h-9` dimensions and both SVGs to matching `60x36` viewports.
+- [x] **7. Darker Toast Text in Light Mode**:
+  - Updated `#toast-notifications-container` styling so toasts render with deep dark text (`text-slate-900`) on white cards in light mode, and crisp white (`dark:text-slate-100`) on dark cards in dark mode.
+- [x] **8. Lighter Version Badge Text in Dark Mode**:
+  - Lightened dark-mode version badge text to `dark:text-brand-200` (`#c7d2fe`) across `#app-version-badge` and the drawer header for maximum legibility.
+- [x] **9. Manual Image Attachment**:
+  - Added an **"Attach Receipt / Invoice Photo"** section inside the manual Add Expense modal (`#btn-add-expense-manual`) with file picker, thumbnail preview, and full-screen inspection.
+- [x] **10. Removed Receipt Column from Popups & Enabled Row Click**:
+  - In Category Expenses Modal (`#category-expenses-modal`) and Member Expenses Modal (`#member-expenses-modal`): removed the separate "Receipt" column and made every row directly clickable to open receipt details, eliminating horizontal scrolling.
+- [x] **11. Removed Split Column from Member Modal**:
+  - Removed the Split column from `#member-expenses-modal`, streamlining the table to 4 compact columns: Date, Merchant, Category, and Amount.
+- [x] **12. Renamed Merchant Column**:
+  - Renamed `<th id="th-merchant">` from "Merchant / Place" to "Merchant".
+- [x] **13. Deleted Split Policy Column from Main Ledger**:
+  - Deleted `<th id="th-split">` and its table cell from the main ledger table, optimizing table width and responsiveness.
+- [x] **14. Version Control**: Bumped codebase and documentation to `v0.08`.
+
+---
+
+## Version v0.07 (Released November 2026)
+
+- [x] Resolved actual amount paid calculation bug in `calculateMetricsAndSettlement()` for Home Account expenses.
+- [x] Deleted `#text-out-of-pocket-p1` and `#text-out-of-pocket-p2`.
+- [x] Removed background color from `#account-status-badge`.
+- [x] Removed demo receipts, `loadSampleData()`, and `seedDefaultHouseholdData()`.
+- [x] Restored left border colors (`#06b6d4` cyan and `#ec4899` pink) on member cards.
+- [x] Enforced `#ffffff` font color in light mode for key action buttons.
+- [x] Enforced `#ffffff` font color on selected chart mode buttons.
+- [x] Temporarily hidden `#settlement-card` with balanced 3-column hero grid.
 
 ---
 
 ## Version v0.06 (Released November 2026)
 
-### Key Improvements & Enhancements:
-- [x] **1. Inline Header & Hamburger Menu**: Re-anchored `#hamburger-menu-wrapper` inline with `#brand-logo-section` on the right with proper spacing and padding matching the main content cards. Added mobile hamburger button (`#btn-hamburger-menu-mobile`) inline with the brand logo.
-- [x] **2. Real Client-Side Receipt OCR (Tesseract.js & Smart Parser)**: Replaced random data generation with **real on-device OCR** powered by Tesseract.js. Added smart regex parsing for merchant, total amount, date, and category. Added scanning progress overlay and form thumbnail preview.
-- [x] **3. Removed Duplicate Subheading**: Deleted `#subheading-ledger-desc` ("Search expenses.").
-- [x] **4. High-Contrast Drawer Button Design & Light/Dark Theming**: Replicated `#btn-theme-toggle` styling across all drawer buttons in both Dark and Light modes. Added `invoiceToJSON()` export utility.
-- [x] **5. Streamlined Drawer Account Header**: Removed bulky header text, leaving a sleek status badge.
-- [x] **6. Simplified Theme Mode Text**: `#text-theme-mode` now displays exclusively `"Light Mode"` and `"Dark Mode"`.
-- [x] **7. Google Account Status Clarification**: Clarified interactive prototype state and provided roadmap for GIS / Firebase Auth.
-- [x] **8. Intuitive Full-Row Receipt Viewer**: Removed standalone icon; entire ledger rows are now clickable to view receipts with `event.stopPropagation()` on edit/delete.
-- [x] **9. Version Control**: Updated codebase to `v0.06`.
+- [x] Inline header & hamburger menu layout.
+- [x] Real client-side receipt OCR with Tesseract.js & smart regex parser.
+- [x] Deleted `#subheading-ledger-desc`.
+- [x] High-contrast drawer button design and light/dark theming.
+- [x] Simplified theme toggle text to "Light Mode" and "Dark Mode".
+- [x] Clickable ledger rows for receipt viewing.
 
 ---
 
 ## Version v0.05 (Released November 2026)
 
-- [x] Form Field `<label>` associations resolved across all 13 forms and modals to eliminate 10+ browser DevTools / WCAG accessibility issues.
-- [x] Version control bump to `v0.05`.
+- [x] Form Field `<label>` associations resolved across all 13 forms and modals.
 
 ---
 
 ## Version v0.04 (Released November 2026)
 
 - [x] Android Studio WebView optimization and mobile meta tags.
-- [x] Current calendar month default view (clears visual ledger from 1st of each month with historic month dropdown).
+- [x] Calendar month ledger view with month filter dropdown.
 - [x] Right-side drawer menu layout (75% width, 25% blurred backdrop).
 - [x] Right-padding on select chevron down arrows.
 - [x] Streamlined expense categories (Food Shopping, Eating Out, Fuel, Clothes, Other).
-- [x] Settle Up modal and payment logging.
-- [x] Dynamic member badges (MB, RJ, EB).
-- [x] Default category bar chart with interactive tap breakdown.
 
 ---
 
@@ -83,9 +94,8 @@ Git Repository: [https://github.com/DaidalusX78/DuoSpend.git](https://github.com
 - [x] Git repository initialization and remote sync.
 - [x] Direct device camera photo capture on Scan button.
 - [x] Main file renamed to `duospend.html`.
-- [x] JSON data import with schema validation.
 - [x] Multi-currency support (EUR € default).
-- [x] Spanish (Castellano) language switcher with SVG flags and persistence.
+- [x] Spanish (Castellano) language switcher with SVG flags.
 
 ---
 
