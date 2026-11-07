@@ -8,7 +8,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#0b0f19">
-  <title>DuoSpend v0.09 — Household Receipt & Expense Tracker</title>
+  <title>DuoSpend v0.10 — Household Receipt & Expense Tracker</title>
 
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -206,10 +206,58 @@
 
   
     /* Enforced #ffffff for closeAllModals buttons and split badges in all modes (Item 1) */
-    button[onclick*="closeAllModals()"],
+    button[onclick*="closeAllModals()"]:not(#btn-toggle-fullscreen):not(#btn-menu-settings),
     .btn-modal-close,
     .badge-white-text {
       color: #ffffff !important;
+    }
+
+    /* Item 5: app-version-badge font-colour #ffffff in dark mode */
+    html.dark #app-version-badge,
+    html.dark #drawer-version-badge {
+      color: #ffffff !important;
+    }
+
+    /* Item 6: In light mode make icons and text dark for btn-toggle-fullscreen and btn-menu-settings */
+    html:not(.dark) #btn-toggle-fullscreen,
+    html:not(.dark) #btn-toggle-fullscreen span,
+    html:not(.dark) #btn-toggle-fullscreen i,
+    html:not(.dark) #btn-menu-settings,
+    html:not(.dark) #btn-menu-settings span,
+    html:not(.dark) #btn-menu-settings i {
+      color: #0f172a !important;
+    }
+
+    /* Item 7: In light mode make text and icons #ffffff for firebase-sync-badge, fa-solid fa-gear, syncFirebaseNow() */
+    #firebase-sync-badge,
+    button[onclick*="syncFirebaseNow"],
+    button[onclick*="syncFirebaseNow"] *,
+    button[onclick*="configureFirebaseModal"],
+    button[onclick*="configureFirebaseModal"] *,
+    button .fa-solid.fa-gear {
+      color: #ffffff !important;
+    }
+    html:not(.dark) #firebase-sync-badge {
+      background-color: #334155 !important;
+      color: #ffffff !important;
+    }
+    html:not(.dark) #firebase-sync-badge.sync-online {
+      background-color: #059669 !important;
+      color: #ffffff !important;
+    }
+    html:not(.dark) button[onclick*="configureFirebaseModal"] {
+      background-color: #334155 !important;
+      color: #ffffff !important;
+    }
+    html:not(.dark) button[onclick*="syncFirebaseNow"] {
+      background-color: #4f46e5 !important;
+      color: #ffffff !important;
+    }
+
+    /* Item 9: members-avatars-group remove border-color */
+    #members-avatars-group > div {
+      border: none !important;
+      border-color: transparent !important;
     }
 
   </style>
@@ -235,7 +283,7 @@
             <div id="brand-title-row" class="flex items-center gap-2">
               <span class="font-extrabold text-xl tracking-tight text-slate-900 dark:text-white">Duo<span class="text-brand-500">Spend</span></span>
               <span id="app-version-badge"
-                class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-brand-50 text-brand-600 border border-brand-200 dark:bg-slate-800 dark:text-brand-200 dark:border-brand-500/40">v0.08</span>
+                class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-brand-50 text-brand-600 border border-brand-200 dark:bg-slate-800 dark:!text-white dark:border-brand-500/40">v0.10</span>
             </div>
             <p id="brand-subtitle" class="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">Receipt scanning & balanced expense splitting</p>
           </div>
@@ -259,11 +307,11 @@
           title="Manage Household Members">
           <div class="flex -space-x-1.5" id="members-avatars-group">
             <div id="avatar-circle-p1"
-              class="w-6 h-6 rounded-full bg-gradient-to-br from-cyan-400 to-cyan-600 flex items-center justify-center text-[10px] text-white font-bold border border-slate-900">
+              class="w-6 h-6 rounded-full bg-gradient-to-br from-cyan-400 to-cyan-600 flex items-center justify-center text-[10px] text-white font-bold">
               <span id="badge-avatar-p1">MB</span>
             </div>
             <div id="avatar-circle-p2"
-              class="w-6 h-6 rounded-full bg-gradient-to-br from-pink-400 to-pink-600 flex items-center justify-center text-[10px] text-white font-bold border border-slate-900">
+              class="w-6 h-6 rounded-full bg-gradient-to-br from-pink-400 to-pink-600 flex items-center justify-center text-[10px] text-white font-bold">
               <span id="badge-avatar-p2">RJ</span>
             </div>
           </div>
@@ -325,7 +373,7 @@
             </div>
             <div>
               <span class="text-xl sm:text-2xl font-extrabold text-white">Duo<span class="text-brand-500">Spend</span></span>
-              <span class="text-xs font-bold px-2 py-0.5 rounded-full bg-brand-50 text-brand-600 border border-brand-200 dark:bg-slate-800 dark:text-brand-200 dark:border-brand-500/40 ml-1">v0.08</span>
+              <span id="drawer-version-badge" class="text-xs font-bold px-2 py-0.5 rounded-full bg-brand-50 text-brand-600 border border-brand-200 dark:bg-slate-800 dark:!text-white dark:border-brand-500/40 ml-1">v0.10</span>
             </div>
           </div>
           <button onclick="closeAllModals()"
@@ -379,16 +427,16 @@
         <nav class="space-y-3">
           <!-- Fullscreen Option -->
           <button id="btn-toggle-fullscreen" onclick="toggleFullscreen(); closeAllModals();"
-            class="w-full flex items-center gap-4 px-4 py-3.5 text-base sm:text-lg font-semibold text-slate-800 dark:text-slate-100 hover:text-slate-900 dark:hover:text-white bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200/80 dark:hover:bg-slate-700/80 border border-slate-200 dark:border-slate-700/80 rounded-2xl transition cursor-pointer shadow-sm">
-            <i id="icon-toggle-fullscreen" class="fa-solid fa-expand text-brand-400 text-xl w-6 text-center"></i>
+            class="w-full flex items-center gap-4 px-4 py-3.5 text-base sm:text-lg font-semibold text-slate-900 dark:text-slate-100 hover:text-slate-950 dark:hover:text-white bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200/80 dark:hover:bg-slate-700/80 border border-slate-200 dark:border-slate-700/80 rounded-2xl transition cursor-pointer shadow-sm">
+            <i id="icon-toggle-fullscreen" class="fa-solid fa-expand text-slate-900 dark:text-brand-400 text-xl w-6 text-center"></i>
             <span id="text-toggle-fullscreen">Fullscreen</span>
           </button>
 
-          <!-- Back to Main Screen Option (Item 5) -->
-          <button id="btn-menu-settings" onclick="closeAllModals()"
-            class="w-full flex items-center gap-4 px-4 py-3.5 text-base sm:text-lg font-semibold text-slate-800 dark:text-slate-100 hover:text-slate-900 dark:hover:text-white bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200/80 dark:hover:bg-slate-700/80 border border-slate-200 dark:border-slate-700/80 rounded-2xl transition cursor-pointer shadow-sm">
-            <i class="fa-solid fa-house text-brand-500 dark:text-brand-400 text-xl w-6 text-center"></i>
-            <span id="text-menu-settings">Back to Main Screen</span>
+          <!-- Household Settings Option (Item 1: Opens Settings Menu) -->
+          <button id="btn-menu-settings" onclick="closeAllModals(); openSettingsModal();"
+            class="w-full flex items-center gap-4 px-4 py-3.5 text-base sm:text-lg font-semibold text-slate-900 dark:text-slate-100 hover:text-slate-950 dark:hover:text-white bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200/80 dark:hover:bg-slate-700/80 border border-slate-200 dark:border-slate-700/80 rounded-2xl transition cursor-pointer shadow-sm">
+            <i class="fa-solid fa-sliders text-slate-900 dark:text-brand-400 text-xl w-6 text-center"></i>
+            <span id="text-menu-settings">Household Settings</span>
           </button>
         </nav>
 
@@ -409,26 +457,40 @@
           </div>
         </div>
 
-        <!-- Firebase Multi-Device Cloud Sync Controls (Item 4) -->
+        <!-- Firebase Multi-Device Cloud Sync Controls (Item 4, 7, 8) -->
         <div class="pt-3 border-t border-slate-200 dark:border-slate-800 space-y-2">
           <div class="px-2 flex items-center justify-between text-xs uppercase tracking-wider font-bold text-slate-500 dark:text-slate-400">
             <span>Firebase Cloud Sync</span>
-            <span id="firebase-sync-badge" class="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-400">Offline</span>
+            <span id="firebase-sync-badge" class="text-[10px] px-2.5 py-0.5 rounded-full bg-slate-700 !text-white font-semibold">Offline</span>
           </div>
-          <div class="p-3 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-2 text-xs">
+          <div class="p-3 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-2.5 text-xs">
             <div class="flex items-center justify-between">
               <span class="text-slate-400">Household Sync Room:</span>
-              <strong id="firebase-room-label" class="text-brand-400 font-mono">duospend-home</strong>
+              <strong id="firebase-room-label" class="text-brand-500 dark:text-brand-400 font-mono">duospend-home</strong>
             </div>
             <div class="flex gap-2">
-              <button onclick="syncFirebaseNow()"
-                class="flex-1 py-1.5 rounded-lg bg-brand-600 hover:bg-brand-500 text-white font-medium flex items-center justify-center gap-1.5 transition cursor-pointer">
-                <i class="fa-solid fa-cloud-arrow-up"></i> Sync Now
+              <button id="btn-firebase-sync-now" onclick="syncFirebaseNow()"
+                class="flex-1 py-1.5 rounded-lg bg-brand-600 hover:bg-brand-500 !text-white font-semibold flex items-center justify-center gap-1.5 transition cursor-pointer shadow-sm">
+                <i class="fa-solid fa-cloud-arrow-up !text-white"></i> <span class="!text-white">Sync Now</span>
               </button>
-              <button onclick="configureFirebaseModal()"
-                class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium transition cursor-pointer" title="Configure Firebase project credentials">
-                <i class="fa-solid fa-gear"></i>
+              <button id="btn-firebase-config" onclick="configureFirebaseModal()"
+                class="px-3 py-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 !text-white font-medium transition cursor-pointer shadow-sm" title="Configure Firebase project credentials">
+                <i class="fa-solid fa-gear !text-white"></i>
               </button>
+            </div>
+            <!-- Live Sync Progress Details (Item 8) -->
+            <div id="firebase-sync-progress-box" class="hidden pt-2 border-t border-slate-200 dark:border-slate-800 space-y-1.5">
+              <div class="flex items-center justify-between text-[11px]">
+                <span id="firebase-sync-step-text" class="text-slate-700 dark:text-slate-200 font-semibold flex items-center gap-1.5">
+                  <i id="firebase-sync-spinner" class="fa-solid fa-rotate fa-spin text-brand-500"></i>
+                  <span id="firebase-sync-step-msg">Initializing sync...</span>
+                </span>
+                <span id="firebase-sync-pct-text" class="font-mono font-bold text-brand-600 dark:text-brand-400">0%</span>
+              </div>
+              <div class="w-full bg-slate-200 dark:bg-slate-950 rounded-full h-1.5 overflow-hidden">
+                <div id="firebase-sync-progress-bar" class="bg-gradient-to-r from-brand-500 to-cyan-400 h-1.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+              </div>
+              <div id="firebase-sync-detail-log" class="text-[10px] font-mono text-slate-600 dark:text-slate-400 space-y-0.5 leading-relaxed"></div>
             </div>
           </div>
         </div>
@@ -506,7 +568,7 @@
           <i class="fa-regular fa-copyright text-brand-400"></i>
           <span id="menu-credits-text">created by <strong class="text-white font-semibold">Marc Bailey 2026</strong></span>
         </div>
-        <div class="text-xs text-slate-500 mt-1">DuoSpend v0.09 — Android Ready Architecture</div>
+        <div class="text-xs text-slate-500 mt-1">DuoSpend v0.10 — Android Ready Architecture</div>
       </div>
 
     </div>
@@ -532,11 +594,14 @@
           </div>
         </div>
         <div id="summary-total-spent-amount" class="text-2xl sm:text-3xl font-extrabold text-white mt-1">€0.00</div>
-        <!-- Monthly Budget Progress & Safe-to-spend (Item 5) -->
+        <!-- Monthly Budget Progress & Safe-to-spend (Item 2 & 5: Click budget-target-display to edit inline) -->
         <div id="budget-progress-section" class="mt-3 pt-2 border-t border-slate-800/80 space-y-1.5">
           <div class="flex items-center justify-between text-[11px]">
             <span class="text-slate-400 flex items-center gap-1">
-              <i class="fa-solid fa-bullseye text-brand-400"></i> Budget: <strong id="budget-target-display" class="text-slate-200">€500</strong>
+              <i class="fa-solid fa-bullseye text-brand-400"></i> Budget:
+              <strong id="budget-target-display" onclick="event.stopPropagation(); editBudgetTargetInline(event)"
+                class="text-slate-200 hover:text-brand-400 underline decoration-dotted underline-offset-2 cursor-pointer px-1 py-0.5 rounded hover:bg-slate-800/40 transition inline-flex items-center gap-1"
+                title="Click to edit monthly budget amount">€500 <i class="fa-solid fa-pen text-[9px] opacity-70"></i></strong>
             </span>
             <span id="budget-percent-display" class="font-bold text-slate-300">0%</span>
           </div>
@@ -558,7 +623,7 @@
 
       <!-- Person 1 Paid Card (Tappable for Person 1 breakdown popup) -->
       <div id="card-person1-paid" onclick="openMemberExpensesModal('p1')"
-        class="glass-card rounded-2xl p-4 sm:p-5 relative overflow-hidden border-l-4 !border-l-cyan-500 min-w-0 cursor-pointer hover:border-cyan-500/50 transition"
+        class="dynamic-member-card glass-card rounded-2xl p-4 sm:p-5 relative overflow-hidden border-l-4 !border-l-cyan-500 min-w-0 cursor-pointer hover:border-cyan-500/50 transition"
         title="Tap to view Marc's expense details">
         <div id="card-person1-header" class="flex items-center justify-between text-slate-400 mb-1">
           <span id="person1-card-label" class="text-xs uppercase tracking-wider font-semibold">Marc Paid</span>
@@ -568,17 +633,17 @@
             MB
           </div>
         </div>
-        <div id="person1-total-paid-amount" class="text-2xl sm:text-3xl font-extrabold text-cyan-400 mt-1">€0.00</div>
+        <div id="p1-total-paid-amount" class="text-2xl sm:text-3xl font-extrabold text-cyan-400 mt-1">€0.00</div>
         <div id="card-person1-footer"
           class="text-xs text-slate-400 mt-3 pt-3 border-t border-slate-800 flex justify-between">
           
-          <span id="person1-spend-percentage" class="font-semibold text-slate-300">0%</span>
+          <span id="p1-spend-percentage" class="font-semibold text-slate-300">0%</span>
         </div>
       </div>
 
       <!-- Person 2 Paid Card (Tappable for Person 2 breakdown popup) -->
       <div id="card-person2-paid" onclick="openMemberExpensesModal('p2')"
-        class="glass-card rounded-2xl p-4 sm:p-5 relative overflow-hidden border-l-4 !border-l-pink-500 min-w-0 cursor-pointer hover:border-pink-500/50 transition"
+        class="dynamic-member-card glass-card rounded-2xl p-4 sm:p-5 relative overflow-hidden border-l-4 !border-l-pink-500 min-w-0 cursor-pointer hover:border-pink-500/50 transition"
         title="Tap to view Rocio's expense details">
         <div id="card-person2-header" class="flex items-center justify-between text-slate-400 mb-1">
           <span id="person2-card-label" class="text-xs uppercase tracking-wider font-semibold">Rocio Paid</span>
@@ -588,11 +653,11 @@
             RJ
           </div>
         </div>
-        <div id="person2-total-paid-amount" class="text-2xl sm:text-3xl font-extrabold text-pink-400 mt-1">€0.00</div>
+        <div id="p2-total-paid-amount" class="text-2xl sm:text-3xl font-extrabold text-pink-400 mt-1">€0.00</div>
         <div id="card-person2-footer"
           class="text-xs text-slate-400 mt-3 pt-3 border-t border-slate-800 flex justify-between">
           
-          <span id="person2-spend-percentage" class="font-semibold text-slate-300">0%</span>
+          <span id="p2-spend-percentage" class="font-semibold text-slate-300">0%</span>
         </div>
       </div>
 
@@ -1111,15 +1176,15 @@
         </div>
       </div>
 
-      <div class="p-4 sm:p-5 max-h-[70vh] overflow-y-auto">
-        <div class="overflow-x-auto w-full">
-          <table class="w-full text-left border-collapse text-xs">
+      <div class="p-2.5 sm:p-4 max-h-[70vh] overflow-y-auto overflow-x-hidden">
+        <div class="w-full overflow-x-hidden">
+          <table class="w-full table-fixed text-left border-collapse text-[11px] sm:text-xs">
             <thead>
               <tr class="bg-slate-900/80 text-slate-400 uppercase tracking-wider font-semibold border-b border-slate-800">
-                <th class="py-2.5 px-3">Date</th>
-                <th class="py-2.5 px-3">Merchant</th>
-                <th class="py-2.5 px-3">Category</th>
-                <th class="py-2.5 px-3 text-right">Amount</th>
+                <th class="py-2 px-1.5 sm:px-2.5 w-[24%]">Date</th>
+                <th class="py-2 px-1.5 sm:px-2.5 w-[34%]">Merchant</th>
+                <th class="py-2 px-1.5 sm:px-2.5 w-[22%]">Category</th>
+                <th class="py-2 px-1.5 sm:px-2.5 w-[20%] text-right">Amount</th>
               </tr>
             </thead>
             <tbody id="member-modal-table-body" class="divide-y divide-slate-800/60 font-medium">
@@ -1163,15 +1228,15 @@
         </button>
       </div>
 
-      <div class="p-4 sm:p-5 max-h-[70vh] overflow-y-auto">
-        <div class="overflow-x-auto w-full">
-          <table class="w-full text-left border-collapse text-xs">
+      <div class="p-2.5 sm:p-4 max-h-[70vh] overflow-y-auto overflow-x-hidden">
+        <div class="w-full overflow-x-hidden">
+          <table class="w-full table-fixed text-left border-collapse text-[11px] sm:text-xs">
             <thead>
               <tr class="bg-slate-900/80 text-slate-400 uppercase tracking-wider font-semibold border-b border-slate-800">
-                <th class="py-2.5 px-3">Date</th>
-                <th class="py-2.5 px-3">Merchant</th>
-                <th class="py-2.5 px-3">Who Paid</th>
-                <th class="py-2.5 px-3 text-right">Amount</th>
+                <th class="py-2 px-1.5 sm:px-2.5 w-[24%]">Date</th>
+                <th class="py-2 px-1.5 sm:px-2.5 w-[34%]">Merchant</th>
+                <th class="py-2 px-1.5 sm:px-2.5 w-[22%]">Who Paid</th>
+                <th class="py-2 px-1.5 sm:px-2.5 w-[20%] text-right">Amount</th>
               </tr>
             </thead>
             <tbody id="cat-modal-table-body" class="divide-y divide-slate-800/60 font-medium">
@@ -1378,7 +1443,7 @@
       }
       if (avatarGroup) {
         avatarGroup.innerHTML = members.map(m => `
-          <div class="w-6 h-6 rounded-full flex items-center justify-center text-[10px] text-white font-bold border border-slate-900 shadow-sm" style="background-color: ${m.color || '#6366f1'}">
+          <div class="w-6 h-6 rounded-full flex items-center justify-center text-[10px] text-white font-bold shadow-sm" style="background-color: ${m.color || '#6366f1'}">
             <span>${escapeHtml(m.badge || computeBadge(m.name))}</span>
           </div>
         `).join('');
@@ -1491,7 +1556,7 @@
       if (curBadge) curBadge.innerText = household.currency;
 
       const budgetDisplay = document.getElementById('budget-target-display');
-      if (budgetDisplay) budgetDisplay.innerText = `${household.currency}${(household.monthlyBudget || 500).toFixed(0)}`;
+      if (budgetDisplay) budgetDisplay.innerHTML = `${household.currency}${(household.monthlyBudget || 500).toFixed(0)} <i class="fa-solid fa-pen text-[9px] opacity-70"></i>`;
     }
 
         // DATA STATE
@@ -1929,8 +1994,10 @@
       document.getElementById('text-btn-save').innerText = t.saveEntry;
 
       document.getElementById('heading-settings-title').innerHTML = `<i class="fa-solid fa-users-gear text-brand-400"></i> ${t.householdSettings}`;
-      document.getElementById('label-settings-p1').innerText = t.p1NameLabel;
-      document.getElementById('label-settings-p2').innerText = t.p2NameLabel;
+      const lblP1 = document.getElementById('label-settings-p1');
+      if (lblP1) lblP1.innerText = t.p1NameLabel;
+      const lblP2 = document.getElementById('label-settings-p2');
+      if (lblP2) lblP2.innerText = t.p2NameLabel;
       document.getElementById('label-setting-currency').innerText = t.currencyLabel;
       document.getElementById('desc-setting-currency').innerText = t.currencyDesc;
       document.getElementById('text-btn-settings-cancel').innerText = t.cancel;
@@ -1960,15 +2027,21 @@
 
       // Update Purchaser Filter Labels
       const purchFilter = document.getElementById('ledger-purchaser-filter');
-      const currentFilterPurch = purchFilter.value;
-      purchFilter.options[0].text = t.allPurchasers;
-      document.getElementById('ledger-purchaser-option-person1').innerText = household.p1Name;
-      document.getElementById('ledger-purchaser-option-person2').innerText = household.p2Name;
-      purchFilter.value = currentFilterPurch || 'ALL';
+      if (purchFilter && purchFilter.options.length > 0) {
+        const currentFilterPurch = purchFilter.value;
+        purchFilter.options[0].text = t.allPurchasers;
+        const optP1 = document.getElementById('ledger-purchaser-option-person1');
+        if (optP1) optP1.innerText = household.p1Name;
+        const optP2 = document.getElementById('ledger-purchaser-option-person2');
+        if (optP2) optP2.innerText = household.p2Name;
+        purchFilter.value = currentFilterPurch || 'ALL';
+      }
 
       // Update Split options
-      document.getElementById('splitOptHome').innerText = currentLang === 'es' ? 'Cuenta Hogar (Cuenta Conjunta del Hogar)' : 'Home Account (Joint Household Account)';
-      document.getElementById('splitOpt5050').innerText = currentLang === 'es' ? 'Compartido 50 / 50 (Reparto Equilibrado)' : 'Shared 50 / 50 (Fair Household Split)';
+      const splitHome = document.getElementById('splitOptHome');
+      if (splitHome) splitHome.innerText = currentLang === 'es' ? 'Cuenta Hogar (Cuenta Conjunta del Hogar)' : 'Home Account (Joint Household Account)';
+      const split5050 = document.getElementById('splitOpt5050');
+      if (split5050) split5050.innerText = currentLang === 'es' ? 'Compartido 50 / 50 (Reparto Equilibrado)' : 'Shared 50 / 50 (Fair Household Split)';
     }
 
     // CLOSE ALL MODALS & POPUPS (Item 19)
@@ -1980,7 +2053,8 @@
         'member-expenses-modal',
         'category-expenses-modal',
         'settle-up-modal',
-        'receipt-image-modal'
+        'receipt-image-modal',
+        'firebase-config-modal'
       ];
       modals.forEach(id => {
         const el = document.getElementById(id);
@@ -2724,6 +2798,7 @@
       }
 
       saveExpensesToStorage();
+      populateLedgerMonthFilter();
       closeAllModals();
       refreshDashboard();
     }
@@ -2761,9 +2836,57 @@
 
     function isCurrentMonth(dateStr) {
       if (!dateStr) return false;
-      const d = new Date(dateStr);
       const now = new Date();
+      const curPrefix = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+      if (typeof dateStr === 'string' && dateStr.slice(0, 7) === curPrefix) return true;
+      const d = new Date(dateStr);
       return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+    }
+
+    // INLINE MONTHLY BUDGET TARGET EDITOR (v0.10 Item 2)
+    function editBudgetTargetInline(event) {
+      if (event) event.stopPropagation();
+      const displayEl = document.getElementById('budget-target-display');
+      if (!displayEl || displayEl.querySelector('input')) return;
+
+      const currentVal = household.monthlyBudget || 500;
+      const cur = household.currency || '€';
+
+      displayEl.innerHTML = `
+        <span class="text-slate-400">${cur}</span>
+        <input type="number" id="inline-budget-input" value="${currentVal}" min="10" step="10"
+          onclick="event.stopPropagation()"
+          class="w-16 bg-slate-950 text-white border border-brand-500 rounded px-1 py-0.5 text-[11px] font-bold focus:outline-none text-right">
+      `;
+      const input = document.getElementById('inline-budget-input');
+      if (input) {
+        input.focus();
+        input.select();
+
+        const commitEdit = () => {
+          const val = parseFloat(input.value);
+          if (!isNaN(val) && val > 0) {
+            household.monthlyBudget = val;
+            localStorage.setItem(SETTINGS_KEY, JSON.stringify(household));
+            const settingsBudgetInput = document.getElementById('setting-monthly-budget-input');
+            if (settingsBudgetInput) settingsBudgetInput.value = val;
+            showToast(`Monthly budget updated to ${cur}${val.toFixed(0)}!`);
+          }
+          displayEl.innerHTML = `${cur}${(household.monthlyBudget || 500).toFixed(0)} <i class="fa-solid fa-pen text-[9px] opacity-70"></i>`;
+          calculateMetricsAndSettlement();
+        };
+
+        input.addEventListener('blur', commitEdit);
+        input.addEventListener('keydown', (ke) => {
+          if (ke.key === 'Enter') {
+            ke.preventDefault();
+            input.blur();
+          } else if (ke.key === 'Escape') {
+            ke.stopPropagation();
+            displayEl.innerHTML = `${cur}${(household.monthlyBudget || 500).toFixed(0)} <i class="fa-solid fa-pen text-[9px] opacity-70"></i>`;
+          }
+        });
+      }
     }
 
     // DYNAMIC MONTH FILTER POPULATION (Item 8: Individual past months selectable)
@@ -3546,13 +3669,13 @@
       emptyDiv.classList.add('hidden');
       tbody.innerHTML = filtered.map(item => `
         <tr onclick="viewReceiptImage('${item.id}')" class="hover:bg-slate-100/70 dark:hover:bg-slate-800/40 transition cursor-pointer" title="Click to view receipt">
-          <td class="py-2.5 px-3 text-slate-500 dark:text-slate-400 whitespace-nowrap text-xs">${item.date}</td>
-          <td class="py-2.5 px-3 font-semibold text-slate-900 dark:text-white text-xs flex items-center gap-1.5">
-            ${escapeHtml(item.merchant)}
-            ${item.receiptImage ? '<i class="fa-solid fa-paperclip text-[10px] text-cyan-400"></i>' : ''}
+          <td class="py-2 px-1.5 sm:px-2.5 text-slate-500 dark:text-slate-400 truncate text-[11px] sm:text-xs">${item.date}</td>
+          <td class="py-2 px-1.5 sm:px-2.5 font-semibold text-slate-900 dark:text-white text-[11px] sm:text-xs truncate">
+            <span class="truncate">${escapeHtml(item.merchant)}</span>
+            ${item.receiptImage ? '<i class="fa-solid fa-paperclip text-[10px] text-cyan-400 ml-1"></i>' : ''}
           </td>
-          <td class="py-2.5 px-3 text-slate-600 dark:text-slate-300 text-xs whitespace-nowrap">${escapeHtml(item.category)}</td>
-          <td class="py-2.5 px-3 text-right font-bold text-slate-900 dark:text-white text-xs whitespace-nowrap">${cur}${Number(item.amount).toFixed(2)}</td>
+          <td class="py-2 px-1.5 sm:px-2.5 text-slate-600 dark:text-slate-300 text-[11px] sm:text-xs truncate">${escapeHtml(item.category)}</td>
+          <td class="py-2 px-1.5 sm:px-2.5 text-right font-bold text-slate-900 dark:text-white text-[11px] sm:text-xs truncate">${cur}${Number(item.amount).toFixed(2)}</td>
         </tr>
       `).join('');
     }
@@ -3576,8 +3699,9 @@
       };
       const catLabel = catMap[categoryKey] || categoryKey;
 
-      // Filter for this category in Current Calendar Month
-      const filtered = expenses.filter(e => e.category === categoryKey && isCurrentMonth(e.date));
+      // Filter for this category in Active Month Filter
+      const activePool = getActiveFilteredExpenses();
+      const filtered = activePool.filter(e => e.category === categoryKey);
       filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
 
       const totalSpent = filtered.reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0);
@@ -3585,19 +3709,27 @@
       totalDisplay.innerText = `${cur}${totalSpent.toFixed(2)}`;
 
       if (filtered.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" class="py-6 text-center text-slate-500">No expenses recorded for this category in the current month.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="4" class="py-6 text-center text-slate-500">No expenses recorded for this category in the selected month.</td></tr>';
       } else {
-        tbody.innerHTML = filtered.map(item => `
+        const members = household.members || [
+          { id: 'p1', name: household.p1Name || 'Marc' },
+          { id: 'p2', name: household.p2Name || 'Rocio' }
+        ];
+        tbody.innerHTML = filtered.map(item => {
+          const mObj = members.find(m => m.id === item.purchaser);
+          const payerName = mObj ? mObj.name : (item.purchaser === 'p1' ? household.p1Name : household.p2Name);
+          return `
           <tr onclick="viewReceiptImage('${item.id}')" class="hover:bg-slate-100/70 dark:hover:bg-slate-800/40 transition cursor-pointer" title="Click to view receipt">
-            <td class="py-2.5 px-3 text-slate-500 dark:text-slate-400 whitespace-nowrap text-xs">${item.date}</td>
-            <td class="py-2.5 px-3 font-semibold text-slate-900 dark:text-white text-xs flex items-center gap-1.5">
-              ${escapeHtml(item.merchant)}
-              ${item.receiptImage ? '<i class="fa-solid fa-paperclip text-[10px] text-cyan-400"></i>' : ''}
+            <td class="py-2 px-1.5 sm:px-2.5 text-slate-500 dark:text-slate-400 truncate text-[11px] sm:text-xs">${item.date}</td>
+            <td class="py-2 px-1.5 sm:px-2.5 font-semibold text-slate-900 dark:text-white text-[11px] sm:text-xs truncate">
+              <span class="truncate">${escapeHtml(item.merchant)}</span>
+              ${item.receiptImage ? '<i class="fa-solid fa-paperclip text-[10px] text-cyan-400 ml-1"></i>' : ''}
             </td>
-            <td class="py-2.5 px-3 text-slate-600 dark:text-slate-300 text-xs whitespace-nowrap">${item.purchaser === 'p1' ? household.p1Name : household.p2Name}</td>
-            <td class="py-2.5 px-3 text-right font-bold text-slate-900 dark:text-white text-xs whitespace-nowrap">${cur}${Number(item.amount).toFixed(2)}</td>
+            <td class="py-2 px-1.5 sm:px-2.5 text-slate-600 dark:text-slate-300 text-[11px] sm:text-xs truncate">${escapeHtml(payerName)}</td>
+            <td class="py-2 px-1.5 sm:px-2.5 text-right font-bold text-slate-900 dark:text-white text-[11px] sm:text-xs truncate">${cur}${Number(item.amount).toFixed(2)}</td>
           </tr>
-        `).join('');
+        `;
+        }).join('');
       }
 
       modal.classList.remove('hidden');
@@ -3762,7 +3894,7 @@
     function exportToJSON() {
       const backupData = {
         app: 'DuoSpend',
-        version: 'v0.09',
+        version: 'v0.10',
         exportedAt: new Date().toISOString(),
         household,
         settlements,
@@ -3771,7 +3903,7 @@
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
       const downloadAnchor = document.createElement('a');
       downloadAnchor.setAttribute("href", dataStr);
-      downloadAnchor.setAttribute("download", `DuoSpend_Backup_v0.08_${new Date().toISOString().split('T')[0]}.json`);
+      downloadAnchor.setAttribute("download", `DuoSpend_Backup_v0.10_${new Date().toISOString().split('T')[0]}.json`);
       document.body.appendChild(downloadAnchor);
       downloadAnchor.click();
       downloadAnchor.remove();
@@ -4017,25 +4149,65 @@
       if (badge) {
         badge.innerText = label;
         badge.className = isOnline
-          ? 'text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-semibold'
-          : 'text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-400';
+          ? 'sync-online text-[10px] px-2 py-0.5 rounded-full bg-emerald-600 !text-white font-semibold'
+          : 'text-[10px] px-2 py-0.5 rounded-full bg-slate-800 !text-white font-semibold';
+      }
+    }
+
+    function setFirebaseSyncProgress(pct, stepMsg, detailMsg, isError = false) {
+      const box = document.getElementById('firebase-sync-progress-box');
+      const bar = document.getElementById('firebase-sync-progress-bar');
+      const pctText = document.getElementById('firebase-sync-pct-text');
+      const stepEl = document.getElementById('firebase-sync-step-msg');
+      const detailEl = document.getElementById('firebase-sync-detail-log');
+
+      if (box) box.classList.remove('hidden');
+      if (bar) {
+        bar.style.width = `${Math.min(100, Math.max(0, pct))}%`;
+        bar.className = isError
+          ? 'bg-rose-500 h-1.5 rounded-full transition-all duration-300'
+          : (pct >= 100 ? 'bg-emerald-500 h-1.5 rounded-full transition-all duration-300' : 'bg-brand-500 h-1.5 rounded-full transition-all duration-300');
+      }
+      if (pctText) pctText.innerText = `${Math.round(pct)}%`;
+      if (stepEl) {
+        const icon = isError
+          ? '<i class="fa-solid fa-triangle-exclamation text-rose-400"></i>'
+          : (pct >= 100 ? '<i class="fa-solid fa-circle-check text-emerald-400"></i>' : '<i class="fa-solid fa-circle-notch fa-spin text-brand-400"></i>');
+        stepEl.innerHTML = `${icon} <span>${escapeHtml(stepMsg)}</span>`;
+      }
+      if (detailEl && detailMsg) {
+        detailEl.innerText = detailMsg;
       }
     }
 
     window._clientId = 'client_' + Math.random().toString(36).substr(2, 9);
 
     async function syncFirebaseNow() {
+      const roomCode = firebaseConfig.roomCode || 'duospend-home';
+      const projId = firebaseConfig.projectId || 'duospend-ef62c';
+      const memberCount = (household.members || []).length;
+      const expenseCount = expenses.length;
+
+      setFirebaseSyncProgress(15, 'Connecting to Firebase...', `Project: ${projId} • Room: ${roomCode}`);
+      await new Promise(r => setTimeout(r, 220));
+
       if (!firestoreDb) {
         initFirebaseSync(true);
       }
       if (!firestoreDb) {
+        setFirebaseSyncProgress(100, 'Firebase SDK unavailable', 'Please check internet connection or configure API key.', true);
         configureFirebaseModal();
         return;
       }
+
       try {
         updateFirebaseStatus('Syncing...', true);
-        const roomRef = firestoreDb.collection('households').doc(firebaseConfig.roomCode || 'duospend-home');
-        // Clean expenses without excessively heavy base64 if needed
+        setFirebaseSyncProgress(45, 'Packaging household ledger...', `Preparing ${expenseCount} receipt(s) & ${memberCount} member profile(s)...`);
+        await new Promise(r => setTimeout(r, 250));
+
+        const roomRef = firestoreDb.collection('households').doc(roomCode);
+        setFirebaseSyncProgress(75, 'Uploading to Cloud Firestore...', `Writing to /households/${roomCode} ...`);
+
         await roomRef.set({
           updatedAt: new Date().toISOString(),
           updatedBy: window._clientId,
@@ -4043,10 +4215,14 @@
           expenses: expenses,
           settlements: settlements
         }, { merge: true });
+
+        const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        setFirebaseSyncProgress(100, 'Cloud Sync Complete!', `Synced ${expenseCount} receipt(s) to "${roomCode}" at ${timeStr}`);
         updateFirebaseStatus('Synced', true);
         showToast('Successfully synced household ledger with Firebase cloud!');
       } catch (err) {
         console.error('Firebase sync failed:', err);
+        setFirebaseSyncProgress(100, 'Sync requires API Key / Rules', `${err.message || 'Check Firebase Console settings (duospend-ef62c)'}`, true);
         updateFirebaseStatus('Error', false);
         showToast('Cloud sync notice: please verify Firebase credentials.', 'info');
       }

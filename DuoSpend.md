@@ -14,6 +14,31 @@ Git Repository: [https://github.com/DaidalusX78/DuoSpend.git](https://github.com
 
 ---
 
+## Version v0.10 (Released November 2026)
+
+### Key Fixes & Enhancements Implemented:
+- [x] **1. `#btn-menu-settings` Opens Household Settings**:
+  - Updated `#btn-menu-settings` in the drawer menu (`onclick="closeAllModals(); openSettingsModal();"`) so tapping it opens the Household Settings modal directly.
+- [x] **2. Inline Editable Monthly Budget Target (`#budget-target-display`)**:
+  - Clicking `#budget-target-display` inside `<!-- Monthly Budget Progress & Safe-to-spend (Item 5) -->` opens an inline numeric editor (`editBudgetTargetInline(event)`) that saves on `Enter` or `blur` and immediately recalculates the progress bar and daily safe-to-spend indicator without triggering the parent card modal.
+- [x] **3. Fixed `#summary-total-spent-amount` Stating `€0.00` When Receipts Exist**:
+  - Fixed a JavaScript `TypeError` in `applyTranslations()` where legacy `#label-settings-p1` / `#label-settings-p2` / `#ledger-purchaser-option-person1` selectors aborted `DOMContentLoaded` before `updateHouseholdUI()` and `calculateMetricsAndSettlement()` could run.
+  - Hardened `isCurrentMonth()` to compare `YYYY-MM` date prefixes directly so timezone offsets never exclude current-month receipts.
+- [x] **4. Condensed Modal Table Containers (Zero Horizontal Overspill)**:
+  - Condensed `p-2.5 sm:p-4 max-h-[70vh] overflow-y-auto overflow-x-hidden` and switched `#member-expenses-modal` and `#category-expenses-modal` tables to `table-fixed` with compact proportional column widths (`24% / 34% / 22% / 20%`) and `truncate` cells so horizontal scrolling is completely eliminated.
+- [x] **5. `#app-version-badge` `#ffffff` Font Colour in Dark Mode**:
+  - Enforced `color: #ffffff !important` in dark mode for `#app-version-badge` and `#drawer-version-badge`.
+- [x] **6. Dark Text & Icons in Light Mode for `#btn-toggle-fullscreen` & `#btn-menu-settings`**:
+  - Excluded `#btn-toggle-fullscreen` and `#btn-menu-settings` from the `button[onclick*="closeAllModals()"]` white-text override and enforced `#0f172a` dark text and icons in light mode.
+- [x] **7. `#ffffff` Text & Icons in Light Mode for Firebase Controls**:
+  - Enforced `#ffffff` text and icons on `#firebase-sync-badge`, `.fa-solid.fa-gear`, `configureFirebaseModal()`, and `syncFirebaseNow()` in light mode.
+- [x] **8. Live Step-by-Step Progress Details on Firebase "Sync Now"**:
+  - Added `#firebase-sync-progress-box` with animated progress bar (`0% -> 15% -> 45% -> 75% -> 100%`), live step status, receipt/member payload count, and timestamp log when tapping **Sync Now**.
+- [x] **9. Removed `border-color` on `#members-avatars-group`**:
+  - Removed `border border-slate-900` from `#members-avatars-group` avatar circles in both static HTML and dynamic `updateHouseholdUI()` rendering, plus CSS enforcement (`border: none !important; border-color: transparent !important;`).
+- [x] **10. Version Control**: Bumped codebase, service worker cache, and documentation to `v0.10`.
+
+---
 ## Version v0.09 (Released November 2026)
 
 ### Key Features & Upgrades Implemented:
