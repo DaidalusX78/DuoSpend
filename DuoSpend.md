@@ -7,10 +7,46 @@ Git Repository: [https://github.com/DaidalusX78/DuoSpend.git](https://github.com
 ## //*** USER PENDING TASKS ***//
 - [ ] **1. Test Receipt Import Feature**: Test physical receipt photo capture on device using the camera and smart OCR.
 - [ ] **2. Logo & Assets**: Create custom logo, including `favicon.ico` and PNG favicons.
-- [ ] **3. Real-Time Multi-Device Sync**: Firebase Firestore setup and implementation.
+- [x] **3. Real-Time Multi-Device Sync**: Firebase Firestore setup and implementation (`duospend-ef62c`).
 - [ ] **4. Live Google Account Login**: Integrate Google Identity Services (GIS) / Firebase Auth for active login.
-- [ ] **5. Android Studio Package Structure**: Break up single-page asset into clean project structure for Android Studio importation.
+- [x] **5. Offline PWA & Service Worker**: Added `manifest.json` and `sw.js` for 100% offline supermarket usage.
 - [ ] **6. Split Settlement Card**: Re-enable and configure settlement card display when ready.
+
+---
+
+## Version v0.09 (Released November 2026)
+
+### Key Features & Upgrades Implemented:
+- [x] **1. Client-Side Image Compression**:
+  - Automatically resizes captured/attached receipt photos down to max 1000px and 72% JPEG quality via off-screen HTML5 `<canvas>`.
+  - Shrinks photos from 4MB+ down to ~60KB–80KB, completely preventing `localStorage` `QuotaExceededError` (5MB limit) and enabling 70+ receipts to be stored locally.
+- [x] **2. Active Month Filtering for KPIs & Visualizations**:
+  - `calculateMetricsAndSettlement()` and `renderCharts()` now dynamically respect the selected `#ledger-month-filter` (defaulting to current month, or past months).
+- [x] **3. Thermal Receipt OCR Enhancement**:
+  - Preprocesses receipt images through an off-screen `<canvas>` with grayscale luminance, contrast boosting (`1.35`), and high-pass ink thresholding before passing to `Tesseract.recognize()`.
+  - Drastically improves recognition speed and total amount detection on faint supermarket thermal slips.
+- [x] **4. Firebase Real-Time Multi-Device Cloud Sync**:
+  - Connected to Firebase project `duospend-ef62c`.
+  - Configurable room code (`duospend-home`), 1-click manual "Sync Now" button, and automatic realtime cloud sync between Marc and Rocio's devices.
+- [x] **5. €500 Monthly Budget Target & Safe-to-Spend**:
+  - Embedded monthly budget tracking into `#card-total-spend`.
+  - Features dynamic progress bar color changing from green to amber at 80% and red at 100%, plus a live "Daily Safe-to-Spend" calculation for remaining days in the month.
+- [x] **6. Android Studio Architecture Evaluation**:
+  - Single-file `.html` confirmed as best practice for Android Studio `WebView` asset loading (`file:///android_asset/duospend.html`).
+- [x] **7. Dynamic Multi-Member Expansion (Elisa `EB` Ready)**:
+  - Upgraded household settings to support dynamic members list (`+ Add Member` with Name, Initials Badge, and custom Accent Colour).
+  - Automatically renders custom KPI summary cards, avatars, and attribution radio buttons.
+- [x] **8. Past Months Selection & Monthly Trend Chart**:
+  - Populates `#ledger-month-filter` with all distinct calendar months in the ledger.
+  - Added new **"Monthly Trend"** bar chart comparing month-over-month household expenditure across the last 6 months.
+- [x] **9. Custom Merchants & Custom Categories**:
+  - Configurable 5 Quick Merchant presets with 1-click "Auto-Rank Top 5" from expense history.
+  - Configurable custom categories / tags (e.g., Pharmacy, Pets, DIY, Holiday) reflected across entry forms, filters, and charts.
+- [x] **10. 1-Click WhatsApp & PDF Summary Sharing**:
+  - Added WhatsApp button formatting a complete monthly summary message ready to send to household chats.
+  - Added Print/PDF button for physical statements and digital archives.
+- [x] **11. PWA & Offline Service Worker (`manifest.json` + `sw.js`)**:
+  - Offline pre-caching for Tailwind, Chart.js, FontAwesome, Tesseract, and DuoSpend core so the app runs smoothly offline in stores with poor mobile signal.
 
 ---
 

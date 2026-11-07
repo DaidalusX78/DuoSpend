@@ -8,7 +8,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#0b0f19">
-  <title>DuoSpend v0.08 — Household Receipt & Expense Tracker</title>
+  <title>DuoSpend v0.09 — Household Receipt & Expense Tracker</title>
 
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -16,6 +16,11 @@
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
   <!-- Chart.js for interactive analytics -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="manifest" href="./manifest.json">
+  <link rel="apple-touch-icon" href="./manifest.json">
+  <!-- Firebase App & Firestore SDKs (v9 compat for zero-build vanilla JS) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
   <!-- Font Awesome for clean icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
@@ -387,8 +392,49 @@
           </button>
         </nav>
 
+        <!-- Monthly WhatsApp & PDF Summary Share (Item 10) -->
+        <div class="pt-3 border-t border-slate-200 dark:border-slate-800 space-y-2">
+          <div class="px-2 text-xs uppercase tracking-wider font-bold text-slate-500 dark:text-slate-400" id="label-menu-share">
+            Monthly Summary & Sharing
+          </div>
+          <div class="grid grid-cols-2 gap-2 text-xs">
+            <button onclick="shareMonthlyWhatsApp()"
+              class="px-3 py-2.5 rounded-xl bg-emerald-600/10 hover:bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 font-semibold flex items-center justify-center gap-2 transition cursor-pointer shadow-sm">
+              <i class="fa-brands fa-whatsapp text-emerald-400 text-sm"></i> <span>WhatsApp</span>
+            </button>
+            <button onclick="printMonthlySummaryPDF()"
+              class="px-3 py-2.5 rounded-xl bg-indigo-600/10 hover:bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 font-semibold flex items-center justify-center gap-2 transition cursor-pointer shadow-sm">
+              <i class="fa-solid fa-print text-indigo-400 text-sm"></i> <span>Print / PDF</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Firebase Multi-Device Cloud Sync Controls (Item 4) -->
+        <div class="pt-3 border-t border-slate-200 dark:border-slate-800 space-y-2">
+          <div class="px-2 flex items-center justify-between text-xs uppercase tracking-wider font-bold text-slate-500 dark:text-slate-400">
+            <span>Firebase Cloud Sync</span>
+            <span id="firebase-sync-badge" class="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-400">Offline</span>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-2 text-xs">
+            <div class="flex items-center justify-between">
+              <span class="text-slate-400">Household Sync Room:</span>
+              <strong id="firebase-room-label" class="text-brand-400 font-mono">duospend-home</strong>
+            </div>
+            <div class="flex gap-2">
+              <button onclick="syncFirebaseNow()"
+                class="flex-1 py-1.5 rounded-lg bg-brand-600 hover:bg-brand-500 text-white font-medium flex items-center justify-center gap-1.5 transition cursor-pointer">
+                <i class="fa-solid fa-cloud-arrow-up"></i> Sync Now
+              </button>
+              <button onclick="configureFirebaseModal()"
+                class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium transition cursor-pointer" title="Configure Firebase project credentials">
+                <i class="fa-solid fa-gear"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
         <!-- Moved Data Management & Export/Import Options (Replicated btn-theme-toggle design) -->
-        <div class="pt-4 border-t border-slate-200 dark:border-slate-800 space-y-2.5">
+        <div class="pt-3 border-t border-slate-200 dark:border-slate-800 space-y-2.5">
           <div class="px-2 text-xs uppercase tracking-wider font-bold text-slate-500 dark:text-slate-400" id="label-menu-data">
             Data Backup & Invoices
           </div>
@@ -460,7 +506,7 @@
           <i class="fa-regular fa-copyright text-brand-400"></i>
           <span id="menu-credits-text">created by <strong class="text-white font-semibold">Marc Bailey 2026</strong></span>
         </div>
-        <div class="text-xs text-slate-500 mt-1">DuoSpend v0.08 — Android Ready Architecture</div>
+        <div class="text-xs text-slate-500 mt-1">DuoSpend v0.09 — Android Ready Architecture</div>
       </div>
 
     </div>
@@ -486,8 +532,25 @@
           </div>
         </div>
         <div id="summary-total-spent-amount" class="text-2xl sm:text-3xl font-extrabold text-white mt-1">€0.00</div>
+        <!-- Monthly Budget Progress & Safe-to-spend (Item 5) -->
+        <div id="budget-progress-section" class="mt-3 pt-2 border-t border-slate-800/80 space-y-1.5">
+          <div class="flex items-center justify-between text-[11px]">
+            <span class="text-slate-400 flex items-center gap-1">
+              <i class="fa-solid fa-bullseye text-brand-400"></i> Budget: <strong id="budget-target-display" class="text-slate-200">€500</strong>
+            </span>
+            <span id="budget-percent-display" class="font-bold text-slate-300">0%</span>
+          </div>
+          <div class="w-full bg-slate-900 rounded-full h-2 overflow-hidden border border-slate-800">
+            <div id="budget-progress-bar" class="h-2 rounded-full transition-all duration-500 bg-emerald-500" style="width: 0%"></div>
+          </div>
+          <div class="flex items-center justify-between text-[10px] text-slate-400 pt-0.5">
+            <span id="budget-status-text">Safe pace</span>
+            <span id="budget-daily-safe-text" class="text-emerald-400 font-mono font-semibold">€16.67/day left</span>
+          </div>
+        </div>
+
         <div id="card-total-spend-footer"
-          class="flex items-center justify-between text-xs text-slate-400 mt-3 pt-3 border-t border-slate-800">
+          class="flex items-center justify-between text-xs text-slate-400 mt-2.5 pt-2 border-t border-slate-800">
           <span id="summary-expense-count-label">0 receipts logged</span>
           <span id="summary-currency-badge" class="text-brand-400 text-xs font-medium">EUR (€)</span>
         </div>
@@ -604,6 +667,8 @@
               class="px-3 py-1 rounded-lg text-slate-400 hover:text-white transition cursor-pointer">By Merchant</button>
             <button id="btn-chart-mode-purchaser" onclick="switchChartMode('purchaser')"
               class="px-3 py-1 rounded-lg text-slate-400 hover:text-white transition cursor-pointer">Split Comparison</button>
+            <button id="btn-chart-mode-trend" onclick="switchChartMode('trend')"
+              class="px-3 py-1 rounded-lg text-slate-400 hover:text-white transition cursor-pointer">Monthly Trend</button>
           </div>
         </div>
         <div id="distribution-chart-wrapper" class="relative flex-1 min-h-[220px] w-full max-w-full pt-2">
@@ -629,7 +694,7 @@
           <!-- Month Selector Filter: Defaults to Current Calendar Month (Item 2) -->
           <div class="flex items-center gap-2">
             <span class="text-xs text-slate-400 font-medium" id="label-ledger-month">Month:</span>
-            <select id="ledger-month-filter" onchange="renderTable()"
+            <select id="ledger-month-filter" onchange="onLedgerMonthChange()"
               class="bg-slate-900/90 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-brand-500 pr-8">
               <option value="CURRENT">Current Month</option>
               <option value="ALL">All Time</option>
@@ -927,29 +992,61 @@
           <i class="fa-solid fa-xmark"></i>
         </button>
       </div>
-      <form onsubmit="saveSettings(event)" class="p-5 space-y-4">
-        <!-- Person 1 Name & Badge -->
-        <div id="settings-field-wrapper-person1" class="space-y-2">
-          <label id="label-settings-p1" for="settings-person1-name-input" class="block text-xs font-medium text-cyan-400">Person 1 Name & Badge</label>
-          <div class="grid grid-cols-3 gap-2">
-            <input type="text" id="settings-person1-name-input" required placeholder="Name"
-              class="col-span-2 w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-cyan-500">
-            <input type="text" id="settings-person1-badge-input" maxlength="3" placeholder="MB"
-              title="Card Badge Initials (e.g. MB for Marc, RJ for Rocio, EB for Elisa)"
-              class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-center font-bold text-cyan-400 uppercase focus:outline-none focus:border-cyan-500">
+      <form onsubmit="saveSettings(event)" class="p-5 space-y-4 max-h-[75vh] overflow-y-auto">
+        <!-- Monthly Budget Target (Item 5) -->
+        <div id="settings-field-wrapper-budget" class="p-3 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
+          <label id="label-settings-budget" for="settings-budget-input" class="block text-xs font-semibold text-brand-400">
+            <i class="fa-solid fa-bullseye mr-1"></i> Monthly Household Budget Target (<span class="currency-symbol-label">€</span>)
+          </label>
+          <div class="flex items-center gap-2">
+            <span class="currency-symbol-label text-slate-400 text-sm font-bold">€</span>
+            <input type="number" id="settings-budget-input" min="50" step="10" value="500" placeholder="500"
+              class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs font-bold text-slate-100 focus:outline-none focus:border-brand-500">
+          </div>
+          <p class="text-[10px] text-slate-400">Progress bar alerts at 80% (amber) and 100% (red) with daily safe spend calculation.</p>
+        </div>
+
+        <!-- Dynamic Household Members Section (Item 7: Marc, Rocio, Elisa EB, etc.) -->
+        <div id="settings-members-section" class="space-y-2">
+          <div class="flex items-center justify-between">
+            <label class="block text-xs font-semibold text-slate-200">
+              <i class="fa-solid fa-users mr-1 text-cyan-400"></i> Household Members
+            </label>
+            <button type="button" onclick="addSettingsMemberRow()"
+              class="px-2.5 py-1 rounded-lg bg-brand-600/20 hover:bg-brand-600 text-brand-300 hover:text-white text-[11px] font-semibold border border-brand-500/30 transition cursor-pointer flex items-center gap-1">
+              <i class="fa-solid fa-plus text-[10px]"></i> Add Member
+            </button>
+          </div>
+          <div id="settings-members-list-container" class="space-y-2">
+            <!-- Dynamically populated rows for members -->
           </div>
         </div>
 
-        <!-- Person 2 Name & Badge -->
-        <div id="settings-field-wrapper-person2" class="space-y-2">
-          <label id="label-settings-p2" for="settings-person2-name-input" class="block text-xs font-medium text-pink-400">Person 2 Name & Badge</label>
-          <div class="grid grid-cols-3 gap-2">
-            <input type="text" id="settings-person2-name-input" required placeholder="Name"
-              class="col-span-2 w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-pink-500">
-            <input type="text" id="settings-person2-badge-input" maxlength="3" placeholder="RJ"
-              title="Card Badge Initials (e.g. RJ for Rocio)"
-              class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-center font-bold text-pink-400 uppercase focus:outline-none focus:border-pink-500">
+        <!-- 5 Quick Merchants Configuration (Item 9) -->
+        <div id="settings-merchants-section" class="space-y-2 pt-2 border-t border-slate-800">
+          <div class="flex items-center justify-between">
+            <label class="block text-xs font-semibold text-slate-200">
+              <i class="fa-solid fa-store mr-1 text-amber-400"></i> 5 Quick Merchant Presets
+            </label>
+            <button type="button" onclick="autoRankTopMerchants()"
+              class="px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-medium border border-slate-700 transition cursor-pointer"
+              title="Auto-fill with your top 5 most used merchants from expenses history">
+              Auto-Rank Top 5
+            </button>
           </div>
+          <input type="text" id="settings-merchants-csv-input" placeholder="AlCash, Lidl, Aldi, Mercadona, Deza"
+            class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-brand-500">
+          <p class="text-[10px] text-slate-400">Comma-separated list of the 5 fast-entry merchant buttons.</p>
+        </div>
+
+        <!-- Custom Categories & Tags (Item 9) -->
+        <div id="settings-categories-section" class="space-y-2 pt-2 border-t border-slate-800">
+          <label class="block text-xs font-semibold text-slate-200">
+            <i class="fa-solid fa-tags mr-1 text-purple-400"></i> Custom Categories & Tags
+          </label>
+          <input type="text" id="settings-custom-categories-input" placeholder="e.g. Pharmacy, Pets, DIY, Holidays"
+            class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-brand-500">
+          <p class="text-[10px] text-slate-400">Comma-separated list of additional categories to include in forms and filters.</p>
         </div>
 
         <!-- Multi-Currency Selector (Euros default) -->
@@ -1213,6 +1310,53 @@
     </div>
   </div>
 
+  <!-- ========================================== -->
+  <!-- POPUP: FIREBASE CONFIGURATION MODAL (Item 4)-->
+  <!-- ========================================== -->
+  <div id="firebase-config-modal" onclick="closeAllModals()"
+    class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div onclick="event.stopPropagation()"
+      class="glass-modal rounded-2xl w-full max-w-md my-auto overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+      <div class="px-5 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-900/90">
+        <h3 class="text-sm sm:text-base font-bold text-white flex items-center gap-2">
+          <i class="fa-solid fa-fire text-amber-500"></i> Firebase Project Setup (duospend-ef62c)
+        </h3>
+        <button onclick="closeAllModals()" class="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition cursor-pointer">
+          <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+      </div>
+      <form onsubmit="saveFirebaseConfig(event)" class="p-5 space-y-3.5 text-xs">
+        <p class="text-slate-400 text-[11px]">
+          Enter your Firebase Web App credentials from the Firebase Console (Project Settings &gt; General &gt; Your Apps):
+        </p>
+        <div>
+          <label class="block text-slate-300 font-medium mb-1">Project ID</label>
+          <input type="text" id="firebase-project-id-input" value="duospend-ef62c" required
+            class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-brand-500">
+        </div>
+        <div>
+          <label class="block text-slate-300 font-medium mb-1">Web API Key (from Firebase Console)</label>
+          <input type="text" id="firebase-api-key-input" placeholder="AIzaSy..."
+            class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-brand-500">
+        </div>
+        <div>
+          <label class="block text-slate-300 font-medium mb-1">Sync Room / Household Code</label>
+          <input type="text" id="firebase-room-code-input" value="duospend-home" required
+            class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-brand-500">
+          <span class="text-[10px] text-slate-500">Both devices using this room code share the exact same ledger.</span>
+        </div>
+        <div class="pt-3 border-t border-slate-800 flex justify-end gap-2">
+          <button type="button" onclick="closeAllModals()" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 !text-white font-semibold cursor-pointer">
+            Cancel
+          </button>
+          <button type="submit" class="px-4 py-1.5 rounded-xl text-white font-semibold bg-brand-600 hover:bg-brand-500 shadow-md cursor-pointer">
+            Save & Connect
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- TOAST NOTIFICATION CONTAINER -->
   <div id="toast-notifications-container" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
@@ -1220,20 +1364,166 @@
   <!-- JAVASCRIPT LOGIC                           -->
   <!-- ========================================== -->
   <script>
-    // DATA STATE
+    function updateHouseholdUI() {
+      // 1. Header members pill
+      const navHousehold = document.getElementById('header-household-name');
+      const avatarGroup = document.getElementById('members-avatars-group');
+      const members = household.members || [
+        { id: 'p1', name: 'Marc', badge: 'MB', color: '#06b6d4' },
+        { id: 'p2', name: 'Rocio', badge: 'RJ', color: '#ec4899' }
+      ];
+
+      if (navHousehold) {
+        navHousehold.innerText = members.map(m => m.name).join(', ');
+      }
+      if (avatarGroup) {
+        avatarGroup.innerHTML = members.map(m => `
+          <div class="w-6 h-6 rounded-full flex items-center justify-center text-[10px] text-white font-bold border border-slate-900 shadow-sm" style="background-color: ${m.color || '#6366f1'}">
+            <span>${escapeHtml(m.badge || computeBadge(m.name))}</span>
+          </div>
+        `).join('');
+      }
+
+      // 2. Dynamic Summary Cards Grid (Item 7: Marc, Rocio, Elisa EB, etc.)
+      const summaryGrid = document.getElementById('summary-cards-grid');
+      if (summaryGrid) {
+        // Adjust grid columns dynamically
+        const totalCards = 1 + members.length; // 1 for Total Spend + members
+        if (totalCards >= 4) {
+          summaryGrid.className = 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 min-w-0';
+        } else if (totalCards === 3) {
+          summaryGrid.className = 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 min-w-0';
+        } else {
+          summaryGrid.className = 'grid grid-cols-1 sm:grid-cols-2 gap-4 min-w-0';
+        }
+
+        // Keep #card-total-spend as first child, remove prior member cards, re-render dynamically
+        const totalCard = document.getElementById('card-total-spend');
+        const settleCard = document.getElementById('settlement-card');
+
+        // Remove existing dynamic member cards
+        const existingMemberCards = summaryGrid.querySelectorAll('.dynamic-member-card');
+        existingMemberCards.forEach(c => c.remove());
+
+        // Create new member cards before settlement card
+        members.forEach(m => {
+          const card = document.createElement('div');
+          card.id = `card-${m.id}-paid`;
+          card.className = `dynamic-member-card glass-card rounded-2xl p-4 sm:p-5 relative overflow-hidden border-l-4 min-w-0 cursor-pointer hover:opacity-90 transition`;
+          card.style.borderLeftColor = m.color || '#6366f1';
+          card.title = `Tap to view ${m.name}'s expense details`;
+          card.onclick = () => openMemberExpensesModal(m.id);
+
+          card.innerHTML = `
+            <div class="flex items-center justify-between text-slate-400 mb-1">
+              <span class="text-xs uppercase tracking-wider font-semibold member-card-name-label">${escapeHtml(m.name)} ${currentLang === 'es' ? 'Pagó' : 'Paid'}</span>
+              <div class="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs" style="background-color: ${m.color}20; color: ${m.color}">
+                ${escapeHtml(m.badge || computeBadge(m.name))}
+              </div>
+            </div>
+            <div id="${m.id}-total-paid-amount" class="text-2xl sm:text-3xl font-extrabold mt-1" style="color: ${m.color}">€0.00</div>
+            <div class="text-xs text-slate-400 mt-3 pt-3 border-t border-slate-800 flex justify-between">
+              <span id="${m.id}-spend-percentage" class="font-semibold text-slate-300">0%</span>
+            </div>
+          `;
+          if (settleCard) {
+            summaryGrid.insertBefore(card, settleCard);
+          } else {
+            summaryGrid.appendChild(card);
+          }
+        });
+      }
+
+      // 3. Quick Merchant Presets in Receipt Modal (Item 9)
+      const presetsGroup = document.getElementById('receipt-presets-buttons-group');
+      if (presetsGroup) {
+        const merchants = household.quickMerchants || ['AlCash', 'Lidl', 'Aldi', 'Mercadona', 'Deza'];
+        presetsGroup.innerHTML = merchants.map(m => `
+          <button type="button" onclick="loadReceiptPreset('${escapeHtml(m)}')"
+            class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs text-slate-200 border border-slate-700 font-medium transition cursor-pointer">${escapeHtml(m)}</button>
+        `).join('');
+      }
+
+      // 4. Who Paid Radio Group in Expense Form
+      const purchaserRadioGroup = document.getElementById('purchaser-radio-group');
+      if (purchaserRadioGroup) {
+        purchaserRadioGroup.className = `grid grid-cols-${Math.min(members.length, 3)} gap-2`;
+        purchaserRadioGroup.innerHTML = members.map((m, idx) => `
+          <label class="flex items-center gap-2 p-2 rounded-xl bg-slate-950 border border-slate-800 cursor-pointer hover:border-brand-500 transition">
+            <input type="radio" name="formPurchaser" value="${m.id}" ${idx === 0 ? 'checked' : ''} class="focus:ring-0" style="accent-color: ${m.color}">
+            <span class="text-xs font-semibold" style="color: ${m.color}">${escapeHtml(m.name)}</span>
+          </label>
+        `).join('');
+      }
+
+      // 5. Split Policy Options
+      const splitSelect = document.getElementById('expense-split-policy-select');
+      if (splitSelect) {
+        const currentSplitVal = splitSelect.value || 'home_account';
+        let splitHtml = `
+          <option value="home_account" id="splitOptHome">${currentLang === 'es' ? 'Cuenta Hogar (Cuenta Conjunta del Hogar)' : 'Home Account (Joint Household Account)'}</option>
+          <option value="50/50" id="splitOpt5050">${currentLang === 'es' ? 'Compartido (Reparto Equilibrado)' : 'Shared (Fair Household Split)'}</option>
+        `;
+        members.forEach(m => {
+          splitHtml += `<option value="100_${m.id}">100% ${escapeHtml(m.name)} (${TRANSLATIONS[currentLang].personalBadge})</option>`;
+        });
+        splitSelect.innerHTML = splitHtml;
+        splitSelect.value = currentSplitVal;
+      }
+
+      // 6. Ledger Purchaser Filter Dropdown
+      const purchFilter = document.getElementById('ledger-purchaser-filter');
+      if (purchFilter) {
+        const currentPurchVal = purchFilter.value || 'ALL';
+        let purchOpts = `<option value="ALL">${TRANSLATIONS[currentLang].allPurchasers}</option>`;
+        members.forEach(m => {
+          purchOpts += `<option value="${m.id}">${escapeHtml(m.name)}</option>`;
+        });
+        purchFilter.innerHTML = purchOpts;
+        purchFilter.value = currentPurchVal;
+      }
+
+      // 7. Currency symbols & Budget target display
+      document.querySelectorAll('.currency-symbol-label').forEach(el => {
+        el.innerText = household.currency;
+      });
+      const curBadge = document.getElementById('summary-currency-badge');
+      if (curBadge) curBadge.innerText = household.currency;
+
+      const budgetDisplay = document.getElementById('budget-target-display');
+      if (budgetDisplay) budgetDisplay.innerText = `${household.currency}${(household.monthlyBudget || 500).toFixed(0)}`;
+    }
+
+        // DATA STATE
     const STORAGE_KEY = 'duospend_expenses_v1';
     const SETTINGS_KEY = 'duospend_settings_v1';
     const LANG_KEY = 'duospend_lang_v1';
     const THEME_KEY = 'duospend_theme_v1';
     const SETTLEMENTS_KEY = 'duospend_settlements_v1';
+    const FIREBASE_CONFIG_KEY = 'duospend_firebase_v1';
 
     let household = {
       p1Name: 'Marc',
       p2Name: 'Rocio',
       p1Badge: 'MB',
       p2Badge: 'RJ',
-      currency: '€'
+      currency: '€',
+      monthlyBudget: 500, // Item 5: €500/month default
+      members: [
+        { id: 'p1', name: 'Marc', badge: 'MB', color: '#06b6d4' },
+        { id: 'p2', name: 'Rocio', badge: 'RJ', color: '#ec4899' }
+      ],
+      quickMerchants: ['AlCash', 'Lidl', 'Aldi', 'Mercadona', 'Deza'], // Item 9
+      customCategories: [] // Item 9: e.g. Pharmacy, Pets, DIY, Holiday
     };
+
+    let firebaseConfig = {
+      projectId: 'duospend-ef62c',
+      apiKey: '',
+      roomCode: 'duospend-home'
+    };
+    let firestoreDb = null;
+    let isFirebaseListening = false;
 
     let expenses = [];
     let settlements = []; // Settlement payments logged to balance debts
@@ -1470,15 +1760,27 @@
 
     // INITIALIZATION
     window.addEventListener('DOMContentLoaded', () => {
+      // Register Service Worker for 100% offline caching (Item 11)
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./sw.js').then(() => {
+          console.log('DuoSpend ServiceWorker registered successfully.');
+        }).catch(err => {
+          console.warn('ServiceWorker registration skipped or failed:', err);
+        });
+      }
+
       loadTheme();
       loadLanguage();
       loadSettings();
+      loadFirebaseConfig();
       loadExpensesFromStorage();
       loadSettlementsFromStorage();
       
       applyTranslations();
       updateHouseholdUI();
+      populateLedgerMonthFilter(); // Item 8
       refreshDashboard();
+      initFirebaseSync(); // Item 4
     });
 
     // DAY / NIGHT THEME TOGGLE (Item 9)
@@ -1853,30 +2155,121 @@
       return { merchant, amount, date, category, notes };
     }
 
-    function handleDirectCapture(e) {
+    
+    // IMAGE COMPRESSION (Item 1: Prevents 5MB localStorage QuotaExceededError)
+    function compressImage(dataUrl, maxDim = 1000, quality = 0.72) {
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => {
+          let w = img.width;
+          let h = img.height;
+          if (w > maxDim || h > maxDim) {
+            if (w > h) {
+              h = Math.round((h * maxDim) / w);
+              w = maxDim;
+            } else {
+              w = Math.round((w * maxDim) / h);
+              h = maxDim;
+            }
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+          const compressed = canvas.toDataURL('image/jpeg', quality);
+          resolve(compressed);
+        };
+        img.onerror = () => resolve(dataUrl);
+        img.src = dataUrl;
+      });
+    }
+
+    // CANVAS PRE-PROCESSING FOR OCR (Item 3: Grayscale + high-contrast thresholding for thermal tickets)
+    function preprocessReceiptForOcr(dataUrl) {
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => {
+          const maxDim = 1400; // Optimal OCR resolution
+          let w = img.width;
+          let h = img.height;
+          if (w > maxDim || h > maxDim) {
+            if (w > h) {
+              h = Math.round((h * maxDim) / w);
+              w = maxDim;
+            } else {
+              w = Math.round((w * maxDim) / h);
+              h = maxDim;
+            }
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+
+          try {
+            const imgData = ctx.getImageData(0, 0, w, h);
+            const d = imgData.data;
+            // Contrast enhancement factor
+            const contrast = 1.35;
+            const factor = (259 * (contrast + 255)) / (255 * (259 - contrast));
+            
+            for (let i = 0; i < d.length; i += 4) {
+              // Grayscale luminance
+              const gray = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
+              // Contrast adjustment
+              let c = factor * (gray - 128) + 128;
+              if (c < 0) c = 0;
+              if (c > 255) c = 255;
+              // High-pass sharpening threshold for thermal ink
+              const finalVal = c > 138 ? 255 : (c < 90 ? 0 : c);
+              d[i] = finalVal;
+              d[i + 1] = finalVal;
+              d[i + 2] = finalVal;
+            }
+            ctx.putImageData(imgData, 0, 0);
+            resolve(canvas.toDataURL('image/jpeg', 0.9));
+          } catch (e) {
+            console.warn('Canvas OCR filter error, using raw image:', e);
+            resolve(canvas.toDataURL('image/jpeg', 0.85));
+          }
+        };
+        img.onerror = () => resolve(dataUrl);
+        img.src = dataUrl;
+      });
+    }
+
+    async function handleDirectCapture(e) {
       const file = e.target.files[0];
       if (!file) return;
 
       const t = TRANSLATIONS[currentLang];
-      showOcrScanning('Loading captured image...');
+      showOcrScanning('Optimizing & compressing receipt image...');
 
       const reader = new FileReader();
-      reader.onload = function(evt) {
-        const photoDataUrl = evt.target.result;
-        window._lastCapturedPhoto = photoDataUrl;
+      reader.onload = async function(evt) {
+        const rawDataUrl = evt.target.result;
+        // Item 1: Compress for storage
+        const compressedStoragePhoto = await compressImage(rawDataUrl, 1000, 0.72);
+        window._lastCapturedPhoto = compressedStoragePhoto;
+
+        // Item 3: Grayscale & high contrast filter for OCR
+        showOcrScanning('Applying thermal receipt contrast enhancement...');
+        const ocrPreparedPhoto = await preprocessReceiptForOcr(rawDataUrl);
 
         let hasProcessed = false;
         const safetyTimer = setTimeout(() => {
           if (!hasProcessed) {
             hasProcessed = true;
             closeOcrScanning();
-            processOcrResult('', photoDataUrl, false);
+            processOcrResult('', compressedStoragePhoto, false);
           }
-        }, 9000);
+        }, 11000);
 
         if (window.Tesseract && typeof window.Tesseract.recognize === 'function') {
           showOcrScanning('Recognizing receipt text & totals with OCR...');
-          window.Tesseract.recognize(photoDataUrl, 'spa+eng', {
+          window.Tesseract.recognize(ocrPreparedPhoto, 'spa+eng', {
             logger: m => {
               if (m.status === 'recognizing text' && m.progress) {
                 const pct = Math.round(m.progress * 100);
@@ -1888,7 +2281,7 @@
               hasProcessed = true;
               clearTimeout(safetyTimer);
               closeOcrScanning();
-              processOcrResult(text, photoDataUrl, true);
+              processOcrResult(text, compressedStoragePhoto, true);
             }
           }).catch(err => {
             console.warn('Tesseract OCR error:', err);
@@ -1896,7 +2289,7 @@
               hasProcessed = true;
               clearTimeout(safetyTimer);
               closeOcrScanning();
-              processOcrResult('', photoDataUrl, false);
+              processOcrResult('', compressedStoragePhoto, false);
             }
           });
         } else {
@@ -1905,7 +2298,7 @@
               hasProcessed = true;
               clearTimeout(safetyTimer);
               closeOcrScanning();
-              processOcrResult('', photoDataUrl, false);
+              processOcrResult('', compressedStoragePhoto, false);
             }
           }, 600);
         }
@@ -1966,8 +2359,10 @@
       if (!file) return;
 
       const reader = new FileReader();
-      reader.onload = function(evt) {
-        const photoDataUrl = evt.target.result;
+      reader.onload = async function(evt) {
+        const rawPhoto = evt.target.result;
+        // Item 1: Compress before attaching
+        const photoDataUrl = await compressImage(rawPhoto, 1000, 0.72);
         window._lastCapturedPhoto = photoDataUrl;
 
         const previewBox = document.getElementById('form-receipt-photo-preview');
@@ -2013,7 +2408,7 @@
 
       const exportPayload = {
         app: 'DuoSpend',
-        version: 'v0.08',
+        version: 'v0.09',
         exportType: 'invoices_and_receipts',
         exportTimestamp: new Date().toISOString(),
         totalExpensesCount: invoices.length,
@@ -2038,7 +2433,7 @@
       showToast(`Exported ${invoices.length} invoices to JSON!`);
     }
 
-    // SETTINGS MANAGEMENT
+    // SETTINGS MANAGEMENT (Items 5, 7, 9)
     function loadSettings() {
       const stored = localStorage.getItem(SETTINGS_KEY);
       if (stored) {
@@ -2050,63 +2445,147 @@
         }
       }
       if (!household.currency) household.currency = '€';
-      household.p1Badge = computeBadge(household.p1Name, household.p1Badge);
-      household.p2Badge = computeBadge(household.p2Name, household.p2Badge);
+      if (!household.monthlyBudget) household.monthlyBudget = 500;
+      if (!Array.isArray(household.quickMerchants) || household.quickMerchants.length === 0) {
+        household.quickMerchants = ['AlCash', 'Lidl', 'Aldi', 'Mercadona', 'Deza'];
+      }
+      if (!Array.isArray(household.customCategories)) {
+        household.customCategories = [];
+      }
+      // Guarantee dynamic members array
+      if (!Array.isArray(household.members) || household.members.length === 0) {
+        household.members = [
+          { id: 'p1', name: household.p1Name || 'Marc', badge: computeBadge(household.p1Name || 'Marc', household.p1Badge), color: '#06b6d4' },
+          { id: 'p2', name: household.p2Name || 'Rocio', badge: computeBadge(household.p2Name || 'Rocio', household.p2Badge), color: '#ec4899' }
+        ];
+      }
+      household.p1Name = household.members[0] ? household.members[0].name : 'Marc';
+      household.p2Name = household.members[1] ? household.members[1].name : 'Rocio';
+      household.p1Badge = household.members[0] ? household.members[0].badge : 'MB';
+      household.p2Badge = household.members[1] ? household.members[1].badge : 'RJ';
+    }
+
+    function addSettingsMemberRow(name = '', badge = '', color = '#10b981') {
+      const container = document.getElementById('settings-members-list-container');
+      const idx = container.children.length;
+      const memId = 'p' + (idx + 1);
+      const row = document.createElement('div');
+      row.className = 'grid grid-cols-12 gap-2 items-center p-2 rounded-xl bg-slate-900 border border-slate-800 settings-member-row';
+      row.innerHTML = `
+        <div class="col-span-5">
+          <input type="text" class="member-row-name w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand-500" placeholder="Name (e.g. Elisa)" value="${escapeHtml(name)}" required>
+        </div>
+        <div class="col-span-3">
+          <input type="text" maxlength="3" class="member-row-badge w-full bg-slate-950 border border-slate-800 rounded-lg px-1.5 py-1.5 text-xs text-center font-bold text-brand-400 uppercase focus:outline-none focus:border-brand-500" placeholder="EB" value="${escapeHtml(badge)}">
+        </div>
+        <div class="col-span-3 flex items-center gap-1.5">
+          <input type="color" class="member-row-color w-7 h-7 rounded border border-slate-700 bg-transparent cursor-pointer p-0" value="${color}">
+          <span class="text-[10px] text-slate-400 font-mono">Accent</span>
+        </div>
+        <div class="col-span-1 text-center">
+          ${idx >= 2 ? `<button type="button" onclick="this.closest('.settings-member-row').remove()" class="text-rose-400 hover:text-rose-300 p-1 cursor-pointer"><i class="fa-solid fa-trash-can text-xs"></i></button>` : ''}
+        </div>
+      `;
+      container.appendChild(row);
+    }
+
+    function autoRankTopMerchants() {
+      const merchantCounts = {};
+      expenses.forEach(e => {
+        const m = (e.merchant || '').trim();
+        if (m) merchantCounts[m] = (merchantCounts[m] || 0) + 1;
+      });
+      const sorted = Object.keys(merchantCounts).sort((a, b) => merchantCounts[b] - merchantCounts[a]);
+      const top5 = sorted.slice(0, 5);
+      if (top5.length > 0) {
+        document.getElementById('settings-merchants-csv-input').value = top5.join(', ');
+        showToast(`Ranked top merchants: ${top5.join(', ')}`);
+      } else {
+        showToast('No logged expenses yet to rank merchants.', 'info');
+      }
     }
 
     function saveSettings(e) {
       e.preventDefault();
-      household.p1Name = document.getElementById('settings-person1-name-input').value.trim() || 'Person 1';
-      household.p2Name = document.getElementById('settings-person2-name-input').value.trim() || 'Person 2';
-      household.p1Badge = document.getElementById('settings-person1-badge-input').value.trim().toUpperCase() || computeBadge(household.p1Name);
-      household.p2Badge = document.getElementById('settings-person2-badge-input').value.trim().toUpperCase() || computeBadge(household.p2Name);
+      // Read dynamic members
+      const rows = document.querySelectorAll('.settings-member-row');
+      const newMembers = [];
+      rows.forEach((r, idx) => {
+        const name = r.querySelector('.member-row-name').value.trim() || `Person ${idx + 1}`;
+        let badge = r.querySelector('.member-row-badge').value.trim().toUpperCase();
+        if (!badge) badge = computeBadge(name);
+        const color = r.querySelector('.member-row-color').value || (idx === 0 ? '#06b6d4' : idx === 1 ? '#ec4899' : '#10b981');
+        newMembers.push({ id: 'p' + (idx + 1), name, badge, color });
+      });
+
+      if (newMembers.length > 0) {
+        household.members = newMembers;
+        household.p1Name = newMembers[0] ? newMembers[0].name : 'Marc';
+        household.p2Name = newMembers[1] ? newMembers[1].name : 'Rocio';
+        household.p1Badge = newMembers[0] ? newMembers[0].badge : 'MB';
+        household.p2Badge = newMembers[1] ? newMembers[1].badge : 'RJ';
+      }
+
+      // Budget
+      const budgetVal = parseFloat(document.getElementById('settings-budget-input').value);
+      household.monthlyBudget = (!isNaN(budgetVal) && budgetVal > 0) ? budgetVal : 500;
+
+      // Currency
       household.currency = document.getElementById('settings-currency-symbol-input').value || '€';
 
+      // Quick merchants
+      const merchantsCsv = document.getElementById('settings-merchants-csv-input').value;
+      if (merchantsCsv) {
+        const mList = merchantsCsv.split(',').map(m => m.trim()).filter(Boolean);
+        if (mList.length > 0) household.quickMerchants = mList.slice(0, 8);
+      }
+
+      // Custom categories
+      const catCsv = document.getElementById('settings-custom-categories-input').value;
+      if (catCsv !== undefined) {
+        household.customCategories = catCsv.split(',').map(c => c.trim()).filter(Boolean);
+      }
+
       localStorage.setItem(SETTINGS_KEY, JSON.stringify(household));
+      applyTranslations();
       updateHouseholdUI();
+      populateLedgerMonthFilter();
       refreshDashboard();
       closeAllModals();
       showToast(TRANSLATIONS[currentLang].toastUpdatedHousehold);
-    }
-
-    function updateHouseholdUI() {
-      const navHousehold = document.getElementById('header-household-name');
-      if (navHousehold) navHousehold.innerText = `${household.p1Name}, ${household.p2Name}`;
-
-      document.getElementById('person1-card-label').innerText = `${household.p1Name} ${currentLang === 'es' ? 'Pagó' : 'Paid'}`;
-      document.getElementById('person2-card-label').innerText = `${household.p2Name} ${currentLang === 'es' ? 'Pagó' : 'Paid'}`;
-
-      // Dynamic Badges (Item 17: MB for Marc, RJ for Rocio, EB for Elisa)
-      const b1 = computeBadge(household.p1Name, household.p1Badge);
-      const b2 = computeBadge(household.p2Name, household.p2Badge);
-      document.getElementById('person1-card-badge').innerText = b1;
-      document.getElementById('person2-card-badge').innerText = b2;
-
-      document.getElementById('expense-payer-person1-label').innerText = household.p1Name;
-      document.getElementById('expense-payer-person2-label').innerText = household.p2Name;
-
-      document.getElementById('expense-split-option-person1').innerText = `100% ${household.p1Name} (${TRANSLATIONS[currentLang].personalBadge})`;
-      document.getElementById('expense-split-option-person2').innerText = `100% ${household.p2Name} (${TRANSLATIONS[currentLang].personalBadge})`;
-
-      document.getElementById('ledger-purchaser-option-person1').innerText = household.p1Name;
-      document.getElementById('ledger-purchaser-option-person2').innerText = household.p2Name;
-
-      document.querySelectorAll('.currency-symbol-label').forEach(el => {
-        el.innerText = household.currency;
-      });
-      document.getElementById('summary-currency-badge').innerText = household.currency;
+      if (firestoreDb) syncFirebaseNow();
     }
 
     function openSettingsModal() {
-      document.getElementById('settings-person1-name-input').value = household.p1Name;
-      document.getElementById('settings-person2-name-input').value = household.p2Name;
-      document.getElementById('settings-person1-badge-input').value = household.p1Badge || computeBadge(household.p1Name);
-      document.getElementById('settings-person2-badge-input').value = household.p2Badge || computeBadge(household.p2Name);
-      document.getElementById('settings-currency-symbol-input').value = household.currency || '€';
+      // Populate monthly budget
+      const bInput = document.getElementById('settings-budget-input');
+      if (bInput) bInput.value = household.monthlyBudget || 500;
+
+      // Populate Currency
+      const curSelect = document.getElementById('settings-currency-symbol-input');
+      if (curSelect) curSelect.value = household.currency || '€';
+
+      // Populate Quick Merchants
+      const mInput = document.getElementById('settings-merchants-csv-input');
+      if (mInput) mInput.value = (household.quickMerchants || ['AlCash', 'Lidl', 'Aldi', 'Mercadona', 'Deza']).join(', ');
+
+      // Populate Custom Categories
+      const cInput = document.getElementById('settings-custom-categories-input');
+      if (cInput) cInput.value = (household.customCategories || []).join(', ');
+
+      // Populate Members list
+      const container = document.getElementById('settings-members-list-container');
+      if (container) {
+        container.innerHTML = '';
+        (household.members || []).forEach(m => {
+          addSettingsMemberRow(m.name, m.badge, m.color);
+        });
+      }
+
       document.getElementById('household-settings-modal-backdrop').classList.remove('hidden');
     }
 
-    // EXPENSES STORAGE & SEEDING
+        // EXPENSES STORAGE & SEEDING
     function loadExpensesFromStorage() {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
@@ -2287,88 +2766,192 @@
       return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
     }
 
-    function calculateMetricsAndSettlement() {
-      let total = 0;
-      let p1Paid = 0;
-      let p2Paid = 0;
-      let p1FairShare = 0;
-      let p2FairShare = 0;
+    // DYNAMIC MONTH FILTER POPULATION (Item 8: Individual past months selectable)
+    function populateLedgerMonthFilter() {
+      const select = document.getElementById('ledger-month-filter');
+      if (!select) return;
+      const currentSelected = select.value || 'CURRENT';
 
-      // Actual Amount Paid & Fair Share Calculations (Item 1)
+      const monthsSet = new Set();
       expenses.forEach(e => {
+        if (e.date && e.date.length >= 7) {
+          monthsSet.add(e.date.slice(0, 7));
+        }
+      });
+      // Always include current month
+      const now = new Date();
+      const curKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+      monthsSet.add(curKey);
+
+      const sortedMonths = Array.from(monthsSet).sort().reverse();
+      const t = TRANSLATIONS[currentLang];
+
+      let opts = `<option value="CURRENT">${t.currentMonth || 'Current Month'}</option>`;
+      opts += `<option value="ALL">${t.allTime || 'All Time'}</option>`;
+
+      sortedMonths.forEach(m => {
+        const [year, month] = m.split('-');
+        const dateObj = new Date(parseInt(year, 10), parseInt(month, 10) - 1, 1);
+        const monthName = dateObj.toLocaleString(currentLang === 'es' ? 'es-ES' : 'en-US', { month: 'long', year: 'numeric' });
+        const capMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
+        opts += `<option value="${m}">${capMonth}</option>`;
+      });
+
+      select.innerHTML = opts;
+      select.value = currentSelected;
+    }
+
+    // FILTER HELPER FOR ACTIVE MONTH SELECTION (Item 2)
+    function getActiveFilteredExpenses() {
+      const monthFilter = document.getElementById('ledger-month-filter') ? document.getElementById('ledger-month-filter').value : 'CURRENT';
+      if (monthFilter === 'ALL') return expenses;
+      if (monthFilter === 'CURRENT') {
+        return expenses.filter(e => isCurrentMonth(e.date));
+      }
+      return expenses.filter(e => e.date && e.date.startsWith(monthFilter));
+    }
+
+
+    function calculateMetricsAndSettlement() {
+      // Item 2: Filter by active #ledger-month-filter (CURRENT by default, or specific selected month)
+      const activeExpenses = getActiveFilteredExpenses();
+      const members = household.members || [
+        { id: 'p1', name: 'Marc', badge: 'MB', color: '#06b6d4' },
+        { id: 'p2', name: 'Rocio', badge: 'RJ', color: '#ec4899' }
+      ];
+
+      let total = 0;
+      const paidByMember = {};
+      const fairShareByMember = {};
+      members.forEach(m => {
+        paidByMember[m.id] = 0;
+        fairShareByMember[m.id] = 0;
+      });
+
+      activeExpenses.forEach(e => {
         const amt = parseFloat(e.amount) || 0;
         total += amt;
 
-        // Actual amount paid by each person (regardless of split policy)
-        if (e.purchaser === 'p1') {
-          p1Paid += amt;
-        } else if (e.purchaser === 'p2') {
-          p2Paid += amt;
+        if (paidByMember[e.purchaser] !== undefined) {
+          paidByMember[e.purchaser] += amt;
+        } else if (members[0]) {
+          paidByMember[members[0].id] += amt;
         }
 
-        // Only calculate debtor fair share if NOT from shared home account
+        // Split policy calculation
         if (e.split !== 'home_account') {
-          if (e.split === '50/50') {
-            p1FairShare += amt * 0.5;
-            p2FairShare += amt * 0.5;
-          } else if (e.split === '100_P1') {
-            p1FairShare += amt;
-          } else if (e.split === '100_P2') {
-            p2FairShare += amt;
+          if (e.split === '50/50' || e.split === 'shared') {
+            const share = amt / members.length;
+            members.forEach(m => fairShareByMember[m.id] += share);
+          } else if (e.split.startsWith('100_')) {
+            const targetP = e.split.replace('100_', '');
+            if (fairShareByMember[targetP] !== undefined) {
+              fairShareByMember[targetP] += amt;
+            }
           }
         }
-      });
-
-      // Factor in logged settlements
-      let settledP1ToP2 = 0;
-      let settledP2ToP1 = 0;
-      settlements.forEach(s => {
-        if (s.from === 'p1') settledP1ToP2 += s.amount;
-        else if (s.from === 'p2') settledP2ToP1 += s.amount;
       });
 
       const t = TRANSLATIONS[currentLang];
       const cur = household.currency;
 
+      // Update Total Spent Card
       document.getElementById('summary-total-spent-amount').innerText = `${cur}${total.toFixed(2)}`;
-      const countLabel = expenses.length === 1 ? t.receiptLogged : t.receiptsLogged;
-      document.getElementById('summary-expense-count-label').innerText = `${expenses.length} ${countLabel}`;
+      const countLabel = activeExpenses.length === 1 ? t.receiptLogged : t.receiptsLogged;
+      document.getElementById('summary-expense-count-label').innerText = `${activeExpenses.length} ${countLabel}`;
 
-      document.getElementById('person1-total-paid-amount').innerText = `${cur}${p1Paid.toFixed(2)}`;
-      document.getElementById('person2-total-paid-amount').innerText = `${cur}${p2Paid.toFixed(2)}`;
+      // Update Dynamic Member Cards
+      const personalPaidSum = Object.values(paidByMember).reduce((a, b) => a + b, 0);
+      members.forEach(m => {
+        const amtEl = document.getElementById(`${m.id}-total-paid-amount`);
+        const pctEl = document.getElementById(`${m.id}-spend-percentage`);
+        const paid = paidByMember[m.id] || 0;
+        if (amtEl) amtEl.innerText = `${cur}${paid.toFixed(2)}`;
+        if (pctEl) {
+          const pct = personalPaidSum > 0 ? Math.round((paid / personalPaidSum) * 100) : 0;
+          pctEl.innerText = `${pct}% ${t.ofSpend}`;
+        }
+      });
 
-      const personalPaidSum = p1Paid + p2Paid;
-      const p1Pct = personalPaidSum > 0 ? Math.round((p1Paid / personalPaidSum) * 100) : 0;
-      const p2Pct = personalPaidSum > 0 ? (100 - p1Pct) : 0;
-      document.getElementById('person1-spend-percentage').innerText = `${p1Pct}% ${t.ofSpend}`;
-      document.getElementById('person2-spend-percentage').innerText = `${p2Pct}% ${t.ofSpend}`;
+      // Item 5: Monthly Budget Target & Safe-to-Spend Calculation
+      const budgetTarget = household.monthlyBudget || 500;
+      const budgetPct = budgetTarget > 0 ? (total / budgetTarget) * 100 : 0;
+      const barEl = document.getElementById('budget-progress-bar');
+      const pctDisplay = document.getElementById('budget-percent-display');
+      const statusText = document.getElementById('budget-status-text');
+      const dailySafeText = document.getElementById('budget-daily-safe-text');
 
-      // Net balance after settlements
-      const p1Net = (p1Paid - p1FairShare) + settledP1ToP2 - settledP2ToP1;
-      const verdictEl = document.getElementById('settlement-verdict-text');
-      const detailEl = document.getElementById('settlement-detail-text');
-      const card = document.getElementById('settlement-card');
+      if (barEl && pctDisplay) {
+        pctDisplay.innerText = `${Math.round(budgetPct)}%`;
+        barEl.style.width = Math.min(100, Math.max(0, budgetPct)) + '%';
 
-      window._currentP1Net = p1Net;
+        // Color coding: normal (emerald) < 80%, amber 80-100%, red >= 100%
+        if (budgetPct >= 100) {
+          barEl.className = 'h-2 rounded-full transition-all duration-500 bg-rose-500 shadow-sm shadow-rose-500/50';
+          if (statusText) statusText.innerHTML = `<span class="text-rose-400 font-semibold"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Over budget by ${cur}${(total - budgetTarget).toFixed(2)}</span>`;
+          if (dailySafeText) {
+            dailySafeText.innerText = `${cur}0.00/day left`;
+            dailySafeText.className = 'text-rose-400 font-mono font-semibold';
+          }
+        } else if (budgetPct >= 80) {
+          barEl.className = 'h-2 rounded-full transition-all duration-500 bg-amber-400 shadow-sm shadow-amber-400/50';
+          if (statusText) statusText.innerHTML = `<span class="text-amber-400 font-semibold"><i class="fa-solid fa-bell mr-1"></i> 80% Budget Alert (${cur}${(budgetTarget - total).toFixed(2)} left)</span>`;
+        } else {
+          barEl.className = 'h-2 rounded-full transition-all duration-500 bg-emerald-500';
+          if (statusText) statusText.innerText = currentLang === 'es' ? 'Ritmo de gasto seguro' : 'Safe spend pace';
+        }
 
-      if (Math.abs(p1Net) < 0.05) {
-        verdictEl.innerHTML = `<span class="text-emerald-400"><i class="fa-solid fa-check-circle mr-1"></i> ${t.allSquaredUp}</span>`;
-        detailEl.innerText = `${household.p1Name} & ${household.p2Name} ${t.exactFairShareMsg}`;
-        card.className = "hidden glass-card rounded-2xl p-4 sm:p-5 relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-900 to-emerald-950/40 border border-emerald-500/30 min-w-0 flex flex-col justify-between";
-      } else if (p1Net > 0) {
-        const debt = p1Net.toFixed(2);
-        verdictEl.innerHTML = `<span class="text-pink-400">${household.p2Name}</span> ${t.owesText} <span class="text-cyan-400">${cur}${debt}</span>`;
-        detailEl.innerText = `${household.p2Name} ${t.transferText} ${cur}${debt} to ${household.p1Name} ${t.toEqualize}`;
-        card.className = "hidden glass-card rounded-2xl p-4 sm:p-5 relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-900 to-pink-950/40 border border-pink-500/30 min-w-0 flex flex-col justify-between";
-      } else {
-        const debt = Math.abs(p1Net).toFixed(2);
-        verdictEl.innerHTML = `<span class="text-cyan-400">${household.p1Name}</span> ${t.owesText} <span class="text-pink-400">${cur}${debt}</span>`;
-        detailEl.innerText = `${household.p1Name} ${t.transferText} ${cur}${debt} to ${household.p2Name} ${t.toEqualize}`;
-        card.className = "hidden glass-card rounded-2xl p-4 sm:p-5 relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-900 to-cyan-950/40 border border-cyan-500/30 min-w-0 flex flex-col justify-between";
+        // Daily safe to spend calculation for current month
+        if (budgetPct < 100 && dailySafeText) {
+          const now = new Date();
+          const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+          const remainingDays = Math.max(1, daysInMonth - now.getDate() + 1);
+          const remainingBudget = Math.max(0, budgetTarget - total);
+          const dailySafe = remainingBudget / remainingDays;
+          dailySafeText.innerText = `${cur}${dailySafe.toFixed(2)}/day left`;
+          dailySafeText.className = budgetPct >= 80 ? 'text-amber-400 font-mono font-semibold' : 'text-emerald-400 font-mono font-semibold';
+        }
+      }
+
+      // Net settlement balance between first two members
+      if (members.length >= 2) {
+        const p1Paid = paidByMember[members[0].id] || 0;
+        const p1Fair = fairShareByMember[members[0].id] || 0;
+        let settledP1ToP2 = 0;
+        let settledP2ToP1 = 0;
+        settlements.forEach(s => {
+          if (s.from === members[0].id) settledP1ToP2 += s.amount;
+          else if (s.from === members[1].id) settledP2ToP1 += s.amount;
+        });
+        const p1Net = (p1Paid - p1Fair) + settledP1ToP2 - settledP2ToP1;
+        window._currentP1Net = p1Net;
+
+        const verdictEl = document.getElementById('settlement-verdict-text');
+        const detailEl = document.getElementById('settlement-detail-text');
+        if (verdictEl && detailEl) {
+          if (Math.abs(p1Net) < 0.05) {
+            verdictEl.innerHTML = `<span class="text-emerald-400"><i class="fa-solid fa-check-circle mr-1"></i> ${t.allSquaredUp}</span>`;
+            detailEl.innerText = `${members[0].name} & ${members[1].name} ${t.exactFairShareMsg}`;
+          } else if (p1Net > 0) {
+            const debt = p1Net.toFixed(2);
+            verdictEl.innerHTML = `<span style="color: ${members[1].color}">${members[1].name}</span> ${t.owesText} <span class="text-cyan-400">${cur}${debt}</span>`;
+            detailEl.innerText = `${members[1].name} ${t.transferText} ${cur}${debt} to ${members[0].name} ${t.toEqualize}`;
+          } else {
+            const debt = Math.abs(p1Net).toFixed(2);
+            verdictEl.innerHTML = `<span style="color: ${members[0].color}">${members[0].name}</span> ${t.owesText} <span style="color: ${members[1].color}">${cur}${debt}</span>`;
+            detailEl.innerText = `${members[0].name} ${t.transferText} ${cur}${debt} to ${members[1].name} ${t.toEqualize}`;
+          }
+        }
       }
     }
-
     // TABLE RENDERING & FILTERING (Item 2: Current Calendar Month default, Item 13: Border-left highlight)
+    
+    function onLedgerMonthChange() {
+      calculateMetricsAndSettlement();
+      renderTable();
+      renderCharts();
+    }
+
     function renderTable() {
       const tbody = document.getElementById('ledger-table-body');
       const emptyState = document.getElementById('ledger-empty-state');
@@ -2381,9 +2964,11 @@
 
       // Filter array
       const filtered = expenses.filter(item => {
-        // Month filter (CURRENT by default, clearing prior months from view, Item 2)
-        if (monthVal === 'CURRENT' && !isCurrentMonth(item.date)) {
-          return false;
+        // Month filter (Item 2, 8: CURRENT, ALL, or YYYY-MM)
+        if (monthVal === 'CURRENT') {
+          if (!isCurrentMonth(item.date)) return false;
+        } else if (monthVal !== 'ALL') {
+          if (!item.date || !item.date.startsWith(monthVal)) return false;
         }
 
         const matchSearch = !searchVal ||
@@ -2521,11 +3106,20 @@
         'Clothes': t.catClothes,
         'Other': t.catOther
       };
+      (household.customCategories || []).forEach(cc => {
+        if (!catMap[cc]) catMap[cc] = cc;
+      });
 
       const catTotals = {};
       Object.keys(CATEGORY_COLORS).forEach(c => catTotals[c] = 0);
+      (household.customCategories || []).forEach(cc => {
+        catTotals[cc] = 0;
+      });
 
-      expenses.forEach(e => {
+      // Item 2: Filter by active month
+      const activeExpenses = getActiveFilteredExpenses();
+
+      activeExpenses.forEach(e => {
         if (catTotals[e.category] !== undefined) {
           catTotals[e.category] += parseFloat(e.amount);
         } else {
@@ -2535,7 +3129,8 @@
 
       const activeCats = Object.keys(catTotals).filter(c => catTotals[c] > 0);
       const dataValues = activeCats.map(c => catTotals[c]);
-      const bgColors = activeCats.map(c => CATEGORY_COLORS[c]);
+      const palette = ['#10b981', '#f59e0b', '#0ea5e9', '#a855f7', '#64748b', '#ec4899', '#06b6d4', '#eab308'];
+      const bgColors = activeCats.map((c, idx) => CATEGORY_COLORS[c] || palette[idx % palette.length]);
       const labels = activeCats.map(c => catMap[c] || c);
 
       const ctx = document.getElementById('category-breakdown-chart').getContext('2d');
@@ -2555,7 +3150,7 @@
             maintainAspectRatio: false
           }
         });
-        document.getElementById('category-chart-legend').innerHTML = '<div class="col-span-2 text-slate-500 text-center py-2">Add receipts to see breakdown</div>';
+        document.getElementById('category-chart-legend').innerHTML = '<div class="col-span-2 text-slate-500 text-center py-2">No expenses for selected month</div>';
         return;
       }
 
@@ -2591,13 +3186,14 @@
 
       const totalAmount = dataValues.reduce((a, b) => a + b, 0);
       const legendEl = document.getElementById('category-chart-legend');
-      legendEl.innerHTML = activeCats.map(cat => {
+      legendEl.innerHTML = activeCats.map((cat, idx) => {
         const val = catTotals[cat];
         const pct = totalAmount > 0 ? Math.round((val / totalAmount) * 100) : 0;
+        const col = CATEGORY_COLORS[cat] || palette[idx % palette.length];
         return `
           <div class="flex items-center justify-between p-1 rounded hover:bg-slate-800/40">
             <span class="flex items-center gap-1.5 truncate">
-              <span class="w-2 h-2 rounded-full flex-shrink-0" style="background-color: ${CATEGORY_COLORS[cat]}"></span>
+              <span class="w-2 h-2 rounded-full flex-shrink-0" style="background-color: ${col}"></span>
               <span class="truncate">${catMap[cat] || cat}</span>
             </span>
             <span class="font-bold text-slate-300 ml-1">${household.currency}${val.toFixed(0)} <span class="text-[9px] text-slate-500">(${pct}%)</span></span>
@@ -2611,8 +3207,9 @@
       const bCategory = document.getElementById('btn-chart-mode-category');
       const bMerchant = document.getElementById('btn-chart-mode-merchant');
       const bPurchaser = document.getElementById('btn-chart-mode-purchaser');
+      const bTrend = document.getElementById('btn-chart-mode-trend');
 
-      [bCategory, bMerchant, bPurchaser].forEach(b => {
+      [bCategory, bMerchant, bPurchaser, bTrend].filter(Boolean).forEach(b => {
         b.className = 'px-3 py-1 rounded-lg text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition cursor-pointer';
         b.classList.remove('active-chart-mode', 'bg-brand-600', '!text-white');
       });
@@ -2620,9 +3217,12 @@
       let activeBtn = bCategory;
       if (mode === 'merchant') activeBtn = bMerchant;
       else if (mode === 'purchaser') activeBtn = bPurchaser;
+      else if (mode === 'trend') activeBtn = bTrend;
 
-      activeBtn.className = 'px-3 py-1 rounded-lg bg-brand-600 !text-white font-medium transition cursor-pointer shadow-sm active-chart-mode';
-      activeBtn.style.color = '#ffffff';
+      if (activeBtn) {
+        activeBtn.className = 'px-3 py-1 rounded-lg bg-brand-600 !text-white font-medium transition cursor-pointer shadow-sm active-chart-mode';
+        activeBtn.style.color = '#ffffff';
+      }
 
       renderBarChart();
     }
@@ -2633,6 +3233,11 @@
       const cur = household.currency;
       const t = TRANSLATIONS[currentLang];
       const textColor = currentTheme === 'dark' ? '#94a3b8' : '#64748b';
+      const activeExpenses = getActiveFilteredExpenses();
+      const members = household.members || [
+        { id: 'p1', name: 'Marc', badge: 'MB', color: '#06b6d4' },
+        { id: 'p2', name: 'Rocio', badge: 'RJ', color: '#ec4899' }
+      ];
 
       if (currentChartMode === 'category') {
         // DEFAULT DISPLAY: By Category (Item 18 - Tap bar to open category popup)
@@ -2643,15 +3248,19 @@
           'Clothes': t.catClothes,
           'Other': t.catOther
         };
+        (household.customCategories || []).forEach(cc => {
+          if (!catMap[cc]) catMap[cc] = cc;
+        });
 
         const catTotals = {};
-        expenses.forEach(e => {
+        activeExpenses.forEach(e => {
           catTotals[e.category] = (catTotals[e.category] || 0) + parseFloat(e.amount);
         });
 
         const sortedCats = Object.keys(catTotals).sort((a, b) => catTotals[b] - catTotals[a]);
         const amounts = sortedCats.map(c => catTotals[c]);
-        const barColors = sortedCats.map(c => CATEGORY_COLORS[c] || '#6366f1');
+        const palette = ['#10b981', '#f59e0b', '#0ea5e9', '#a855f7', '#64748b', '#ec4899', '#06b6d4', '#eab308'];
+        const barColors = sortedCats.map((c, idx) => CATEGORY_COLORS[c] || palette[idx % palette.length]);
         const labels = sortedCats.map(c => catMap[c] || c);
 
         barChartInstance = new Chart(ctx, {
@@ -2678,17 +3287,10 @@
               }
             },
             scales: {
-              x: {
-                grid: { display: false },
-                ticks: { color: textColor, font: { size: 10 } }
-              },
+              x: { grid: { display: false }, ticks: { color: textColor, font: { size: 10 } } },
               y: {
                 grid: { color: 'rgba(255, 255, 255, 0.05)' },
-                ticks: {
-                  color: textColor,
-                  callback: val => cur + val,
-                  font: { size: 10 }
-                }
+                ticks: { color: textColor, callback: val => cur + val, font: { size: 10 } }
               }
             },
             plugins: {
@@ -2702,9 +3304,9 @@
           }
         });
       } else if (currentChartMode === 'merchant') {
-        // Mode: By Merchant
+        // Mode: By Merchant (Filtered by active month)
         const merchantMap = {};
-        expenses.forEach(e => {
+        activeExpenses.forEach(e => {
           const m = (e.merchant || 'Unknown').trim();
           merchantMap[m] = (merchantMap[m] || 0) + (parseFloat(e.amount) || 0);
         });
@@ -2727,17 +3329,10 @@
             responsive: true,
             maintainAspectRatio: false,
             scales: {
-              x: {
-                grid: { display: false },
-                ticks: { color: textColor, font: { size: 10 } }
-              },
+              x: { grid: { display: false }, ticks: { color: textColor, font: { size: 10 } } },
               y: {
                 grid: { color: 'rgba(255, 255, 255, 0.05)' },
-                ticks: {
-                  color: textColor,
-                  callback: val => cur + val,
-                  font: { size: 10 }
-                }
+                ticks: { color: textColor, callback: val => cur + val, font: { size: 10 } }
               }
             },
             plugins: {
@@ -2750,9 +3345,63 @@
             }
           }
         });
+      } else if (currentChartMode === 'trend') {
+        // Mode: Monthly Trend (Item 8: Month-over-month comparison across the last 6 months)
+        const monthTotals = {};
+        expenses.forEach(e => {
+          if (e.date && e.date.length >= 7) {
+            const mKey = e.date.slice(0, 7);
+            monthTotals[mKey] = (monthTotals[mKey] || 0) + (parseFloat(e.amount) || 0);
+          }
+        });
+
+        // Ensure current month is present
+        const now = new Date();
+        const curM = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+        if (monthTotals[curM] === undefined) monthTotals[curM] = 0;
+
+        const sortedMonths = Object.keys(monthTotals).sort().slice(-6); // Last 6 months
+        const monthLabels = sortedMonths.map(m => {
+          const [y, mo] = m.split('-');
+          const d = new Date(parseInt(y, 10), parseInt(mo, 10) - 1, 1);
+          return d.toLocaleString(currentLang === 'es' ? 'es-ES' : 'en-US', { month: 'short', year: '2-digit' });
+        });
+        const monthData = sortedMonths.map(m => monthTotals[m]);
+
+        barChartInstance = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: monthLabels.length ? monthLabels : ['No Data'],
+            datasets: [{
+              label: currentLang === 'es' ? `Gasto Mensual (${cur})` : `Monthly Spend (${cur})`,
+              data: monthData.length ? monthData : [0],
+              backgroundColor: sortedMonths.map(m => m === curM ? '#6366f1' : '#475569'),
+              borderRadius: 6
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              x: { grid: { display: false }, ticks: { color: textColor, font: { size: 10 } } },
+              y: {
+                grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                ticks: { color: textColor, callback: val => cur + val, font: { size: 10 } }
+              }
+            },
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  label: ctx => ` ${ctx.dataset.label}: ${cur}${ctx.raw.toFixed(2)}`
+                }
+              }
+            }
+          }
+        });
       } else {
-        // Mode: Split comparison
-        const categories = ['Groceries', 'Dining Out', 'Transit', 'Clothes', 'Other'];
+        // Mode: Split comparison (Dynamic members supported)
+        const categories = ['Groceries', 'Dining Out', 'Transit', 'Clothes', 'Other', ...(household.customCategories || [])];
         const catMap = {
           'Groceries': t.catFoodShopping,
           'Dining Out': t.catEatingOut,
@@ -2760,51 +3409,38 @@
           'Clothes': t.catClothes,
           'Other': t.catOther
         };
+        (household.customCategories || []).forEach(cc => {
+          if (!catMap[cc]) catMap[cc] = cc;
+        });
         const labels = categories.map(c => catMap[c] || c);
 
-        const p1Data = categories.map(cat => {
-          return expenses.filter(e => e.purchaser === 'p1' && e.category === cat)
-            .reduce((sum, e) => sum + parseFloat(e.amount), 0);
-        });
-        const p2Data = categories.map(cat => {
-          return expenses.filter(e => e.purchaser === 'p2' && e.category === cat)
-            .reduce((sum, e) => sum + parseFloat(e.amount), 0);
+        const datasets = members.map(m => {
+          const data = categories.map(cat => {
+            return activeExpenses.filter(e => e.purchaser === m.id && e.category === cat)
+              .reduce((sum, e) => sum + parseFloat(e.amount), 0);
+          });
+          return {
+            label: m.name,
+            data: data,
+            backgroundColor: m.color || '#6366f1',
+            borderRadius: 6
+          };
         });
 
         barChartInstance = new Chart(ctx, {
           type: 'bar',
           data: {
             labels: labels,
-            datasets: [
-              {
-                label: household.p1Name,
-                data: p1Data,
-                backgroundColor: '#06b6d4',
-                borderRadius: 6
-              },
-              {
-                label: household.p2Name,
-                data: p2Data,
-                backgroundColor: '#ec4899',
-                borderRadius: 6
-              }
-            ]
+            datasets: datasets
           },
           options: {
             responsive: true,
             maintainAspectRatio: false,
             scales: {
-              x: {
-                grid: { display: false },
-                ticks: { color: textColor, font: { size: 10 } }
-              },
+              x: { grid: { display: false }, ticks: { color: textColor, font: { size: 10 } } },
               y: {
                 grid: { color: 'rgba(255, 255, 255, 0.05)' },
-                ticks: {
-                  color: textColor,
-                  callback: val => cur + val,
-                  font: { size: 10 }
-                }
+                ticks: { color: textColor, callback: val => cur + val, font: { size: 10 } }
               }
             },
             plugins: {
@@ -2822,7 +3458,6 @@
         });
       }
     }
-
     // POPUP: MEMBER EXPENSES MODAL (Item 15)
     function openMemberExpensesModal(memberId) {
       closeAllModals();
@@ -3127,7 +3762,7 @@
     function exportToJSON() {
       const backupData = {
         app: 'DuoSpend',
-        version: 'v0.08',
+        version: 'v0.09',
         exportedAt: new Date().toISOString(),
         household,
         settlements,
@@ -3225,6 +3860,198 @@
       }, displayTime);
     }
 
+    
+    // 1-CLICK MONTHLY WHATSAPP & PDF SUMMARY SHARE (Item 10)
+    function shareMonthlyWhatsApp() {
+      const activeExpenses = getActiveFilteredExpenses();
+      const monthFilter = document.getElementById('ledger-month-filter') ? document.getElementById('ledger-month-filter').value : 'CURRENT';
+      const cur = household.currency;
+      const t = TRANSLATIONS[currentLang];
+      const members = household.members || [
+        { id: 'p1', name: 'Marc', color: '#06b6d4' },
+        { id: 'p2', name: 'Rocio', color: '#ec4899' }
+      ];
+
+      let total = 0;
+      const paidByMember = {};
+      const catTotals = {};
+      members.forEach(m => paidByMember[m.name] = 0);
+
+      activeExpenses.forEach(e => {
+        const amt = parseFloat(e.amount) || 0;
+        total += amt;
+        const mObj = members.find(m => m.id === e.purchaser);
+        const name = mObj ? mObj.name : 'Unknown';
+        paidByMember[name] = (paidByMember[name] || 0) + amt;
+        catTotals[e.category] = (catTotals[e.category] || 0) + amt;
+      });
+
+      let periodTitle = t.currentMonth || 'Current Month';
+      if (monthFilter !== 'CURRENT' && monthFilter !== 'ALL') {
+        periodTitle = monthFilter;
+      } else if (monthFilter === 'ALL') {
+        periodTitle = t.allTime || 'All Time';
+      }
+
+      let text = `*📊 DuoSpend Household Summary (${periodTitle})*\n\n`;
+      text += `💰 *Total Spend:* ${cur}${total.toFixed(2)}\n`;
+      text += `🎯 *Monthly Budget:* ${cur}${(household.monthlyBudget || 500).toFixed(0)} (${Math.round((total / (household.monthlyBudget || 500)) * 100)}%)\n\n`;
+      
+      text += `*👥 Who Paid:*\n`;
+      Object.keys(paidByMember).forEach(name => {
+        text += `• ${name}: ${cur}${paidByMember[name].toFixed(2)}\n`;
+      });
+
+      text += `\n*🏷️ Top Categories:*\n`;
+      const sortedCats = Object.keys(catTotals).sort((a, b) => catTotals[b] - catTotals[a]);
+      sortedCats.forEach(c => {
+        text += `• ${c}: ${cur}${catTotals[c].toFixed(2)}\n`;
+      });
+
+      text += `\n_Sent from DuoSpend (Marc Bailey 2026)_\nhttps://github.com/DaidalusX78/DuoSpend.git`;
+
+      const waUrl = 'https://api.whatsapp.com/send?text=' + encodeURIComponent(text);
+      window.open(waUrl, '_blank');
+      showToast(currentLang === 'es' ? 'Abriendo WhatsApp para compartir resumen...' : 'Opening WhatsApp to share summary...');
+    }
+
+    function printMonthlySummaryPDF() {
+      showToast(currentLang === 'es' ? 'Preparando vista de impresión / PDF...' : 'Preparing printable summary / PDF...');
+      setTimeout(() => {
+        window.print();
+      }, 400);
+    }
+
+    // FIREBASE REAL-TIME MULTI-DEVICE CLOUD SYNC (Item 4)
+    function loadFirebaseConfig() {
+      const stored = localStorage.getItem(FIREBASE_CONFIG_KEY);
+      if (stored) {
+        try {
+          firebaseConfig = { ...firebaseConfig, ...JSON.parse(stored) };
+        } catch (e) {
+          console.error(e);
+        }
+      }
+      const roomLbl = document.getElementById('firebase-room-label');
+      if (roomLbl) roomLbl.innerText = firebaseConfig.roomCode || 'duospend-home';
+    }
+
+    function configureFirebaseModal() {
+      document.getElementById('firebase-project-id-input').value = firebaseConfig.projectId || 'duospend-ef62c';
+      document.getElementById('firebase-api-key-input').value = firebaseConfig.apiKey || '';
+      document.getElementById('firebase-room-code-input').value = firebaseConfig.roomCode || 'duospend-home';
+      document.getElementById('firebase-config-modal').classList.remove('hidden');
+    }
+
+    function saveFirebaseConfig(e) {
+      e.preventDefault();
+      firebaseConfig.projectId = document.getElementById('firebase-project-id-input').value.trim() || 'duospend-ef62c';
+      firebaseConfig.apiKey = document.getElementById('firebase-api-key-input').value.trim();
+      firebaseConfig.roomCode = document.getElementById('firebase-room-code-input').value.trim() || 'duospend-home';
+
+      localStorage.setItem(FIREBASE_CONFIG_KEY, JSON.stringify(firebaseConfig));
+      const roomLbl = document.getElementById('firebase-room-label');
+      if (roomLbl) roomLbl.innerText = firebaseConfig.roomCode;
+      closeAllModals();
+      showToast('Saved Firebase settings!');
+      initFirebaseSync(true);
+    }
+
+    function initFirebaseSync(manual = false) {
+      if (!window.firebase) {
+        updateFirebaseStatus('Offline', false);
+        return;
+      }
+      try {
+        if (!firebase.apps.length) {
+          // Initialize Firebase
+          const cfg = {
+            projectId: firebaseConfig.projectId || 'duospend-ef62c',
+            apiKey: firebaseConfig.apiKey || undefined
+          };
+          firebase.initializeApp(cfg);
+        }
+        firestoreDb = firebase.firestore();
+        updateFirebaseStatus('Ready', true);
+
+        // Realtime listener on household room document
+        if (!isFirebaseListening && firebaseConfig.roomCode) {
+          isFirebaseListening = true;
+          const roomRef = firestoreDb.collection('households').doc(firebaseConfig.roomCode);
+          roomRef.onSnapshot(doc => {
+            if (doc.exists) {
+              const data = doc.data();
+              if (data && data.updatedAt && data.updatedBy !== window._clientId) {
+                if (Array.isArray(data.expenses)) {
+                  expenses = data.expenses;
+                  saveExpensesToStorage();
+                }
+                if (Array.isArray(data.settlements)) {
+                  settlements = data.settlements;
+                  saveSettlementsToStorage();
+                }
+                if (data.household) {
+                  household = { ...household, ...data.household };
+                  localStorage.setItem(SETTINGS_KEY, JSON.stringify(household));
+                }
+                populateLedgerMonthFilter();
+                updateHouseholdUI();
+                refreshDashboard();
+                showToast('Synced latest updates from household cloud!', 'info');
+              }
+            }
+          }, err => {
+            console.warn('Firebase realtime listener warning:', err.message);
+            updateFirebaseStatus('Offline', false);
+          });
+        }
+      } catch (err) {
+        console.warn('Firebase init error:', err);
+        updateFirebaseStatus('Offline', false);
+        if (manual) showToast('Firebase credentials required for live sync.', 'error');
+      }
+    }
+
+    function updateFirebaseStatus(label, isOnline = true) {
+      const badge = document.getElementById('firebase-sync-badge');
+      if (badge) {
+        badge.innerText = label;
+        badge.className = isOnline
+          ? 'text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-semibold'
+          : 'text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-400';
+      }
+    }
+
+    window._clientId = 'client_' + Math.random().toString(36).substr(2, 9);
+
+    async function syncFirebaseNow() {
+      if (!firestoreDb) {
+        initFirebaseSync(true);
+      }
+      if (!firestoreDb) {
+        configureFirebaseModal();
+        return;
+      }
+      try {
+        updateFirebaseStatus('Syncing...', true);
+        const roomRef = firestoreDb.collection('households').doc(firebaseConfig.roomCode || 'duospend-home');
+        // Clean expenses without excessively heavy base64 if needed
+        await roomRef.set({
+          updatedAt: new Date().toISOString(),
+          updatedBy: window._clientId,
+          household: household,
+          expenses: expenses,
+          settlements: settlements
+        }, { merge: true });
+        updateFirebaseStatus('Synced', true);
+        showToast('Successfully synced household ledger with Firebase cloud!');
+      } catch (err) {
+        console.error('Firebase sync failed:', err);
+        updateFirebaseStatus('Error', false);
+        showToast('Cloud sync notice: please verify Firebase credentials.', 'info');
+      }
+    }
+
     // SANITIZATION
     function escapeHtml(text) {
       if (!text) return '';
@@ -3235,6 +4062,7 @@
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
     }
+  
   </script>
 </body>
 
