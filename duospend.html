@@ -8,7 +8,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#0b0f19">
-  <title>DuoSpend v0.10 — Household Receipt & Expense Tracker</title>
+  <title>DuoSpend v0.11 — Household Receipt & Expense Tracker</title>
 
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -283,7 +283,7 @@
             <div id="brand-title-row" class="flex items-center gap-2">
               <span class="font-extrabold text-xl tracking-tight text-slate-900 dark:text-white">Duo<span class="text-brand-500">Spend</span></span>
               <span id="app-version-badge"
-                class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-brand-50 text-brand-600 border border-brand-200 dark:bg-slate-800 dark:!text-white dark:border-brand-500/40">v0.10</span>
+                class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-brand-50 text-brand-600 border border-brand-200 dark:bg-slate-800 dark:!text-white dark:border-brand-500/40">v0.11</span>
             </div>
             <p id="brand-subtitle" class="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">Receipt scanning & balanced expense splitting</p>
           </div>
@@ -373,7 +373,7 @@
             </div>
             <div>
               <span class="text-xl sm:text-2xl font-extrabold text-white">Duo<span class="text-brand-500">Spend</span></span>
-              <span id="drawer-version-badge" class="text-xs font-bold px-2 py-0.5 rounded-full bg-brand-50 text-brand-600 border border-brand-200 dark:bg-slate-800 dark:!text-white dark:border-brand-500/40 ml-1">v0.10</span>
+              <span id="drawer-version-badge" class="text-xs font-bold px-2 py-0.5 rounded-full bg-brand-50 text-brand-600 border border-brand-200 dark:bg-slate-800 dark:!text-white dark:border-brand-500/40 ml-1">v0.11</span>
             </div>
           </div>
           <button onclick="closeAllModals()"
@@ -568,7 +568,7 @@
           <i class="fa-regular fa-copyright text-brand-400"></i>
           <span id="menu-credits-text">created by <strong class="text-white font-semibold">Marc Bailey 2026</strong></span>
         </div>
-        <div class="text-xs text-slate-500 mt-1">DuoSpend v0.10 — Android Ready Architecture</div>
+        <div class="text-xs text-slate-500 mt-1">DuoSpend v0.11 — Android Ready Architecture</div>
       </div>
 
     </div>
@@ -953,13 +953,46 @@
               </div>
             </div>
 
-            <!-- Amount -->
+            <!-- Amount + Travel Mode Live Currency Converter (v0.11 Item 5) -->
             <div id="field-wrapper-amount">
-              <label id="label-amount" for="expense-amount-input" class="block text-xs font-medium text-slate-300 mb-1">Total Amount (<span class="currency-symbol-label">€</span>) <span class="text-red-400">*</span></label>
+              <div class="flex items-center justify-between mb-1">
+                <label id="label-amount" for="expense-amount-input" class="block text-xs font-medium text-slate-300">Total Amount (<span class="currency-symbol-label">€</span>) <span class="text-red-400">*</span></label>
+                <div class="flex items-center gap-1" title="Travel Mode: Select receipt currency for live conversion">
+                  <i class="fa-solid fa-plane-departure text-[10px] text-cyan-400"></i>
+                  <select id="expense-entry-currency-select" onchange="updateTravelCurrencyPreview()"
+                    class="bg-slate-900 border border-slate-700 rounded-lg px-1.5 py-0.5 text-[10px] font-bold text-cyan-300 focus:outline-none focus:border-brand-500 cursor-pointer">
+                    <option value="€">€ EUR</option>
+                    <option value="£">£ GBP</option>
+                    <option value="$">$ USD</option>
+                    <option value="CHF">CHF</option>
+                    <option value="¥">¥ JPY</option>
+                    <option value="zł">zł PLN</option>
+                    <option value="C$">C$ CAD</option>
+                    <option value="A$">A$ AUD</option>
+                  </select>
+                </div>
+              </div>
               <div id="input-container-amount" class="relative">
-                <span class="currency-symbol-label absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs font-bold">€</span>
+                <span id="entry-amount-currency-prefix" class="currency-symbol-label absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs font-bold">€</span>
                 <input type="number" step="0.01" min="0.01" id="expense-amount-input" required placeholder="0.00"
+                  oninput="updateTravelCurrencyPreview(); checkDuplicateReceiptLive();"
                   class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-8 pr-3 py-2 text-xs font-bold text-slate-100 placeholder-slate-500 focus:outline-none focus:border-brand-500">
+              </div>
+              <!-- Live Travel Currency Conversion Preview Box -->
+              <div id="travel-currency-converter-box" class="hidden mt-1.5 p-2 rounded-xl bg-cyan-950/40 border border-cyan-500/30 text-[11px] space-y-1.5">
+                <div class="flex items-center justify-between text-cyan-300">
+                  <span class="font-semibold flex items-center gap-1"><i class="fa-solid fa-arrows-rotate text-[10px]"></i> <span id="travel-conv-summary-text">£0.00 = €0.00</span></span>
+                  <div class="flex items-center gap-1">
+                    <span class="text-[10px] text-slate-400">Rate:</span>
+                    <input type="number" id="travel-exchange-rate-input" step="0.0001" min="0.0001" value="1.1765"
+                      oninput="updateTravelCurrencyPreview(true)"
+                      class="w-16 bg-slate-950 border border-slate-700 rounded px-1 py-0.5 text-[10px] font-mono text-white text-right">
+                  </div>
+                </div>
+                <label class="flex items-center gap-1.5 text-[10px] text-slate-300 cursor-pointer">
+                  <input type="checkbox" id="travel-auto-convert-checkbox" checked onchange="updateTravelCurrencyPreview()" class="rounded text-brand-500 focus:ring-0">
+                  <span>Save converted amount in household currency (<span class="currency-symbol-label">€</span>)</span>
+                </label>
               </div>
             </div>
 
@@ -1024,6 +1057,27 @@
               class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-brand-500"></textarea>
           </div>
 
+          <!-- Duplicate Receipt Detection Warning Banner (v0.11 Item 1) -->
+          <div id="duplicate-receipt-warning-box" class="hidden p-3 rounded-xl bg-amber-500/15 border border-amber-500/50 text-xs space-y-2">
+            <div class="flex items-start gap-2.5">
+              <i class="fa-solid fa-triangle-exclamation text-amber-400 text-sm mt-0.5"></i>
+              <div class="space-y-0.5 flex-1">
+                <div class="font-bold text-amber-400">Possible Duplicate Receipt Detected!</div>
+                <p id="duplicate-receipt-warning-msg" class="text-[11px] text-slate-300 leading-relaxed"></p>
+              </div>
+            </div>
+            <div class="flex justify-end gap-2 pt-1">
+              <button type="button" onclick="dismissDuplicateWarning()"
+                class="px-3 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 !text-white text-[11px] font-semibold cursor-pointer">
+                Review / Edit
+              </button>
+              <button type="button" onclick="confirmSaveDuplicateExpense()"
+                class="px-3 py-1 rounded-lg bg-amber-600 hover:bg-amber-500 !text-white text-[11px] font-bold cursor-pointer shadow">
+                Save Anyway
+              </button>
+            </div>
+          </div>
+
           <!-- Form Buttons -->
           <div id="expense-form-actions" class="flex items-center justify-end gap-3 pt-3 border-t border-slate-800">
             <button type="button" onclick="closeAllModals()"
@@ -1069,6 +1123,43 @@
               class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs font-bold text-slate-100 focus:outline-none focus:border-brand-500">
           </div>
           <p class="text-[10px] text-slate-400">Progress bar alerts at 80% (amber) and 100% (red) with daily safe spend calculation.</p>
+        </div>
+
+        <!-- Category-Specific Monthly Sub-Budgets (v0.11 Item 3) -->
+        <div id="settings-category-budgets-section" class="p-3 rounded-xl bg-slate-950 border border-slate-800 space-y-2.5">
+          <div class="flex items-center justify-between">
+            <label class="block text-xs font-semibold text-emerald-400">
+              <i class="fa-solid fa-chart-pie mr-1"></i> Category Monthly Sub-Budgets (<span class="currency-symbol-label">€</span>)
+            </label>
+            <span class="text-[10px] text-slate-400">Optional monthly caps</span>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
+            <div class="p-2 rounded-lg bg-slate-900 border border-slate-800">
+              <label for="subbudget-groceries" class="block text-[10px] text-emerald-400 font-semibold mb-1 truncate">Food Shopping</label>
+              <input type="number" id="subbudget-groceries" min="0" step="10" value="300"
+                class="w-full bg-slate-950 border border-slate-800 rounded px-2 py-1 text-xs font-bold text-white focus:outline-none focus:border-brand-500">
+            </div>
+            <div class="p-2 rounded-lg bg-slate-900 border border-slate-800">
+              <label for="subbudget-dining" class="block text-[10px] text-amber-400 font-semibold mb-1 truncate">Eating Out</label>
+              <input type="number" id="subbudget-dining" min="0" step="10" value="100"
+                class="w-full bg-slate-950 border border-slate-800 rounded px-2 py-1 text-xs font-bold text-white focus:outline-none focus:border-brand-500">
+            </div>
+            <div class="p-2 rounded-lg bg-slate-900 border border-slate-800">
+              <label for="subbudget-transit" class="block text-[10px] text-sky-400 font-semibold mb-1 truncate">Fuel</label>
+              <input type="number" id="subbudget-transit" min="0" step="10" value="60"
+                class="w-full bg-slate-950 border border-slate-800 rounded px-2 py-1 text-xs font-bold text-white focus:outline-none focus:border-brand-500">
+            </div>
+            <div class="p-2 rounded-lg bg-slate-900 border border-slate-800">
+              <label for="subbudget-clothes" class="block text-[10px] text-purple-400 font-semibold mb-1 truncate">Clothes</label>
+              <input type="number" id="subbudget-clothes" min="0" step="10" value="40"
+                class="w-full bg-slate-950 border border-slate-800 rounded px-2 py-1 text-xs font-bold text-white focus:outline-none focus:border-brand-500">
+            </div>
+            <div class="p-2 rounded-lg bg-slate-900 border border-slate-800">
+              <label for="subbudget-other" class="block text-[10px] text-slate-400 font-semibold mb-1 truncate">Other</label>
+              <input type="number" id="subbudget-other" min="0" step="10" value="50"
+                class="w-full bg-slate-950 border border-slate-800 rounded px-2 py-1 text-xs font-bold text-white focus:outline-none focus:border-brand-500">
+            </div>
+          </div>
         </div>
 
         <!-- Dynamic Household Members Section (Item 7: Marc, Rocio, Elisa EB, etc.) -->
@@ -1220,12 +1311,18 @@
           </div>
           <div>
             <h3 id="cat-modal-title" class="text-sm sm:text-base font-bold text-white">Food Shopping (Current Month)</h3>
-            <p id="cat-modal-subtitle" class="text-[11px] text-slate-400">Total Spent: <span id="cat-modal-total" class="font-bold text-brand-400">€0.00</span></p>
+            <p id="cat-modal-subtitle" class="text-[11px] text-slate-400">Total Spent: <span id="cat-modal-total" class="font-bold text-brand-400">€0.00</span> <span id="cat-modal-subbudget-info" class="ml-1 text-[10px] text-slate-400"></span></p>
           </div>
         </div>
         <button onclick="closeAllModals()" class="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition cursor-pointer">
           <i class="fa-solid fa-xmark text-sm"></i>
         </button>
+      </div>
+      <!-- Category Sub-Budget Bar inside Modal (v0.11 Item 3) -->
+      <div id="cat-modal-budget-bar-wrapper" class="px-5 py-2 bg-slate-950/70 border-b border-slate-800/80 hidden">
+        <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+          <div id="cat-modal-budget-bar" class="bg-emerald-500 h-1.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+        </div>
       </div>
 
       <div class="p-2.5 sm:p-4 max-h-[70vh] overflow-y-auto overflow-x-hidden">
@@ -1339,8 +1436,24 @@
         </div>
       </div>
 
-      <div class="px-5 py-3 border-t border-slate-800 flex justify-end">
-        <button onclick="closeAllModals()" class="px-4 py-1.5 text-xs rounded-xl bg-slate-800 hover:bg-slate-700 !text-white font-semibold font-medium cursor-pointer">
+      <div class="px-5 py-3 border-t border-slate-800 flex flex-wrap items-center justify-between gap-2">
+        <div id="receipt-preview-action-buttons" class="flex items-center gap-2">
+          <button type="button" onclick="editFromReceiptPreview()"
+            class="px-3 py-1.5 text-xs rounded-xl bg-brand-600 hover:bg-brand-500 !text-white font-semibold flex items-center gap-1.5 cursor-pointer shadow-sm">
+            <i class="fa-solid fa-pen-to-square !text-white"></i> <span class="!text-white">Edit Expense</span>
+          </button>
+          <button type="button" onclick="triggerReplaceReceiptPhoto()"
+            class="px-3 py-1.5 text-xs rounded-xl bg-cyan-600 hover:bg-cyan-500 !text-white font-semibold flex items-center gap-1.5 cursor-pointer shadow-sm">
+            <i class="fa-solid fa-camera-rotate !text-white"></i> <span class="!text-white">Replace Photo</span>
+          </button>
+          <button type="button" onclick="deleteFromReceiptPreview()"
+            class="px-2.5 py-1.5 text-xs rounded-xl bg-rose-600/20 hover:bg-rose-600 text-rose-400 hover:!text-white border border-rose-500/30 font-semibold flex items-center gap-1 cursor-pointer transition"
+            title="Delete this expense">
+            <i class="fa-solid fa-trash-can"></i>
+          </button>
+          <input type="file" id="preview-replace-photo-input" accept="image/*" class="hidden" onchange="handleReplaceReceiptPhoto(event)">
+        </div>
+        <button onclick="closeAllModals()" class="px-4 py-1.5 text-xs rounded-xl bg-slate-800 hover:bg-slate-700 !text-white font-semibold font-medium cursor-pointer ml-auto">
           Close
         </button>
       </div>
@@ -1401,7 +1514,7 @@
         </div>
         <div>
           <label class="block text-slate-300 font-medium mb-1">Web API Key (from Firebase Console)</label>
-          <input type="text" id="firebase-api-key-input" placeholder="AIzaSy..."
+          <input type="text" id="firebase-api-key-input" value="AIzaSyD8jdgprqqdwbBqvRdFNR1qlXVgFF8VXp4" placeholder="AIzaSy..."
             class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-brand-500">
         </div>
         <div>
@@ -1566,6 +1679,7 @@
     const THEME_KEY = 'duospend_theme_v1';
     const SETTLEMENTS_KEY = 'duospend_settlements_v1';
     const FIREBASE_CONFIG_KEY = 'duospend_firebase_v1';
+    const EXCHANGE_RATES_KEY = 'duospend_fx_rates_v1';
 
     let household = {
       p1Name: 'Marc',
@@ -1574,6 +1688,13 @@
       p2Badge: 'RJ',
       currency: '€',
       monthlyBudget: 500, // Item 5: €500/month default
+      categoryBudgets: {  // v0.11 Item 3: Category-Specific Monthly Sub-Budgets
+        'Groceries': 300,
+        'Dining Out': 100,
+        'Transit': 60,
+        'Clothes': 40,
+        'Other': 50
+      },
       members: [
         { id: 'p1', name: 'Marc', badge: 'MB', color: '#06b6d4' },
         { id: 'p2', name: 'Rocio', badge: 'RJ', color: '#ec4899' }
@@ -1584,11 +1705,23 @@
 
     let firebaseConfig = {
       projectId: 'duospend-ef62c',
-      apiKey: '',
+      apiKey: 'AIzaSyD8jdgprqqdwbBqvRdFNR1qlXVgFF8VXp4',
       roomCode: 'duospend-home'
     };
     let firestoreDb = null;
     let isFirebaseListening = false;
+
+    // v0.11 Item 5: Multi-Currency Live Exchange Rates (Base EUR with offline fallback)
+    let fxRatesPerEur = {
+      '€': 1.0,
+      '£': 0.85,
+      '$': 1.08,
+      'CHF': 0.95,
+      '¥': 162.0,
+      'zł': 4.30,
+      'C$': 1.48,
+      'A$': 1.65
+    };
 
     let expenses = [];
     let settlements = []; // Settlement payments logged to balance debts
@@ -1845,7 +1978,8 @@
       updateHouseholdUI();
       populateLedgerMonthFilter(); // Item 8
       refreshDashboard();
-      initFirebaseSync(); // Item 4
+      fetchLiveExchangeRates(); // v0.11 Item 5: Live FX rates with offline cache
+      initFirebaseSync(); // Item 4 & 6: Auto-connect & smart merge sync
     });
 
     // DAY / NIGHT THEME TOGGLE (Item 9)
@@ -2044,8 +2178,21 @@
       if (split5050) split5050.innerText = currentLang === 'es' ? 'Compartido 50 / 50 (Reparto Equilibrado)' : 'Shared 50 / 50 (Fair Household Split)';
     }
 
-    // CLOSE ALL MODALS & POPUPS (Item 19)
-    function closeAllModals() {
+    // ANDROID WEBVIEW HARDWARE BACK-BUTTON HANDLING (v0.11 Item 4: history.pushState & popstate)
+    window._hasModalHistoryState = false;
+
+    function pushModalHistoryState() {
+      if (!window._hasModalHistoryState) {
+        try {
+          history.pushState({ duospendModal: true }, '');
+          window._hasModalHistoryState = true;
+        } catch (err) {
+          // Ignore in restricted sandboxed frames
+        }
+      }
+    }
+
+    function isAnyModalOpen() {
       const modals = [
         'receipt-modal-backdrop',
         'household-settings-modal-backdrop',
@@ -2056,18 +2203,62 @@
         'receipt-image-modal',
         'firebase-config-modal'
       ];
+      return modals.some(id => {
+        const el = document.getElementById(id);
+        return el && !el.classList.contains('hidden');
+      });
+    }
+
+    // CLOSE ALL MODALS & POPUPS (Item 19 & v0.11 Item 4)
+    function closeAllModals(fromPopState = false) {
+      const modals = [
+        'receipt-modal-backdrop',
+        'household-settings-modal-backdrop',
+        'hamburger-drawer-overlay',
+        'member-expenses-modal',
+        'category-expenses-modal',
+        'settle-up-modal',
+        'receipt-image-modal',
+        'firebase-config-modal'
+      ];
+      let closedAny = false;
       modals.forEach(id => {
         const el = document.getElementById(id);
         if (el && !el.classList.contains('hidden')) {
           el.classList.add('hidden');
+          closedAny = true;
         }
       });
+      if (fromPopState) {
+        window._hasModalHistoryState = false;
+      } else if (closedAny && window._hasModalHistoryState) {
+        window._hasModalHistoryState = false;
+        try {
+          if (history.state && history.state.duospendModal) {
+            history.back();
+          }
+        } catch (err) {}
+      }
     }
+
+    window.addEventListener('popstate', (e) => {
+      if (isAnyModalOpen()) {
+        closeAllModals(true);
+      } else {
+        window._hasModalHistoryState = false;
+      }
+    });
 
     function toggleHamburgerMenu(e) {
       if (e) e.stopPropagation();
       const drawer = document.getElementById('hamburger-drawer-overlay');
-      drawer.classList.toggle('hidden');
+      const willOpen = drawer.classList.contains('hidden');
+      if (willOpen) {
+        pushModalHistoryState();
+        drawer.classList.remove('hidden');
+      } else {
+        closeAllModals();
+      }
     }
 
     // Global Keydown Handler (Escape closes all modals)
@@ -2425,6 +2616,8 @@
       } else {
         showToast('Receipt captured! Please confirm the total amount.', 'info');
       }
+      // v0.11 Item 1: Check for duplicate right after OCR scan
+      setTimeout(() => checkDuplicateReceiptLive(), 150);
     }
 
     
@@ -2455,9 +2648,13 @@
 
     function viewCapturedPhotoFull() {
       if (window._lastCapturedPhoto) {
+        window._previewExpenseId = null;
+        const actionBtns = document.getElementById('receipt-preview-action-buttons');
+        if (actionBtns) actionBtns.classList.add('hidden');
         const modal = document.getElementById('receipt-image-modal');
         const content = document.getElementById('receipt-preview-content');
         if (modal && content) {
+          pushModalHistoryState();
           content.innerHTML = `<img src="${window._lastCapturedPhoto}" alt="Captured Receipt" class="max-h-[75vh] w-auto object-contain rounded-xl border border-slate-700 shadow-2xl mx-auto">`;
           modal.classList.remove('hidden');
         }
@@ -2482,7 +2679,7 @@
 
       const exportPayload = {
         app: 'DuoSpend',
-        version: 'v0.09',
+        version: 'v0.11',
         exportType: 'invoices_and_receipts',
         exportTimestamp: new Date().toISOString(),
         totalExpensesCount: invoices.length,
@@ -2507,7 +2704,7 @@
       showToast(`Exported ${invoices.length} invoices to JSON!`);
     }
 
-    // SETTINGS MANAGEMENT (Items 5, 7, 9)
+    // SETTINGS MANAGEMENT (Items 5, 7, 9 & v0.11 Item 3)
     function loadSettings() {
       const stored = localStorage.getItem(SETTINGS_KEY);
       if (stored) {
@@ -2520,6 +2717,15 @@
       }
       if (!household.currency) household.currency = '€';
       if (!household.monthlyBudget) household.monthlyBudget = 500;
+      if (!household.categoryBudgets || typeof household.categoryBudgets !== 'object') {
+        household.categoryBudgets = {
+          'Groceries': 300,
+          'Dining Out': 100,
+          'Transit': 60,
+          'Clothes': 40,
+          'Other': 50
+        };
+      }
       if (!Array.isArray(household.quickMerchants) || household.quickMerchants.length === 0) {
         household.quickMerchants = ['AlCash', 'Lidl', 'Aldi', 'Mercadona', 'Deza'];
       }
@@ -2604,6 +2810,15 @@
       const budgetVal = parseFloat(document.getElementById('settings-budget-input').value);
       household.monthlyBudget = (!isNaN(budgetVal) && budgetVal > 0) ? budgetVal : 500;
 
+      // v0.11 Item 3: Category Monthly Sub-Budgets
+      household.categoryBudgets = {
+        'Groceries': Math.max(0, parseFloat(document.getElementById('subbudget-groceries')?.value) || 0),
+        'Dining Out': Math.max(0, parseFloat(document.getElementById('subbudget-dining')?.value) || 0),
+        'Transit': Math.max(0, parseFloat(document.getElementById('subbudget-transit')?.value) || 0),
+        'Clothes': Math.max(0, parseFloat(document.getElementById('subbudget-clothes')?.value) || 0),
+        'Other': Math.max(0, parseFloat(document.getElementById('subbudget-other')?.value) || 0)
+      };
+
       // Currency
       household.currency = document.getElementById('settings-currency-symbol-input').value || '€';
 
@@ -2627,13 +2842,28 @@
       refreshDashboard();
       closeAllModals();
       showToast(TRANSLATIONS[currentLang].toastUpdatedHousehold);
-      if (firestoreDb) syncFirebaseNow();
+      if (firestoreDb) syncFirebaseNow(true);
     }
 
     function openSettingsModal() {
+      closeAllModals();
+      pushModalHistoryState();
       // Populate monthly budget
       const bInput = document.getElementById('settings-budget-input');
       if (bInput) bInput.value = household.monthlyBudget || 500;
+
+      // Populate Category Sub-Budgets (v0.11 Item 3)
+      const cb = household.categoryBudgets || { 'Groceries': 300, 'Dining Out': 100, 'Transit': 60, 'Clothes': 40, 'Other': 50 };
+      const sg = document.getElementById('subbudget-groceries');
+      const sd = document.getElementById('subbudget-dining');
+      const st = document.getElementById('subbudget-transit');
+      const sc = document.getElementById('subbudget-clothes');
+      const so = document.getElementById('subbudget-other');
+      if (sg) sg.value = cb['Groceries'] ?? 300;
+      if (sd) sd.value = cb['Dining Out'] ?? 100;
+      if (st) st.value = cb['Transit'] ?? 60;
+      if (sc) sc.value = cb['Clothes'] ?? 40;
+      if (so) so.value = cb['Other'] ?? 50;
 
       // Populate Currency
       const curSelect = document.getElementById('settings-currency-symbol-input');
@@ -2694,9 +2924,144 @@
 
     
 
+    // MULTI-CURRENCY LIVE CONVERSION ON ENTRY (v0.11 Item 5: Travel Mode)
+    async function fetchLiveExchangeRates() {
+      const cached = localStorage.getItem(EXCHANGE_RATES_KEY);
+      if (cached) {
+        try {
+          const parsed = JSON.parse(cached);
+          if (parsed && parsed.rates) {
+            fxRatesPerEur = { ...fxRatesPerEur, ...parsed.rates };
+          }
+        } catch (err) {}
+      }
+      try {
+        const res = await fetch('https://open.er-api.com/v6/latest/EUR');
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.rates) {
+            const mapped = {
+              '€': 1.0,
+              '£': data.rates.GBP || 0.85,
+              '$': data.rates.USD || 1.08,
+              'CHF': data.rates.CHF || 0.95,
+              '¥': data.rates.JPY || 162.0,
+              'zł': data.rates.PLN || 4.30,
+              'C$': data.rates.CAD || 1.48,
+              'A$': data.rates.AUD || 1.65
+            };
+            fxRatesPerEur = mapped;
+            localStorage.setItem(EXCHANGE_RATES_KEY, JSON.stringify({ updatedAt: Date.now(), rates: mapped }));
+          }
+        }
+      } catch (err) {
+        // Offline supermarket fallback: use cached or built-in rates silently
+      }
+    }
+
+    function getDefaultConversionRate(fromCur, toCur) {
+      if (fromCur === toCur) return 1.0;
+      const fromPerEur = fxRatesPerEur[fromCur] || 1.0;
+      const toPerEur = fxRatesPerEur[toCur] || 1.0;
+      // 1 unit of fromCur = (1 / fromPerEur) * toPerEur units of toCur
+      return Number(((1 / fromPerEur) * toPerEur).toFixed(4));
+    }
+
+    function updateTravelCurrencyPreview(manualRateEdit = false) {
+      const entryCurSelect = document.getElementById('expense-entry-currency-select');
+      const prefixEl = document.getElementById('entry-amount-currency-prefix');
+      const convBox = document.getElementById('travel-currency-converter-box');
+      const rateInput = document.getElementById('travel-exchange-rate-input');
+      const summaryText = document.getElementById('travel-conv-summary-text');
+      const amtInput = document.getElementById('expense-amount-input');
+
+      if (!entryCurSelect || !convBox) return;
+      const entryCur = entryCurSelect.value || household.currency;
+      const homeCur = household.currency || '€';
+
+      if (prefixEl) prefixEl.innerText = entryCur;
+
+      if (entryCur === homeCur) {
+        convBox.classList.add('hidden');
+        return;
+      }
+
+      convBox.classList.remove('hidden');
+      if (!manualRateEdit && rateInput) {
+        const autoRate = getDefaultConversionRate(entryCur, homeCur);
+        rateInput.value = autoRate;
+      }
+
+      const rawAmt = parseFloat(amtInput?.value) || 0;
+      const rate = parseFloat(rateInput?.value) || getDefaultConversionRate(entryCur, homeCur);
+      const converted = rawAmt * rate;
+
+      if (summaryText) {
+        summaryText.innerText = `${entryCur}${rawAmt.toFixed(2)} = ${homeCur}${converted.toFixed(2)}`;
+      }
+    }
+
+    // DUPLICATE RECEIPT DETECTION HELPERS (v0.11 Item 1)
+    window._forceSaveDuplicate = false;
+
+    function findDuplicateExpense(merchant, amount, date, excludeId = '') {
+      if (!amount || isNaN(amount) || !date) return null;
+      const cleanMerch = (merchant || '').trim().toLowerCase();
+      return expenses.find(item => {
+        if (excludeId && item.id === excludeId) return false;
+        const sameAmount = Math.abs((parseFloat(item.amount) || 0) - amount) < 0.01;
+        if (!sameAmount) return false;
+        const sameDate = item.date === date;
+        const itemMerch = (item.merchant || '').trim().toLowerCase();
+        const sameMerchant = cleanMerch && itemMerch && (itemMerch === cleanMerch || itemMerch.includes(cleanMerch) || cleanMerch.includes(itemMerch));
+        return (sameDate && sameMerchant) || (sameDate && sameAmount);
+      });
+    }
+
+    function checkDuplicateReceiptLive() {
+      const id = document.getElementById('expense-id-hidden')?.value || '';
+      const merchant = document.getElementById('expense-merchant-input')?.value.trim() || '';
+      const rawAmount = parseFloat(document.getElementById('expense-amount-input')?.value);
+      const date = document.getElementById('expense-date-input')?.value || '';
+      const warnBox = document.getElementById('duplicate-receipt-warning-box');
+      const warnMsg = document.getElementById('duplicate-receipt-warning-msg');
+      if (!warnBox || !warnMsg) return null;
+
+      const dup = findDuplicateExpense(merchant, rawAmount, date, id);
+      if (dup && !window._forceSaveDuplicate) {
+        const members = household.members || [
+          { id: 'p1', name: household.p1Name || 'Marc' },
+          { id: 'p2', name: household.p2Name || 'Rocio' }
+        ];
+        const mObj = members.find(m => m.id === dup.purchaser);
+        const payerName = mObj ? mObj.name : (dup.purchaser === 'p1' ? household.p1Name : household.p2Name);
+        warnMsg.innerText = `A receipt for ${household.currency}${Number(dup.amount).toFixed(2)} at "${dup.merchant}" on ${dup.date} was already logged by ${payerName}.`;
+        warnBox.classList.remove('hidden');
+        return dup;
+      } else {
+        warnBox.classList.add('hidden');
+        return null;
+      }
+    }
+
+    function dismissDuplicateWarning() {
+      const warnBox = document.getElementById('duplicate-receipt-warning-box');
+      if (warnBox) warnBox.classList.add('hidden');
+      document.getElementById('expense-amount-input')?.focus();
+    }
+
+    function confirmSaveDuplicateExpense() {
+      window._forceSaveDuplicate = true;
+      const warnBox = document.getElementById('duplicate-receipt-warning-box');
+      if (warnBox) warnBox.classList.add('hidden');
+      const form = document.getElementById('expense-details-form');
+      if (form) form.requestSubmit();
+    }
+
     // MODAL & RECEIPT PRESETS INTERACTION
     function openReceiptModal(mode = 'manual', editId = null) {
       closeAllModals();
+      pushModalHistoryState();
       const modal = document.getElementById('receipt-modal-backdrop');
       const detectedBadge = document.getElementById('ocr-detected-badge');
       const form = document.getElementById('expense-details-form');
@@ -2704,6 +3069,14 @@
       form.reset();
       detectedBadge.classList.add('hidden');
       window._currentEditId = null;
+      window._forceSaveDuplicate = false;
+
+      const warnBox = document.getElementById('duplicate-receipt-warning-box');
+      if (warnBox) warnBox.classList.add('hidden');
+
+      const entryCurSelect = document.getElementById('expense-entry-currency-select');
+      if (entryCurSelect) entryCurSelect.value = household.currency || '€';
+      updateTravelCurrencyPreview();
 
       const photoPreviewBox = document.getElementById('form-receipt-photo-preview');
       const photoThumbImg = document.getElementById('form-receipt-thumbnail-img');
@@ -2757,11 +3130,11 @@
       e.preventDefault();
       const id = document.getElementById('expense-id-hidden').value;
       const merchant = document.getElementById('expense-merchant-input').value.trim();
-      const amount = parseFloat(document.getElementById('expense-amount-input').value);
+      let amount = parseFloat(document.getElementById('expense-amount-input').value);
       const date = document.getElementById('expense-date-input').value;
       const category = document.getElementById('expense-category-select').value;
       const split = document.getElementById('expense-split-policy-select').value;
-      const notes = document.getElementById('expense-notes-textarea').value.trim();
+      let notes = document.getElementById('expense-notes-textarea').value.trim();
 
       const form = document.getElementById('expense-details-form');
       const purchaser = form.elements['formPurchaser'].value;
@@ -2771,13 +3144,38 @@
         return;
       }
 
+      // v0.11 Item 5: Apply Multi-Currency Live Conversion if Travel Currency is selected
+      const entryCur = document.getElementById('expense-entry-currency-select')?.value || household.currency;
+      const autoConvert = document.getElementById('travel-auto-convert-checkbox')?.checked;
+      if (entryCur !== household.currency && autoConvert) {
+        const rate = parseFloat(document.getElementById('travel-exchange-rate-input')?.value) || getDefaultConversionRate(entryCur, household.currency);
+        const origAmt = amount;
+        amount = Number((origAmt * rate).toFixed(2));
+        const fxTag = `[Travel FX: ${entryCur}${origAmt.toFixed(2)} @ ${rate}]`;
+        if (!notes.includes('[Travel FX:')) {
+          notes = notes ? `${notes} ${fxTag}` : fxTag;
+        }
+      }
+
+      // v0.11 Item 1: Duplicate Receipt Detection Warning
+      if (!window._forceSaveDuplicate) {
+        const dup = findDuplicateExpense(merchant, amount, date, id);
+        if (dup) {
+          checkDuplicateReceiptLive();
+          const warnBox = document.getElementById('duplicate-receipt-warning-box');
+          if (warnBox) warnBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          return;
+        }
+      }
+      window._forceSaveDuplicate = false;
+
       const receiptImage = window._lastCapturedPhoto || null;
       window._lastCapturedPhoto = null;
 
       if (id) {
         const idx = expenses.findIndex(x => x.id === id);
         if (idx !== -1) {
-          expenses[idx] = { ...expenses[idx], merchant, amount, date, category, purchaser, split, notes };
+          expenses[idx] = { ...expenses[idx], merchant, amount, date, category, purchaser, split, notes, updatedAt: Date.now() };
           if (receiptImage) expenses[idx].receiptImage = receiptImage;
           showToast(`Updated expense for "${merchant}".`);
         }
@@ -2791,7 +3189,8 @@
           purchaser,
           split,
           notes,
-          receiptImage: receiptImage || null
+          receiptImage: receiptImage || null,
+          updatedAt: Date.now()
         };
         expenses.unshift(newEntry);
         showToast(`Added ${household.currency}${amount.toFixed(2)} (${merchant})!`);
@@ -2801,6 +3200,7 @@
       populateLedgerMonthFilter();
       closeAllModals();
       refreshDashboard();
+      if (firestoreDb) syncFirebaseNow(true);
     }
 
     function deleteExpense(id) {
@@ -3309,17 +3709,36 @@
 
       const totalAmount = dataValues.reduce((a, b) => a + b, 0);
       const legendEl = document.getElementById('category-chart-legend');
+      const subBudgets = household.categoryBudgets || {};
       legendEl.innerHTML = activeCats.map((cat, idx) => {
         const val = catTotals[cat];
         const pct = totalAmount > 0 ? Math.round((val / totalAmount) * 100) : 0;
         const col = CATEGORY_COLORS[cat] || palette[idx % palette.length];
+        const catCap = parseFloat(subBudgets[cat]) || 0;
+        let capBarHtml = '';
+        if (catCap > 0) {
+          const capPct = Math.round((val / catCap) * 100);
+          const barCol = capPct >= 100 ? 'bg-rose-500' : (capPct >= 80 ? 'bg-amber-400' : 'bg-emerald-500');
+          capBarHtml = `
+            <div class="w-full bg-slate-800 rounded-full h-1 mt-1 overflow-hidden">
+              <div class="${barCol} h-1 rounded-full" style="width: ${Math.min(100, capPct)}%"></div>
+            </div>
+            <div class="flex justify-between text-[9px] text-slate-400 mt-0.5">
+              <span>Cap: ${household.currency}${catCap.toFixed(0)}</span>
+              <span class="${capPct >= 100 ? 'text-rose-400 font-bold' : (capPct >= 80 ? 'text-amber-400 font-semibold' : 'text-emerald-400')}">${capPct}%</span>
+            </div>
+          `;
+        }
         return `
-          <div class="flex items-center justify-between p-1 rounded hover:bg-slate-800/40">
-            <span class="flex items-center gap-1.5 truncate">
-              <span class="w-2 h-2 rounded-full flex-shrink-0" style="background-color: ${col}"></span>
-              <span class="truncate">${catMap[cat] || cat}</span>
-            </span>
-            <span class="font-bold text-slate-300 ml-1">${household.currency}${val.toFixed(0)} <span class="text-[9px] text-slate-500">(${pct}%)</span></span>
+          <div onclick="openCategoryExpensesModal('${escapeHtml(cat)}')" class="p-1.5 rounded-lg bg-slate-900/40 hover:bg-slate-800/60 border border-slate-800/60 cursor-pointer transition" title="Tap to view ${escapeHtml(catMap[cat] || cat)} receipts">
+            <div class="flex items-center justify-between">
+              <span class="flex items-center gap-1.5 truncate">
+                <span class="w-2 h-2 rounded-full flex-shrink-0" style="background-color: ${col}"></span>
+                <span class="truncate font-semibold">${catMap[cat] || cat}</span>
+              </span>
+              <span class="font-bold text-slate-200 ml-1">${household.currency}${val.toFixed(0)} <span class="text-[9px] text-slate-400">(${pct}%)</span></span>
+            </div>
+            ${capBarHtml}
           </div>
         `;
       }).join('');
@@ -3584,23 +4003,27 @@
     // POPUP: MEMBER EXPENSES MODAL (Item 15)
     function openMemberExpensesModal(memberId) {
       closeAllModals();
+      pushModalHistoryState();
       currentMemberModalMode = memberId;
       const modal = document.getElementById('member-expenses-modal');
       const badge = document.getElementById('member-modal-badge');
       const title = document.getElementById('member-modal-title');
+      const members = household.members || [
+        { id: 'p1', name: household.p1Name || 'Marc', badge: 'MB', color: '#06b6d4' },
+        { id: 'p2', name: household.p2Name || 'Rocio', badge: 'RJ', color: '#ec4899' }
+      ];
 
-      if (memberId === 'p1') {
-        badge.className = 'w-9 h-9 rounded-xl flex items-center justify-center font-bold text-sm bg-cyan-500/20 text-cyan-400';
-        badge.innerText = computeBadge(household.p1Name, household.p1Badge);
-        title.innerText = `${household.p1Name}'s Expenses`;
-      } else if (memberId === 'p2') {
-        badge.className = 'w-9 h-9 rounded-xl flex items-center justify-center font-bold text-sm bg-pink-500/20 text-pink-400';
-        badge.innerText = computeBadge(household.p2Name, household.p2Badge);
-        title.innerText = `${household.p2Name}'s Expenses`;
-      } else {
+      if (memberId === 'all') {
         badge.className = 'w-9 h-9 rounded-xl flex items-center justify-center font-bold text-sm bg-indigo-500/20 text-indigo-400';
         badge.innerText = 'ALL';
         title.innerText = 'Total Household Expenses';
+      } else {
+        const mObj = members.find(m => m.id === memberId) || members[0];
+        badge.className = 'w-9 h-9 rounded-xl flex items-center justify-center font-bold text-sm';
+        badge.style.backgroundColor = `${mObj.color || '#06b6d4'}25`;
+        badge.style.color = mObj.color || '#06b6d4';
+        badge.innerText = mObj.badge || computeBadge(mObj.name);
+        title.innerText = `${mObj.name}'s Expenses`;
       }
 
       // Populate Month Selector dynamically with available calendar months
@@ -3680,12 +4103,16 @@
       `).join('');
     }
 
-    // POPUP: CATEGORY EXPENSES MODAL (Item 18)
+    // POPUP: CATEGORY EXPENSES MODAL (Item 18 & v0.11 Item 3 Sub-Budgets)
     function openCategoryExpensesModal(categoryKey) {
       closeAllModals();
+      pushModalHistoryState();
       const modal = document.getElementById('category-expenses-modal');
       const title = document.getElementById('cat-modal-title');
       const totalDisplay = document.getElementById('cat-modal-total');
+      const subBudgetInfo = document.getElementById('cat-modal-subbudget-info');
+      const barWrapper = document.getElementById('cat-modal-budget-bar-wrapper');
+      const barEl = document.getElementById('cat-modal-budget-bar');
       const tbody = document.getElementById('cat-modal-table-body');
       const t = TRANSLATIONS[currentLang];
       const cur = household.currency;
@@ -3707,6 +4134,21 @@
       const totalSpent = filtered.reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0);
       title.innerText = `${catLabel} (${t.currentMonth})`;
       totalDisplay.innerText = `${cur}${totalSpent.toFixed(2)}`;
+
+      // Category Sub-Budget Indicator (v0.11 Item 3)
+      const catCap = parseFloat((household.categoryBudgets || {})[categoryKey]) || 0;
+      if (catCap > 0 && subBudgetInfo && barWrapper && barEl) {
+        const pct = Math.round((totalSpent / catCap) * 100);
+        subBudgetInfo.innerText = `/ ${cur}${catCap.toFixed(0)} sub-budget (${pct}%)`;
+        barWrapper.classList.remove('hidden');
+        barEl.style.width = `${Math.min(100, pct)}%`;
+        barEl.className = pct >= 100
+          ? 'bg-rose-500 h-1.5 rounded-full transition-all duration-300'
+          : (pct >= 80 ? 'bg-amber-400 h-1.5 rounded-full transition-all duration-300' : 'bg-emerald-500 h-1.5 rounded-full transition-all duration-300');
+      } else {
+        if (subBudgetInfo) subBudgetInfo.innerText = '';
+        if (barWrapper) barWrapper.classList.add('hidden');
+      }
 
       if (filtered.length === 0) {
         tbody.innerHTML = '<tr><td colspan="4" class="py-6 text-center text-slate-500">No expenses recorded for this category in the selected month.</td></tr>';
@@ -3799,11 +4241,18 @@
       showToast(`Settlement payment of ${household.currency}${record.amount.toFixed(2)} recorded via ${method}!`);
     }
 
-    // POPUP: VIEW RECEIPT IMAGE PREVIEW (Item 11)
+    // POPUP: VIEW RECEIPT IMAGE PREVIEW (Item 11 & v0.11 Item 2 Edit/Replace Directly)
+    window._previewExpenseId = null;
+
     function viewReceiptImage(expenseId) {
       closeAllModals();
       const item = expenses.find(e => e.id === expenseId);
       if (!item) return;
+
+      pushModalHistoryState();
+      window._previewExpenseId = expenseId;
+      const actionBtns = document.getElementById('receipt-preview-action-buttons');
+      if (actionBtns) actionBtns.classList.remove('hidden');
 
       const modal = document.getElementById('receipt-image-modal');
       const merchantEl = document.getElementById('receipt-preview-merchant');
@@ -3812,9 +4261,16 @@
       const amtEl = document.getElementById('receipt-preview-amount');
       const content = document.getElementById('receipt-preview-content');
 
+      const members = household.members || [
+        { id: 'p1', name: household.p1Name || 'Marc' },
+        { id: 'p2', name: household.p2Name || 'Rocio' }
+      ];
+      const mObj = members.find(m => m.id === item.purchaser);
+      const payerName = mObj ? mObj.name : (item.purchaser === 'p1' ? household.p1Name : household.p2Name);
+
       merchantEl.innerText = item.merchant;
       dateEl.innerText = `${item.date} • ${item.category}`;
-      payerEl.innerText = item.purchaser === 'p1' ? household.p1Name : household.p2Name;
+      payerEl.innerText = payerName;
       amtEl.innerText = `${household.currency}${Number(item.amount).toFixed(2)}`;
 
       if (item.receiptImage) {
@@ -3845,6 +4301,46 @@
       }
 
       modal.classList.remove('hidden');
+    }
+
+    function editFromReceiptPreview() {
+      const targetId = window._previewExpenseId;
+      if (!targetId) return;
+      openReceiptModal('manual', targetId);
+    }
+
+    function triggerReplaceReceiptPhoto() {
+      if (!window._previewExpenseId) return;
+      document.getElementById('preview-replace-photo-input')?.click();
+    }
+
+    function handleReplaceReceiptPhoto(event) {
+      const file = event.target.files[0];
+      const targetId = window._previewExpenseId;
+      if (!file || !targetId) return;
+
+      const reader = new FileReader();
+      reader.onload = async function(evt) {
+        const compressed = await compressImage(evt.target.result, 1000, 0.72);
+        const idx = expenses.findIndex(e => e.id === targetId);
+        if (idx !== -1) {
+          expenses[idx].receiptImage = compressed;
+          expenses[idx].updatedAt = Date.now();
+          saveExpensesToStorage();
+          refreshDashboard();
+          viewReceiptImage(targetId);
+          showToast('Receipt photo updated on this expense!');
+          if (firestoreDb) syncFirebaseNow(true);
+        }
+        event.target.value = '';
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function deleteFromReceiptPreview() {
+      const targetId = window._previewExpenseId;
+      if (!targetId) return;
+      deleteExpense(targetId);
     }
 
     // GOOGLE ACCOUNT LOGIN SIMULATION & CONTROLS (Item 7)
@@ -3894,7 +4390,7 @@
     function exportToJSON() {
       const backupData = {
         app: 'DuoSpend',
-        version: 'v0.10',
+        version: 'v0.11',
         exportedAt: new Date().toISOString(),
         household,
         settlements,
@@ -3903,7 +4399,7 @@
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
       const downloadAnchor = document.createElement('a');
       downloadAnchor.setAttribute("href", dataStr);
-      downloadAnchor.setAttribute("download", `DuoSpend_Backup_v0.10_${new Date().toISOString().split('T')[0]}.json`);
+      downloadAnchor.setAttribute("download", `DuoSpend_Backup_v0.11_${new Date().toISOString().split('T')[0]}.json`);
       document.body.appendChild(downloadAnchor);
       downloadAnchor.click();
       downloadAnchor.remove();
@@ -4054,7 +4550,9 @@
       }, 400);
     }
 
-    // FIREBASE REAL-TIME MULTI-DEVICE CLOUD SYNC (Item 4)
+    // FIREBASE REAL-TIME MULTI-DEVICE CLOUD SYNC (Item 4, v0.11 Item 6 & 7 Smart Auto-Sync)
+    const DEFAULT_FIREBASE_API_KEY = 'AIzaSyD8jdgprqqdwbBqvRdFNR1qlXVgFF8VXp4';
+
     function loadFirebaseConfig() {
       const stored = localStorage.getItem(FIREBASE_CONFIG_KEY);
       if (stored) {
@@ -4064,13 +4562,22 @@
           console.error(e);
         }
       }
+      if (!firebaseConfig.projectId) firebaseConfig.projectId = 'duospend-ef62c';
+      if (!firebaseConfig.apiKey || !firebaseConfig.apiKey.trim()) {
+        firebaseConfig.apiKey = DEFAULT_FIREBASE_API_KEY;
+        localStorage.setItem(FIREBASE_CONFIG_KEY, JSON.stringify(firebaseConfig));
+      }
+      if (!firebaseConfig.roomCode) firebaseConfig.roomCode = 'duospend-home';
+
       const roomLbl = document.getElementById('firebase-room-label');
       if (roomLbl) roomLbl.innerText = firebaseConfig.roomCode || 'duospend-home';
     }
 
     function configureFirebaseModal() {
+      closeAllModals();
+      pushModalHistoryState();
       document.getElementById('firebase-project-id-input').value = firebaseConfig.projectId || 'duospend-ef62c';
-      document.getElementById('firebase-api-key-input').value = firebaseConfig.apiKey || '';
+      document.getElementById('firebase-api-key-input').value = firebaseConfig.apiKey || DEFAULT_FIREBASE_API_KEY;
       document.getElementById('firebase-room-code-input').value = firebaseConfig.roomCode || 'duospend-home';
       document.getElementById('firebase-config-modal').classList.remove('hidden');
     }
@@ -4078,7 +4585,7 @@
     function saveFirebaseConfig(e) {
       e.preventDefault();
       firebaseConfig.projectId = document.getElementById('firebase-project-id-input').value.trim() || 'duospend-ef62c';
-      firebaseConfig.apiKey = document.getElementById('firebase-api-key-input').value.trim();
+      firebaseConfig.apiKey = document.getElementById('firebase-api-key-input').value.trim() || DEFAULT_FIREBASE_API_KEY;
       firebaseConfig.roomCode = document.getElementById('firebase-room-code-input').value.trim() || 'duospend-home';
 
       localStorage.setItem(FIREBASE_CONFIG_KEY, JSON.stringify(firebaseConfig));
@@ -4089,6 +4596,23 @@
       initFirebaseSync(true);
     }
 
+    // Smart ID-based Merge so offline local receipts are never overwritten on app load
+    function mergeExpenseLists(localList, cloudList) {
+      const map = new Map();
+      (Array.isArray(cloudList) ? cloudList : []).forEach(item => {
+        if (item && item.id) map.set(item.id, item);
+      });
+      (Array.isArray(localList) ? localList : []).forEach(item => {
+        if (item && item.id) {
+          const existing = map.get(item.id);
+          if (!existing || (item.updatedAt || 0) >= (existing.updatedAt || 0)) {
+            map.set(item.id, item);
+          }
+        }
+      });
+      return Array.from(map.values()).sort((a, b) => new Date(b.date) - new Date(a.date));
+    }
+
     function initFirebaseSync(manual = false) {
       if (!window.firebase) {
         updateFirebaseStatus('Offline', false);
@@ -4096,41 +4620,53 @@
       }
       try {
         if (!firebase.apps.length) {
-          // Initialize Firebase
           const cfg = {
             projectId: firebaseConfig.projectId || 'duospend-ef62c',
-            apiKey: firebaseConfig.apiKey || undefined
+            apiKey: firebaseConfig.apiKey || DEFAULT_FIREBASE_API_KEY,
+            authDomain: `${firebaseConfig.projectId || 'duospend-ef62c'}.firebaseapp.com`
           };
           firebase.initializeApp(cfg);
         }
         firestoreDb = firebase.firestore();
-        updateFirebaseStatus('Ready', true);
+        updateFirebaseStatus('Connected', true);
 
-        // Realtime listener on household room document
+        // Realtime listener + Smart Auto-Sync on App Load
         if (!isFirebaseListening && firebaseConfig.roomCode) {
           isFirebaseListening = true;
           const roomRef = firestoreDb.collection('households').doc(firebaseConfig.roomCode);
           roomRef.onSnapshot(doc => {
             if (doc.exists) {
               const data = doc.data();
-              if (data && data.updatedAt && data.updatedBy !== window._clientId) {
-                if (Array.isArray(data.expenses)) {
-                  expenses = data.expenses;
-                  saveExpensesToStorage();
-                }
-                if (Array.isArray(data.settlements)) {
+              if (data) {
+                const cloudExpenses = Array.isArray(data.expenses) ? data.expenses : [];
+                const merged = mergeExpenseLists(expenses, cloudExpenses);
+                const countChanged = merged.length !== expenses.length;
+                expenses = merged;
+                saveExpensesToStorage();
+
+                if (Array.isArray(data.settlements) && data.settlements.length >= settlements.length) {
                   settlements = data.settlements;
                   saveSettlementsToStorage();
                 }
-                if (data.household) {
+                if (data.household && data.updatedBy !== window._clientId) {
                   household = { ...household, ...data.household };
                   localStorage.setItem(SETTINGS_KEY, JSON.stringify(household));
                 }
                 populateLedgerMonthFilter();
                 updateHouseholdUI();
                 refreshDashboard();
-                showToast('Synced latest updates from household cloud!', 'info');
+                updateFirebaseStatus('Synced', true);
+
+                // If local device had offline receipts not yet in cloud, push merged list back up
+                if (merged.length > cloudExpenses.length) {
+                  syncFirebaseNow(true);
+                } else if (countChanged && data.updatedBy !== window._clientId) {
+                  showToast('Synced latest updates from household cloud!', 'info');
+                }
               }
+            } else if (expenses.length > 0) {
+              // Room doc doesn't exist yet on Firestore — seed it automatically on load
+              syncFirebaseNow(true);
             }
           }, err => {
             console.warn('Firebase realtime listener warning:', err.message);
@@ -4182,31 +4718,39 @@
 
     window._clientId = 'client_' + Math.random().toString(36).substr(2, 9);
 
-    async function syncFirebaseNow() {
+    async function syncFirebaseNow(silent = false) {
       const roomCode = firebaseConfig.roomCode || 'duospend-home';
       const projId = firebaseConfig.projectId || 'duospend-ef62c';
       const memberCount = (household.members || []).length;
       const expenseCount = expenses.length;
 
-      setFirebaseSyncProgress(15, 'Connecting to Firebase...', `Project: ${projId} • Room: ${roomCode}`);
-      await new Promise(r => setTimeout(r, 220));
+      if (!silent) {
+        setFirebaseSyncProgress(15, 'Connecting to Firebase...', `Project: ${projId} • Room: ${roomCode}`);
+        await new Promise(r => setTimeout(r, 220));
+      }
 
       if (!firestoreDb) {
-        initFirebaseSync(true);
+        initFirebaseSync(!silent);
       }
       if (!firestoreDb) {
-        setFirebaseSyncProgress(100, 'Firebase SDK unavailable', 'Please check internet connection or configure API key.', true);
-        configureFirebaseModal();
+        if (!silent) {
+          setFirebaseSyncProgress(100, 'Firebase SDK unavailable', 'Please check internet connection or configure API key.', true);
+          configureFirebaseModal();
+        }
         return;
       }
 
       try {
         updateFirebaseStatus('Syncing...', true);
-        setFirebaseSyncProgress(45, 'Packaging household ledger...', `Preparing ${expenseCount} receipt(s) & ${memberCount} member profile(s)...`);
-        await new Promise(r => setTimeout(r, 250));
+        if (!silent) {
+          setFirebaseSyncProgress(45, 'Packaging household ledger...', `Preparing ${expenseCount} receipt(s) & ${memberCount} member profile(s)...`);
+          await new Promise(r => setTimeout(r, 250));
+        }
 
         const roomRef = firestoreDb.collection('households').doc(roomCode);
-        setFirebaseSyncProgress(75, 'Uploading to Cloud Firestore...', `Writing to /households/${roomCode} ...`);
+        if (!silent) {
+          setFirebaseSyncProgress(75, 'Uploading to Cloud Firestore...', `Writing to /households/${roomCode} ...`);
+        }
 
         await roomRef.set({
           updatedAt: new Date().toISOString(),
@@ -4219,12 +4763,16 @@
         const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
         setFirebaseSyncProgress(100, 'Cloud Sync Complete!', `Synced ${expenseCount} receipt(s) to "${roomCode}" at ${timeStr}`);
         updateFirebaseStatus('Synced', true);
-        showToast('Successfully synced household ledger with Firebase cloud!');
+        if (!silent) {
+          showToast('Successfully synced household ledger with Firebase cloud!');
+        }
       } catch (err) {
         console.error('Firebase sync failed:', err);
-        setFirebaseSyncProgress(100, 'Sync requires API Key / Rules', `${err.message || 'Check Firebase Console settings (duospend-ef62c)'}`, true);
+        setFirebaseSyncProgress(100, 'Firestore Rules / Network Notice', `${err.message || 'Check Firestore security rules in Firebase Console'}`, true);
         updateFirebaseStatus('Error', false);
-        showToast('Cloud sync notice: please verify Firebase credentials.', 'info');
+        if (!silent) {
+          showToast('Cloud sync notice: verify Firestore security rules allow read/write.', 'info');
+        }
       }
     }
 

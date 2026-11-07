@@ -14,6 +14,28 @@ Git Repository: [https://github.com/DaidalusX78/DuoSpend.git](https://github.com
 
 ---
 
+## Version v0.11 (Released November 2026)
+
+### Key Features & Upgrades Implemented:
+- [x] **1. Duplicate Receipt Detection Warning**:
+  - Live and on-submit duplicate check (`findDuplicateExpense()` / `checkDuplicateReceiptLive()`) detects if an expense with the same Amount + Date (+ Merchant) was already logged.
+  - Displays an inline amber warning banner (`#duplicate-receipt-warning-box`) naming who logged the matching receipt with **"Review / Edit"** and **"Save Anyway"** actions.
+- [x] **2. Edit / Replace Expense Directly from the Receipt Preview Modal (`#receipt-image-modal`)**:
+  - Added **"Edit Expense"**, **"Replace Photo"** (with instant client-side image compression), and **"Delete"** action buttons directly inside the `#receipt-image-modal` footer (`editFromReceiptPreview()`, `triggerReplaceReceiptPhoto()`, `deleteFromReceiptPreview()`).
+- [x] **3. Category-Specific Monthly Sub-Budgets**:
+  - Added configurable monthly sub-budget caps in Household Settings (`household.categoryBudgets` for Food Shopping `€300`, Eating Out `€100`, Fuel `€60`, Clothes `€40`, Other `€50`).
+  - Added live color-coded mini progress bars (`<80%` emerald, `80–99%` amber, `>=100%` rose) to every category card in `#category-chart-legend` and inside `#category-expenses-modal`.
+- [x] **4. Android WebView Hardware Back-Button Handling (`history.pushState`)**:
+  - Implemented `pushModalHistoryState()` and a global `popstate` listener so pressing the Android hardware/gesture Back button closes any active modal or drawer (`closeAllModals(true)`) instead of exiting the Android app.
+- [x] **5. Multi-Currency Live Conversion on Entry (Travel Mode)**:
+  - Added `#expense-entry-currency-select` (`€ EUR`, `£ GBP`, `$ USD`, `CHF`, `¥ JPY`, `zł PLN`, `C$ CAD`, `A$ AUD`) inside the Amount field header.
+  - Fetches live exchange rates (`fetchLiveExchangeRates()`) with cached + offline fallback rates, live conversion preview (`#travel-currency-converter-box`), editable exchange rate, and automatic conversion into the household currency with a `[Travel FX: ...]` note tag.
+- [x] **6. Pre-Configured Firebase API Key & Smart Auto-Sync on App Load**:
+  - Pre-configured Firebase Web API Key (`AIzaSyD8jdgprqqdwbBqvRdFNR1qlXVgFF8VXp4`) for project `duospend-ef62c`.
+  - Implemented `mergeExpenseLists(localList, cloudList)` so auto-sync on app load merges offline local receipts and cloud receipts by `id` and `updatedAt` timestamp without ever overwriting offline entries.
+- [x] **7. Version Control**: Bumped codebase, service worker cache, and documentation to `v0.11`.
+
+---
 ## Version v0.10 (Released November 2026)
 
 ### Key Fixes & Enhancements Implemented:
