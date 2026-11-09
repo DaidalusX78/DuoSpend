@@ -8,7 +8,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#0b0f19">
-  <title>DuoSpend v0.12 — Household Receipt & Expense Tracker</title>
+  <title>DuoSpend v0.13 — Household Receipt & Expense Tracker</title>
 
   <!-- Private Local API Keys Vault (git-ignored, never pushed to public repo) -->
   <script src="./secrets.local.js" onerror="window._noLocalSecrets=true"></script>
@@ -208,8 +208,23 @@
     }
 
   
+    /* Light mode: remove grey backgrounds on legends and cards (v0.13 Item 3) */
+    html:not(.dark) #category-chart-legend,
+    html:not(.dark) #category-chart-legend > div {
+      background-color: transparent !important;
+      background: transparent !important;
+      border-color: #f1f5f9 !important;
+    }
+
+    /* Dark mode: ensure icons are lightened properly (v0.13 Item 4) */
+    html.dark #icon-toggle-fullscreen,
+    html.dark #btn-menu-settings i,
+    html.dark #btn-menu-settings .fa-sliders {
+      color: #38bdf8 !important; /* text-sky-400 / lighter brand highlight */
+    }
+
     /* Enforced #ffffff for closeAllModals buttons and split badges in all modes (Item 1) */
-    button[onclick*="closeAllModals()"]:not(#btn-toggle-fullscreen):not(#btn-menu-settings),
+    button[onclick*="closeAllModals()"]:not(#btn-toggle-fullscreen):not(#btn-menu-settings):not(#btn-menu-guide),
     .btn-modal-close,
     .badge-white-text {
       color: #ffffff !important;
@@ -221,13 +236,16 @@
       color: #ffffff !important;
     }
 
-    /* Item 6: In light mode make icons and text dark for btn-toggle-fullscreen and btn-menu-settings */
+    /* Item 6: In light mode make icons and text dark for btn-toggle-fullscreen, btn-menu-settings, and btn-menu-guide */
     html:not(.dark) #btn-toggle-fullscreen,
     html:not(.dark) #btn-toggle-fullscreen span,
     html:not(.dark) #btn-toggle-fullscreen i,
     html:not(.dark) #btn-menu-settings,
     html:not(.dark) #btn-menu-settings span,
-    html:not(.dark) #btn-menu-settings i {
+    html:not(.dark) #btn-menu-settings i,
+    html:not(.dark) #btn-menu-guide,
+    html:not(.dark) #btn-menu-guide span,
+    html:not(.dark) #btn-menu-guide i {
       color: #0f172a !important;
     }
 
@@ -286,7 +304,7 @@
             <div id="brand-title-row" class="flex items-center gap-2">
               <span class="font-extrabold text-xl tracking-tight text-slate-900 dark:text-white">Duo<span class="text-brand-500">Spend</span></span>
               <span id="app-version-badge"
-                class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-brand-50 text-brand-600 border border-brand-200 dark:bg-slate-800 dark:!text-white dark:border-brand-500/40">v0.12</span>
+                class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-brand-50 text-brand-600 border border-brand-200 dark:bg-slate-800 dark:!text-white dark:border-brand-500/40">v0.13</span>
             </div>
             <p id="brand-subtitle" class="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">Receipt scanning & balanced expense splitting</p>
           </div>
@@ -305,7 +323,7 @@
       <!-- Actions Group & Desktop Hamburger (Inline to Brand Logo on the Right with relevant padding) -->
       <div id="header-actions-group" class="flex items-center justify-between md:justify-end gap-2.5 sm:gap-3 w-full md:w-auto">
         <!-- Household Members Pill Button (No &, entire pill is clickable button) -->
-        <button id="household-members-pill" onclick="openSettingsModal()"
+        <button id="household-members-pill" onclick="openSettingsModal('members')"
           class="h-11 px-3 sm:px-4 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800/80 dark:hover:bg-slate-700/80 border border-slate-200 dark:border-slate-700/80 text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-2 transition cursor-pointer shadow-sm active:scale-95"
           title="Manage Household Members">
           <div class="flex -space-x-1.5" id="members-avatars-group">
@@ -376,7 +394,7 @@
             </div>
             <div>
               <span class="text-xl sm:text-2xl font-extrabold text-white">Duo<span class="text-brand-500">Spend</span></span>
-              <span id="drawer-version-badge" class="text-xs font-bold px-2 py-0.5 rounded-full bg-brand-50 text-brand-600 border border-brand-200 dark:bg-slate-800 dark:!text-white dark:border-brand-500/40 ml-1">v0.12</span>
+              <span id="drawer-version-badge" class="text-xs font-bold px-2 py-0.5 rounded-full bg-brand-50 text-brand-600 border border-brand-200 dark:bg-slate-800 dark:!text-white dark:border-brand-500/40 ml-1">v0.13</span>
             </div>
           </div>
           <button onclick="closeAllModals()"
@@ -431,15 +449,22 @@
           <!-- Fullscreen Option -->
           <button id="btn-toggle-fullscreen" onclick="toggleFullscreen(); closeAllModals();"
             class="w-full flex items-center gap-4 px-4 py-3.5 text-base sm:text-lg font-semibold text-slate-900 dark:text-slate-100 hover:text-slate-950 dark:hover:text-white bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200/80 dark:hover:bg-slate-700/80 border border-slate-200 dark:border-slate-700/80 rounded-2xl transition cursor-pointer shadow-sm">
-            <i id="icon-toggle-fullscreen" class="fa-solid fa-expand text-slate-900 dark:text-brand-400 text-xl w-6 text-center"></i>
+            <i id="icon-toggle-fullscreen" class="fa-solid fa-expand text-slate-900 dark:text-sky-300 text-xl w-6 text-center"></i>
             <span id="text-toggle-fullscreen">Fullscreen</span>
           </button>
 
-          <!-- Household Settings Option (Item 1: Opens Settings Menu) -->
-          <button id="btn-menu-settings" onclick="closeAllModals(); openSettingsModal();"
+          <!-- Household Settings Option (Item 9: Opens Manage Household Members) -->
+          <button id="btn-menu-settings" onclick="closeAllModals(); openSettingsModal('members');"
             class="w-full flex items-center gap-4 px-4 py-3.5 text-base sm:text-lg font-semibold text-slate-900 dark:text-slate-100 hover:text-slate-950 dark:hover:text-white bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200/80 dark:hover:bg-slate-700/80 border border-slate-200 dark:border-slate-700/80 rounded-2xl transition cursor-pointer shadow-sm">
-            <i class="fa-solid fa-sliders text-slate-900 dark:text-brand-400 text-xl w-6 text-center"></i>
-            <span id="text-menu-settings">Household Settings</span>
+            <i class="fa-solid fa-sliders text-slate-900 dark:text-sky-300 text-xl w-6 text-center"></i>
+            <span id="text-menu-settings">Manage Household Members</span>
+          </button>
+
+          <!-- User Guide / Tutorial Option (v0.13 Item 1) -->
+          <button id="btn-menu-guide" onclick="closeAllModals(); openTutorialModal();"
+            class="w-full flex items-center gap-4 px-4 py-3.5 text-base sm:text-lg font-semibold text-slate-900 dark:text-slate-100 hover:text-slate-950 dark:hover:text-white bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200/80 dark:hover:bg-slate-700/80 border border-slate-200 dark:border-slate-700/80 rounded-2xl transition cursor-pointer shadow-sm">
+            <i class="fa-solid fa-circle-question text-slate-900 dark:text-sky-300 text-xl w-6 text-center"></i>
+            <span id="text-menu-guide">How to Use & Guide</span>
           </button>
         </nav>
 
@@ -571,7 +596,7 @@
           <i class="fa-regular fa-copyright text-brand-400"></i>
           <span id="menu-credits-text">created by <strong class="text-white font-semibold">Marc Bailey 2026</strong></span>
         </div>
-        <div class="text-xs text-slate-500 mt-1">DuoSpend v0.12 — Android Ready Architecture</div>
+        <div class="text-xs text-slate-500 mt-1">DuoSpend v0.13 — Android Ready Architecture</div>
       </div>
 
     </div>
@@ -597,14 +622,13 @@
           </div>
         </div>
         <div id="summary-total-spent-amount" class="text-2xl sm:text-3xl font-extrabold text-white mt-1">€0.00</div>
-        <!-- Monthly Budget Progress & Safe-to-spend (Item 2 & 5: Click budget-target-display to edit inline) -->
+        <!-- Monthly Budget Progress & Safe-to-spend (Item 5) -->
         <div id="budget-progress-section" class="mt-3 pt-2 border-t border-slate-800/80 space-y-1.5">
           <div class="flex items-center justify-between text-[11px]">
             <span class="text-slate-400 flex items-center gap-1">
               <i class="fa-solid fa-bullseye text-brand-400"></i> Budget:
-              <strong id="budget-target-display" onclick="event.stopPropagation(); editBudgetTargetInline(event)"
-                class="text-slate-200 hover:text-brand-400 underline decoration-dotted underline-offset-2 cursor-pointer px-1 py-0.5 rounded hover:bg-slate-800/40 transition inline-flex items-center gap-1"
-                title="Click to edit monthly budget amount">€500 <i class="fa-solid fa-pen text-[9px] opacity-70"></i></strong>
+              <strong id="budget-target-display"
+                class="text-slate-200 px-1 py-0.5 rounded inline-flex items-center gap-1">€500</strong>
             </span>
             <span id="budget-percent-display" class="font-bold text-slate-300">0%</span>
           </div>
@@ -620,7 +644,6 @@
         <div id="card-total-spend-footer"
           class="flex items-center justify-between text-xs text-slate-400 mt-2.5 pt-2 border-t border-slate-800">
           <span id="summary-expense-count-label">0 receipts logged</span>
-          <span id="summary-currency-badge" class="text-brand-400 text-xs font-medium">EUR (€)</span>
         </div>
       </div>
 
@@ -1091,9 +1114,9 @@
             </div>
           </div>
 
-          <!-- Notes / Line items -->
+          <!-- Notes -->
           <div id="field-wrapper-notes">
-            <label id="label-notes" for="expense-notes-textarea" class="block text-xs font-medium text-slate-300 mb-1">Notes / Line Items Extracted</label>
+            <label id="label-notes" for="expense-notes-textarea" class="block text-xs font-medium text-slate-300 mb-1">Notes</label>
             <textarea id="expense-notes-textarea" rows="2" placeholder="e.g. Weekly shopping, detergent, olive oil..."
               class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-brand-500"></textarea>
           </div>
@@ -1287,12 +1310,11 @@
       
       <div class="px-5 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-900/90">
         <div class="flex items-center gap-3">
-          <div id="member-modal-badge" class="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-sm bg-cyan-500/20 text-cyan-400">
+          <div id="member-modal-badge" class="w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs text-white shadow-sm bg-cyan-500">
             M1
           </div>
           <div>
             <h3 id="member-modal-title" class="text-sm sm:text-base font-bold text-white">Member's Monthly Expenses</h3>
-            <p id="member-modal-subtitle" class="text-[11px] text-slate-400">Total out-of-pocket: <span id="member-modal-total-paid" class="font-bold text-cyan-400">€0.00</span></p>
           </div>
         </div>
         <!-- Month Filter Inside Member Modal -->
@@ -1450,7 +1472,7 @@
   <!-- ========================================== -->
   <!-- POPUP: RECEIPT IMAGE VIEWER (Item 11)      -->
   <!-- ========================================== -->
-  <div id="receipt-image-modal" onclick="closeAllModals()"
+  <div id="receipt-image-modal" onclick="closeReceiptPreviewModal()"
     class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
     <div onclick="event.stopPropagation()"
       class="glass-modal rounded-2xl w-full max-w-lg my-auto overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200">
@@ -1460,7 +1482,7 @@
           <h3 id="receipt-preview-merchant" class="text-sm font-bold text-white">Receipt Preview</h3>
           <p id="receipt-preview-date" class="text-[11px] text-slate-400">Date & Details</p>
         </div>
-        <button onclick="closeAllModals()" class="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition cursor-pointer">
+        <button onclick="closeReceiptPreviewModal()" class="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition cursor-pointer">
           <i class="fa-solid fa-xmark text-sm"></i>
         </button>
       </div>
@@ -1494,7 +1516,7 @@
           </button>
           <input type="file" id="preview-replace-photo-input" accept="image/*" class="hidden" onchange="handleReplaceReceiptPhoto(event)">
         </div>
-        <button onclick="closeAllModals()" class="px-4 py-1.5 text-xs rounded-xl bg-slate-800 hover:bg-slate-700 !text-white font-semibold font-medium cursor-pointer ml-auto">
+        <button onclick="closeReceiptPreviewModal()" class="px-4 py-1.5 text-xs rounded-xl bg-slate-800 hover:bg-slate-700 !text-white font-semibold font-medium cursor-pointer ml-auto">
           Close
         </button>
       </div>
@@ -1597,6 +1619,92 @@
     </div>
   </div>
 
+  <!-- ========================================== -->
+  <!-- USER ONBOARDING & HELP GUIDE MODAL (v0.13) -->
+  <!-- ========================================== -->
+  <div id="user-tutorial-modal-backdrop" onclick="closeTutorialModal()"
+    class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div onclick="event.stopPropagation()"
+      class="glass-modal rounded-3xl w-full max-w-lg my-auto overflow-hidden shadow-2xl border border-slate-700/80 animate-in fade-in zoom-in-95 duration-200">
+      
+      <!-- Modal Header -->
+      <div class="px-5 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-900/90">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-600 via-indigo-500 to-cyan-400 flex items-center justify-center text-white shadow-lg shadow-brand-500/20">
+            <i class="fa-solid fa-graduation-cap text-base"></i>
+          </div>
+          <div>
+            <h3 class="text-sm sm:text-base font-bold text-white">Welcome to DuoSpend</h3>
+            <p class="text-[11px] text-slate-400">Quick start guide & smart features walkthrough</p>
+          </div>
+        </div>
+        <button onclick="closeTutorialModal()" class="w-8 h-8 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 flex items-center justify-center transition cursor-pointer">
+          <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+      </div>
+
+      <!-- Tutorial Content / Carousel -->
+      <div class="p-5 space-y-4 max-h-[75vh] overflow-y-auto text-xs text-slate-300">
+        <!-- Step 1: Scanning -->
+        <div class="p-3.5 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-2">
+          <div class="flex items-center gap-2 text-cyan-400 font-bold text-sm">
+            <span class="w-6 h-6 rounded-lg bg-cyan-500/20 flex items-center justify-center text-xs">1</span>
+            <span>Scan or Snap Supermarket Receipts</span>
+          </div>
+          <p class="text-[11px] text-slate-400 leading-relaxed">
+            Tap <strong class="text-white">Scan Receipt</strong> to take a photo. DuoSpend's 3-tier OCR automatically detects the store, purchase date, total amount, and itemizes products from tickets (Mercadona, Lidl, Aldi, Carrefour, etc.).
+          </p>
+        </div>
+
+        <!-- Step 2: Line Items & Splitting -->
+        <div class="p-3.5 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-2">
+          <div class="flex items-center gap-2 text-brand-400 font-bold text-sm">
+            <span class="w-6 h-6 rounded-lg bg-brand-500/20 flex items-center justify-center text-xs">2</span>
+            <span>Fair Split & Personal Items</span>
+          </div>
+          <p class="text-[11px] text-slate-400 leading-relaxed">
+            Allocate expenses to your joint <strong class="text-white">Home Account</strong> or split 50/50. When buying personal items on a shared supermarket trip, tag them as <strong class="text-amber-400">Personal</strong> to deduct them from the shared total!
+          </p>
+        </div>
+
+        <!-- Step 3: Members & Budget Targets -->
+        <div class="p-3.5 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-2">
+          <div class="flex items-center gap-2 text-pink-400 font-bold text-sm">
+            <span class="w-6 h-6 rounded-lg bg-pink-500/20 flex items-center justify-center text-xs">3</span>
+            <span>Manage Household & Budget</span>
+          </div>
+          <p class="text-[11px] text-slate-400 leading-relaxed">
+            Open <strong class="text-white">Manage Household Members</strong> from the top pill or drawer menu to add partners/roommates, customize initial badges and accent colors, and configure monthly sub-budgets.
+          </p>
+        </div>
+
+        <!-- Step 4: Multi-Device Sync -->
+        <div class="p-3.5 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-2">
+          <div class="flex items-center gap-2 text-emerald-400 font-bold text-sm">
+            <span class="w-6 h-6 rounded-lg bg-emerald-500/20 flex items-center justify-center text-xs">4</span>
+            <span>100% Offline & Private Cloud Sync</span>
+          </div>
+          <p class="text-[11px] text-slate-400 leading-relaxed">
+            DuoSpend works offline in poor-signal supermarkets. When connected, sync receipts in real-time across devices via your private Firebase sync room code.
+          </p>
+        </div>
+      </div>
+
+      <!-- Footer Actions -->
+      <div class="px-5 py-3.5 border-t border-slate-800 flex items-center justify-between bg-slate-900/80">
+        <label class="flex items-center gap-2 text-[11px] text-slate-400 cursor-pointer">
+          <input type="checkbox" id="tutorial-dont-show-checkbox" checked class="rounded bg-slate-950 border-slate-700 text-brand-500 focus:ring-0">
+          <span>Don't show automatically on launch</span>
+        </label>
+        <button type="button" onclick="closeTutorialModal()"
+          class="px-4 py-1.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-semibold text-xs shadow-md transition cursor-pointer">
+          Got It!
+        </button>
+      </div>
+
+    </div>
+  </div>
+
   <!-- TOAST NOTIFICATION CONTAINER -->
   <div id="toast-notifications-container" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
@@ -1618,10 +1726,18 @@
       }
       if (avatarGroup) {
         avatarGroup.innerHTML = members.map(m => `
-          <div class="w-6 h-6 rounded-full flex items-center justify-center text-[10px] text-white font-bold shadow-sm" style="background-color: ${m.color || '#6366f1'}">
+          <div class="w-6 h-6 rounded-full flex items-center justify-center text-[10px] text-white font-bold shadow-sm" style="background-color: ${m.color || '#06b6d4'};">
             <span>${escapeHtml(m.badge || computeBadge(m.name))}</span>
           </div>
         `).join('');
+      }
+
+      // Sync user profile avatar in menu drawer with primary member
+      const userInitialsEl = document.getElementById('user-avatar-initials');
+      if (userInitialsEl && members[0]) {
+        userInitialsEl.style.backgroundColor = members[0].color || '#06b6d4';
+        userInitialsEl.style.color = '#ffffff';
+        userInitialsEl.innerText = escapeHtml(members[0].badge || computeBadge(members[0].name));
       }
 
       // 2. Dynamic Summary Cards Grid (Item 7)
@@ -1723,15 +1839,13 @@
         purchFilter.value = currentPurchVal;
       }
 
-      // 7. Currency symbols & Budget target display
+      // 7. Currency symbols
       document.querySelectorAll('.currency-symbol-label').forEach(el => {
         el.innerText = household.currency;
       });
-      const curBadge = document.getElementById('summary-currency-badge');
-      if (curBadge) curBadge.innerText = household.currency;
 
       const budgetDisplay = document.getElementById('budget-target-display');
-      if (budgetDisplay) budgetDisplay.innerHTML = `${household.currency}${(household.monthlyBudget || 500).toFixed(0)} <i class="fa-solid fa-pen text-[9px] opacity-70"></i>`;
+      if (budgetDisplay) budgetDisplay.innerText = `${household.currency}${(household.monthlyBudget || 500).toFixed(0)}`;
     }
 
         // DATA STATE
@@ -2044,6 +2158,13 @@
       refreshDashboard();
       fetchLiveExchangeRates(); // v0.11 Item 5: Live FX rates with offline cache
       initFirebaseSync(); // Item 4 & 6: Auto-connect & smart merge sync
+
+      // Check first-time launch tutorial (v0.13 Item 1)
+      if (!localStorage.getItem('duospend_tutorial_seen')) {
+        setTimeout(() => {
+          openTutorialModal();
+        }, 500);
+      }
     });
 
     // DAY / NIGHT THEME TOGGLE (Item 9)
@@ -2265,7 +2386,8 @@
         'category-expenses-modal',
         'settle-up-modal',
         'receipt-image-modal',
-        'firebase-config-modal'
+        'firebase-config-modal',
+        'user-tutorial-modal-backdrop'
       ];
       return modals.some(id => {
         const el = document.getElementById(id);
@@ -2273,8 +2395,57 @@
       });
     }
 
+    // TUTORIAL & USER GUIDE (v0.13 Item 1)
+    function openTutorialModal() {
+      closeAllModals();
+      pushModalHistoryState();
+      const modal = document.getElementById('user-tutorial-modal-backdrop');
+      if (modal) modal.classList.remove('hidden');
+    }
+
+    function closeTutorialModal() {
+      const modal = document.getElementById('user-tutorial-modal-backdrop');
+      if (modal) modal.classList.add('hidden');
+      const dontShow = document.getElementById('tutorial-dont-show-checkbox');
+      if (dontShow && dontShow.checked) {
+        localStorage.setItem('duospend_tutorial_seen', 'true');
+      }
+      if (window._hasModalHistoryState) {
+        window._hasModalHistoryState = false;
+        try {
+          if (history.state && history.state.duospendModal) {
+            history.back();
+          }
+        } catch (err) {}
+      }
+    }
+
+    // CLOSE RECEIPT PREVIEW (v0.13 Item 6)
+    function closeReceiptPreviewModal() {
+      const modal = document.getElementById('receipt-image-modal');
+      if (modal) modal.classList.add('hidden');
+      const parent = window._parentModalBeforeReceiptView;
+      window._parentModalBeforeReceiptView = null;
+      if (parent) {
+        const parentEl = document.getElementById(parent);
+        if (parentEl) {
+          parentEl.classList.remove('hidden');
+          return;
+        }
+      }
+      if (window._hasModalHistoryState) {
+        window._hasModalHistoryState = false;
+        try {
+          if (history.state && history.state.duospendModal) {
+            history.back();
+          }
+        } catch (err) {}
+      }
+    }
+
     // CLOSE ALL MODALS & POPUPS (Item 19 & v0.11 Item 4)
     function closeAllModals(fromPopState = false) {
+      window._parentModalBeforeReceiptView = null;
       const modals = [
         'receipt-modal-backdrop',
         'household-settings-modal-backdrop',
@@ -2283,7 +2454,8 @@
         'category-expenses-modal',
         'settle-up-modal',
         'receipt-image-modal',
-        'firebase-config-modal'
+        'firebase-config-modal',
+        'user-tutorial-modal-backdrop'
       ];
       let closedAny = false;
       modals.forEach(id => {
@@ -3225,7 +3397,7 @@
       if (firestoreDb) syncFirebaseNow(true);
     }
 
-    function openSettingsModal() {
+    function openSettingsModal(focusSection = null) {
       closeAllModals();
       pushModalHistoryState();
       // Populate monthly budget
@@ -3267,6 +3439,12 @@
       }
 
       document.getElementById('household-settings-modal-backdrop').classList.remove('hidden');
+      if (focusSection === 'members') {
+        setTimeout(() => {
+          const sec = document.getElementById('settings-members-section');
+          if (sec) sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 100);
+      }
     }
 
         // EXPENSES STORAGE & SEEDING
@@ -4414,14 +4592,16 @@
       ];
 
       if (memberId === 'all') {
-        badge.className = 'w-9 h-9 rounded-xl flex items-center justify-center font-bold text-sm bg-indigo-500/20 text-indigo-400';
+        badge.className = 'w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs bg-indigo-600 text-white shadow-sm';
+        badge.style.backgroundColor = '';
+        badge.style.color = '#ffffff';
         badge.innerText = 'ALL';
         title.innerText = 'Total Household Expenses';
       } else {
         const mObj = members.find(m => m.id === memberId) || members[0];
-        badge.className = 'w-9 h-9 rounded-xl flex items-center justify-center font-bold text-sm';
-        badge.style.backgroundColor = `${mObj.color || '#06b6d4'}25`;
-        badge.style.color = mObj.color || '#06b6d4';
+        badge.className = 'w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs text-white shadow-sm';
+        badge.style.backgroundColor = mObj.color || '#06b6d4';
+        badge.style.color = '#ffffff';
         badge.innerText = mObj.badge || computeBadge(mObj.name);
         title.innerText = `${mObj.name}'s Expenses`;
       }
@@ -4643,11 +4823,26 @@
 
     // POPUP: VIEW RECEIPT IMAGE PREVIEW (Item 11 & v0.11 Item 2 Edit/Replace Directly)
     window._previewExpenseId = null;
+    window._parentModalBeforeReceiptView = null;
 
     function viewReceiptImage(expenseId) {
-      closeAllModals();
       const item = expenses.find(e => e.id === expenseId);
       if (!item) return;
+
+      // Remember if called from member expenses or category expenses popup (v0.13 Item 6)
+      let parentModal = null;
+      const memModal = document.getElementById('member-expenses-modal');
+      const catModal = document.getElementById('category-expenses-modal');
+      if (memModal && !memModal.classList.contains('hidden')) {
+        parentModal = 'member-expenses-modal';
+        memModal.classList.add('hidden');
+      } else if (catModal && !catModal.classList.contains('hidden')) {
+        parentModal = 'category-expenses-modal';
+        catModal.classList.add('hidden');
+      } else {
+        closeAllModals();
+      }
+      window._parentModalBeforeReceiptView = parentModal;
 
       pushModalHistoryState();
       window._previewExpenseId = expenseId;
@@ -4812,7 +5007,7 @@
     function exportToJSON() {
       const backupData = {
         app: 'DuoSpend',
-        version: 'v0.12',
+        version: 'v0.13',
         exportedAt: new Date().toISOString(),
         household,
         settlements,
@@ -4821,7 +5016,7 @@
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
       const downloadAnchor = document.createElement('a');
       downloadAnchor.setAttribute("href", dataStr);
-      downloadAnchor.setAttribute("download", `DuoSpend_Backup_v0.12_${new Date().toISOString().split('T')[0]}.json`);
+      downloadAnchor.setAttribute("download", `DuoSpend_Backup_v0.13_${new Date().toISOString().split('T')[0]}.json`);
       document.body.appendChild(downloadAnchor);
       downloadAnchor.click();
       downloadAnchor.remove();
