@@ -8,7 +8,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#0b0f19">
-  <title>DuoSpend v0.13.7 — Household Receipt & Expense Tracker</title>
+  <title>DuoSpend v0.13.8 — Household Receipt & Expense Tracker</title>
 
   <!-- Private Local API Keys Vault (git-ignored, never pushed to public repo) -->
   <script src="./secrets.local.js" onerror="window._noLocalSecrets=true"></script>
@@ -19,7 +19,7 @@
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
   <!-- Chart.js for interactive analytics -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="manifest" href="./manifest.json">
+  <link rel="manifest" href="./manifest.json">
   <link rel="apple-touch-icon" href="./manifest.json">
   <!-- Firebase App & Firestore SDKs (v9 compat for zero-build vanilla JS) -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -51,7 +51,8 @@
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
 
-    html, body {
+    html,
+    body {
       width: 100%;
       max-width: 100%;
       overflow-x: hidden;
@@ -59,19 +60,164 @@
       transition: background-color 0.25s ease, color 0.25s ease;
     }
 
-    /* Dark Mode Defaults */
+    /* Dark Mode Defaults — Unified Surfaces (#0b0f19 bg, rgb(24,24,24) cards, #FFD230 highlights) */
     html.dark body {
       background-color: #0b0f19;
       color: #e2e8f0;
     }
-    html.dark .glass-card {
-      background: rgba(17, 24, 39, 0.78);
+
+    html.dark .glass-card,
+    html.dark .glass-modal,
+    html.dark #hamburger-drawer-panel,
+    html.dark #settlement-card {
+      background: rgb(24, 24, 24) !important;
+      background-image: none !important;
       backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.09) !important;
     }
-    html.dark .glass-modal {
-      background: #0f172a;
-      border: 1px solid rgba(255, 255, 255, 0.12);
+
+    /* Clean up mismatched slate-800/900/950 inner card backgrounds in Dark Mode */
+    html.dark .glass-card .bg-slate-900,
+    html.dark .glass-card .bg-slate-900\/90,
+    html.dark .glass-card .bg-slate-900\/80,
+    html.dark .glass-card .bg-slate-900\/60,
+    html.dark .glass-card .bg-slate-900\/50,
+    html.dark .glass-card .dark\:bg-slate-900\/50,
+    html.dark .glass-modal .bg-slate-900,
+    html.dark .glass-modal .bg-slate-900\/90,
+    html.dark .glass-modal .bg-slate-900\/80,
+    html.dark .glass-modal .bg-slate-900\/60,
+    html.dark #hamburger-drawer-panel .dark\:bg-slate-900,
+    html.dark #hamburger-drawer-panel .bg-slate-900 {
+      background-color: rgb(32, 32, 32) !important;
+      border-color: rgba(255, 255, 255, 0.08) !important;
+    }
+
+    html.dark .glass-card .bg-slate-950,
+    html.dark .glass-modal .bg-slate-950,
+    html.dark .glass-modal .dark\:bg-slate-950\/60,
+    html.dark #hamburger-drawer-panel .dark\:bg-slate-950,
+    html.dark input,
+    html.dark select,
+    html.dark textarea {
+      background-color: rgb(16, 16, 16) !important;
+      border-color: rgba(255, 255, 255, 0.12) !important;
+    }
+
+    html.dark input:focus,
+    html.dark select:focus,
+    html.dark textarea:focus {
+      border-color: #FFD230 !important;
+    }
+
+    html.dark .dark\:bg-slate-800,
+    html.dark .dark\:bg-slate-800\/80,
+    html.dark .dark\:bg-slate-800\/60,
+    html.dark .bg-slate-800,
+    html.dark .bg-slate-800\/80 {
+      background-color: rgb(36, 36, 36) !important;
+      border-color: rgba(255, 255, 255, 0.1) !important;
+    }
+
+    html.dark .border-slate-800,
+    html.dark .border-slate-700,
+    html.dark .border-slate-700\/80,
+    html.dark .dark\:border-slate-800,
+    html.dark .dark\:border-slate-700 {
+      border-color: rgba(255, 255, 255, 0.08) !important;
+    }
+
+    /* Dark Mode Highlights & Primary Buttons (#FFD230) */
+    html.dark #brand-logo-icon,
+    html.dark #hamburger-drawer-panel .bg-gradient-to-tr,
+    html.dark #user-tutorial-modal-backdrop .bg-gradient-to-tr {
+      background: #FFD230 !important;
+      color: #0b0f19 !important;
+      box-shadow: 0 4px 16px rgba(255, 210, 48, 0.25) !important;
+    }
+
+    html.dark #brand-logo-icon i,
+    html.dark #hamburger-drawer-panel .bg-gradient-to-tr i,
+    html.dark #user-tutorial-modal-backdrop .bg-gradient-to-tr i {
+      color: #0b0f19 !important;
+    }
+
+    html.dark .text-brand-500,
+    html.dark .text-brand-400,
+    html.dark .dark\:text-brand-400,
+    html.dark .text-indigo-400,
+    html.dark .text-indigo-500,
+    html.dark .text-indigo-300,
+    html.dark #heading-spend-by-category i,
+    html.dark #heading-spending-distribution i,
+    html.dark #heading-ledger-title i,
+    html.dark #label-budget-target i,
+    html.dark #firebase-room-label,
+    html.dark #firebase-sync-spinner,
+    html.dark #firebase-sync-pct-text,
+    html.dark #menu-credits-text ~ i,
+    html.dark #hamburger-drawer-panel .fa-copyright {
+      color: #FFD230 !important;
+    }
+
+    html.dark .bg-indigo-500\/10,
+    html.dark .bg-indigo-500\/20,
+    html.dark .bg-indigo-600\/10,
+    html.dark .bg-indigo-600\/30,
+    html.dark .bg-indigo-950\/60 {
+      background-color: rgba(255, 210, 48, 0.12) !important;
+      border-color: rgba(255, 210, 48, 0.35) !important;
+      color: #FFD230 !important;
+    }
+
+    html.dark .bg-indigo-600\/10:hover,
+    html.dark .hover\:bg-indigo-600\/20:hover {
+      background-color: rgba(255, 210, 48, 0.2) !important;
+    }
+
+    html.dark #app-version-badge,
+    html.dark #drawer-version-badge {
+      background-color: rgba(255, 210, 48, 0.12) !important;
+      border-color: rgba(255, 210, 48, 0.45) !important;
+      color: #FFD230 !important;
+    }
+
+    html.dark #firebase-sync-progress-bar,
+    html.dark #budget-progress-bar {
+      background: #FFD230 !important;
+    }
+
+    /* Primary Action Buttons in Dark Mode (#FFD230 bg + crisp dark text) */
+    html.dark #btn-add-expense-manual,
+    html.dark #btn-scan-receipt,
+    html.dark #btn-settle-up,
+    html.dark #btn-firebase-sync-now,
+    html.dark #chart-mode-toggle-group button.active-chart-mode,
+    html.dark #chart-mode-toggle-group button.bg-brand-600,
+    html.dark .glass-modal button[type="submit"],
+    html.dark #user-tutorial-modal-backdrop button[onclick*="closeTutorialModal"] {
+      background: #FFD230 !important;
+      background-color: #FFD230 !important;
+      color: #0b0f19 !important;
+      box-shadow: 0 4px 14px rgba(255, 210, 48, 0.2) !important;
+    }
+
+    html.dark #btn-add-expense-manual:hover,
+    html.dark #btn-scan-receipt:hover,
+    html.dark #btn-settle-up:hover,
+    html.dark #btn-firebase-sync-now:hover,
+    html.dark .glass-modal button[type="submit"]:hover {
+      background: #ffe066 !important;
+      background-color: #ffe066 !important;
+      color: #0b0f19 !important;
+    }
+
+    html.dark #btn-add-expense-manual *,
+    html.dark #btn-scan-receipt *,
+    html.dark #btn-settle-up *,
+    html.dark #btn-firebase-sync-now *,
+    html.dark .glass-modal button[type="submit"] * {
+      color: #0b0f19 !important;
     }
 
     /* Light Mode (Day Theme) */
@@ -79,21 +225,25 @@
       background-color: #f8fafc;
       color: #0f172a;
     }
+
     html:not(.dark) .glass-card {
       background: rgba(255, 255, 255, 0.92);
       backdrop-filter: blur(12px);
       border: 1px solid rgba(226, 232, 240, 0.9);
       box-shadow: 0 4px 18px -2px rgba(0, 0, 0, 0.05);
     }
+
     html:not(.dark) .glass-modal {
       background: #ffffff;
       border: 1px solid #e2e8f0;
       color: #0f172a;
     }
+
     html:not(.dark) header {
       background: rgba(255, 255, 255, 0.95) !important;
       border-bottom-color: #e2e8f0 !important;
     }
+
     html:not(.dark) input,
     html:not(.dark) select,
     html:not(.dark) textarea {
@@ -101,35 +251,39 @@
       color: #0f172a !important;
       border-color: #cbd5e1 !important;
     }
+
     html:not(.dark) input::placeholder,
     html:not(.dark) textarea::placeholder {
       color: #94a3b8 !important;
     }
+
     html:not(.dark) tr.bg-slate-900\/80 {
       background-color: #f1f5f9 !important;
       color: #475569 !important;
     }
+
     html:not(.dark) .text-white {
       color: #0f172a !important;
     }
+
     html:not(.dark) .text-slate-400 {
       color: #64748b !important;
     }
+
     html:not(.dark) .text-slate-300 {
       color: #334155 !important;
     }
+
     html:not(.dark) .text-slate-200 {
       color: #1e293b !important;
     }
+
     html:not(.dark) .bg-slate-900\/90,
     html:not(.dark) .bg-slate-950,
     html:not(.dark) .bg-slate-900 {
-      background-color: #f8fafc !important;
       border-color: #e2e8f0 !important;
     }
-    html:not(.dark) .border-slate-800 {
-      border-color: #e2e8f0 !important;
-    }
+
     html:not(.dark) #hamburger-drawer-panel {
       background-color: #ffffff !important;
       border-color: #cbd5e1 !important;
@@ -140,13 +294,16 @@
       width: 6px;
       height: 6px;
     }
+
     ::-webkit-scrollbar-track {
       background: rgba(15, 23, 42, 0.5);
     }
+
     ::-webkit-scrollbar-thumb {
       background: #334155;
       border-radius: 9999px;
     }
+
     ::-webkit-scrollbar-thumb:hover {
       background: #475569;
     }
@@ -175,65 +332,82 @@
     }
 
     @keyframes scanAnim {
-      0% { top: 0%; opacity: 0.2; }
-      50% { top: 96%; opacity: 1; }
-      100% { top: 0%; opacity: 0.2; }
+      0% {
+        top: 0%;
+        opacity: 0.2;
+      }
+
+      50% {
+        top: 96%;
+        opacity: 1;
+      }
+
+      100% {
+        top: 0%;
+        opacity: 0.2;
+      }
     }
-  
-    /* Enforced #ffffff font-color for required buttons in all themes (Item 6 & 7) */
-    #btn-add-expense-manual,
-    #btn-scan-receipt,
-    #btn-settle-up,
-    #btn-reset-filters,
-    #chart-mode-toggle-group button.active-chart-mode,
-    #chart-mode-toggle-group button.bg-brand-600 {
+
+    /* Enforced #ffffff font-color for required buttons in Light Mode (Item 6 & 7) */
+    html:not(.dark) #btn-add-expense-manual,
+    html:not(.dark) #btn-scan-receipt,
+    html:not(.dark) #btn-settle-up,
+    html:not(.dark) #chart-mode-toggle-group button.active-chart-mode,
+    html:not(.dark) #chart-mode-toggle-group button.bg-brand-600,
+    #btn-reset-filters {
       color: #ffffff !important;
     }
 
     #btn-reset-filters {
-      background-color: #334155 !important;
+      background-color: rgb(36, 36, 36) !important;
       color: #ffffff !important;
+      border-color: rgba(255, 255, 255, 0.12) !important;
+    }
+
+    #btn-reset-filters:hover {
+      background-color: rgb(48, 48, 48) !important;
+      color: #ffffff !important;
+    }
+
+    html:not(.dark) #btn-reset-filters {
+      background-color: #334155 !important;
       border-color: #475569 !important;
     }
-    #btn-reset-filters:hover {
+
+    html:not(.dark) #btn-reset-filters:hover {
       background-color: #1e293b !important;
-      color: #ffffff !important;
     }
 
     /* Restored Left Border Accents on Member Cards (Item 5) */
     #card-person1-paid {
       border-left: 4px solid #06b6d4 !important;
     }
+
     #card-person2-paid {
       border-left: 4px solid #ec4899 !important;
     }
 
-  
+
     /* Light mode: remove grey backgrounds on legends and cards (v0.13 Item 3) */
     html:not(.dark) #category-chart-legend,
-    html:not(.dark) #category-chart-legend > div {
+    html:not(.dark) #category-chart-legend>div {
       background-color: transparent !important;
       background: transparent !important;
       border-color: #f1f5f9 !important;
     }
 
-    /* Dark mode: ensure icons are lightened properly (v0.13 Item 4) */
+    /* Dark mode: match drawer icons to #FFD230 highlight */
     html.dark #icon-toggle-fullscreen,
     html.dark #btn-menu-settings i,
-    html.dark #btn-menu-settings .fa-sliders {
-      color: #38bdf8 !important; /* text-sky-400 / lighter brand highlight */
+    html.dark #btn-menu-settings .fa-sliders,
+    html.dark #btn-menu-guide i {
+      color: #FFD230 !important;
     }
 
     /* Enforced #ffffff for closeAllModals buttons and split badges in all modes (Item 1) */
     button[onclick*="closeAllModals()"]:not(#btn-toggle-fullscreen):not(#btn-menu-settings):not(#btn-menu-guide),
     .btn-modal-close,
     .badge-white-text {
-      color: #ffffff !important;
-    }
-
-    /* Item 5: app-version-badge font-colour #ffffff in dark mode */
-    html.dark #app-version-badge,
-    html.dark #drawer-version-badge {
       color: #ffffff !important;
     }
 
@@ -252,36 +426,39 @@
 
     /* Item 7: In light mode make text and icons #ffffff for firebase-sync-badge, fa-solid fa-gear, syncFirebaseNow() */
     #firebase-sync-badge,
-    button[onclick*="syncFirebaseNow"],
-    button[onclick*="syncFirebaseNow"] *,
+    html:not(.dark) button[onclick*="syncFirebaseNow"],
+    html:not(.dark) button[onclick*="syncFirebaseNow"] *,
     button[onclick*="configureFirebaseModal"],
     button[onclick*="configureFirebaseModal"] *,
     button .fa-solid.fa-gear {
       color: #ffffff !important;
     }
+
     html:not(.dark) #firebase-sync-badge {
       background-color: #334155 !important;
       color: #ffffff !important;
     }
+
     html:not(.dark) #firebase-sync-badge.sync-online {
       background-color: #059669 !important;
       color: #ffffff !important;
     }
+
     html:not(.dark) button[onclick*="configureFirebaseModal"] {
       background-color: #334155 !important;
       color: #ffffff !important;
     }
+
     html:not(.dark) button[onclick*="syncFirebaseNow"] {
       background-color: #4f46e5 !important;
       color: #ffffff !important;
     }
 
     /* Item 9: members-avatars-group remove border-color */
-    #members-avatars-group > div {
+    #members-avatars-group>div {
       border: none !important;
       border-color: transparent !important;
     }
-
   </style>
 </head>
 
@@ -290,8 +467,10 @@
   <!-- ========================================== -->
   <!-- TOP NAVIGATION BAR                         -->
   <!-- ========================================== -->
-  <header id="app-top-header" class="sticky top-0 z-40 glass-card border-b border-slate-200 dark:border-slate-800/80 px-4 lg:px-8 py-3 sm:py-3.5">
-    <div id="header-inner-container" class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-3">
+  <header id="app-top-header"
+    class="sticky top-0 z-40 glass-card border-b border-slate-200 dark:border-slate-800/80 px-4 lg:px-8 py-3 sm:py-3.5">
+    <div id="header-inner-container"
+      class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-3">
 
       <!-- Top Row on Mobile / Left Group on Desktop: Brand Logo + Mobile Hamburger -->
       <div id="brand-header-row" class="flex items-center justify-between w-full md:w-auto">
@@ -303,11 +482,13 @@
           </div>
           <div id="brand-title-group">
             <div id="brand-title-row" class="flex items-center gap-2">
-              <span class="font-extrabold text-xl tracking-tight text-slate-900 dark:text-white">Duo<span class="text-brand-500">Spend</span></span>
+              <span class="font-extrabold text-xl tracking-tight text-slate-900 dark:text-white">Duo<span
+                  class="text-brand-500">Spend</span></span>
               <span id="app-version-badge"
-                class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-brand-50 text-brand-600 border border-brand-200 dark:bg-slate-800 dark:!text-white dark:border-brand-500/40">v0.13.7</span>
+                class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-brand-50 text-brand-600 border border-brand-200 dark:bg-slate-800 dark:!text-white dark:border-brand-500/40">v0.13.8</span>
             </div>
-            <p id="brand-subtitle" class="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">Receipt scanning & balanced expense splitting</p>
+            <p id="brand-subtitle" class="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">Receipt scanning &
+              balanced expense splitting</p>
           </div>
         </div>
 
@@ -322,7 +503,8 @@
       </div>
 
       <!-- Actions Group & Desktop Hamburger (Inline to Brand Logo on the Right with relevant padding) -->
-      <div id="header-actions-group" class="flex items-center justify-between md:justify-end gap-2.5 sm:gap-3 w-full md:w-auto">
+      <div id="header-actions-group"
+        class="flex items-center justify-between md:justify-end gap-2.5 sm:gap-3 w-full md:w-auto">
         <!-- Household Members Pill Button (No &, entire pill is clickable button) -->
         <button id="household-members-pill" onclick="openSettingsModal('members')"
           class="h-11 px-3 sm:px-4 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800/80 dark:hover:bg-slate-700/80 border border-slate-200 dark:border-slate-700/80 text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-2 transition cursor-pointer shadow-sm active:scale-95"
@@ -337,7 +519,8 @@
               <span id="badge-avatar-p2">M2</span>
             </div>
           </div>
-          <span id="header-household-name" class="font-medium text-slate-700 dark:text-slate-300">Member 1, Member 2</span>
+          <span id="header-household-name" class="font-medium text-slate-700 dark:text-slate-300">Member 1, Member
+            2</span>
         </button>
 
         <!-- Add Expense Manual Button -->
@@ -377,8 +560,8 @@
   <!-- ========================================== -->
   <div id="hamburger-drawer-overlay" class="fixed inset-0 z-50 hidden transition-opacity duration-300">
     <!-- Blurred 25% Backdrop on Left -->
-    <div id="hamburger-drawer-backdrop" onclick="closeAllModals()"
-      class="fixed inset-0 bg-black/60 backdrop-blur-md"></div>
+    <div id="hamburger-drawer-backdrop" onclick="closeAllModals()" class="fixed inset-0 bg-black/60 backdrop-blur-md">
+    </div>
 
     <!-- Slide Drawer Panel (Anchored to Right: 75% width, 100% height, double font-size) -->
     <div id="hamburger-drawer-panel"
@@ -394,12 +577,15 @@
               <i class="fa-solid fa-receipt text-lg"></i>
             </div>
             <div>
-              <span class="text-xl sm:text-2xl font-extrabold text-white">Duo<span class="text-brand-500">Spend</span></span>
-              <span id="drawer-version-badge" class="text-xs font-bold px-2 py-0.5 rounded-full bg-brand-50 text-brand-600 border border-brand-200 dark:bg-slate-800 dark:!text-white dark:border-brand-500/40 ml-1">v0.13.7</span>
+              <span class="text-xl sm:text-2xl font-extrabold text-white">Duo<span
+                  class="text-brand-500">Spend</span></span>
+              <span id="drawer-version-badge"
+                class="text-xs font-bold px-2 py-0.5 rounded-full bg-brand-50 text-brand-600 border border-brand-200 dark:bg-slate-800 dark:!text-white dark:border-brand-500/40 ml-1">v0.13.8</span>
             </div>
           </div>
           <button onclick="closeAllModals()"
-            class="p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 transition cursor-pointer" title="Close">
+            class="p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 transition cursor-pointer"
+            title="Close">
             <i class="fa-solid fa-xmark text-2xl"></i>
           </button>
         </div>
@@ -407,12 +593,15 @@
         <!-- Google User Account & Security Section -->
         <div id="menu-account-card" class="glass-card rounded-2xl p-4 border border-slate-800 space-y-3">
           <div class="flex items-center justify-end text-xs">
-            <span class="text-[10px] px-1 py-0.5 text-emerald-400 font-semibold flex items-center gap-1.5" id="account-status-badge">
+            <span class="text-[10px] px-1 py-0.5 text-emerald-400 font-semibold flex items-center gap-1.5"
+              id="account-status-badge">
               <i class="fa-brands fa-google text-red-400"></i> Connected
             </span>
           </div>
           <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-full bg-indigo-600/30 border border-indigo-500/50 flex items-center justify-center font-bold text-sm text-indigo-300" id="user-avatar-initials">
+            <div
+              class="w-10 h-10 rounded-full bg-indigo-600/30 border border-indigo-500/50 flex items-center justify-center font-bold text-sm text-indigo-300"
+              id="user-avatar-initials">
               M1
             </div>
             <div class="truncate">
@@ -421,8 +610,10 @@
             </div>
           </div>
           <div class="pt-2 border-t border-slate-800/80 flex items-center justify-between text-xs">
-            <span class="text-slate-400 text-[11px]" id="storage-status-text"><i class="fa-solid fa-shield-halved text-cyan-400 mr-1"></i> Local Encrypted Storage</span>
-            <button onclick="toggleAccountLogin()" class="text-xs text-brand-400 hover:underline font-semibold cursor-pointer" id="btn-switch-account">
+            <span class="text-slate-400 text-[11px]" id="storage-status-text"><i
+                class="fa-solid fa-shield-halved text-cyan-400 mr-1"></i> Local Encrypted Storage</span>
+            <button onclick="toggleAccountLogin()"
+              class="text-xs text-brand-400 hover:underline font-semibold cursor-pointer" id="btn-switch-account">
               Switch
             </button>
           </div>
@@ -436,12 +627,15 @@
               <span id="theme-toggle-icon">
                 <!-- Sun / Moon SVG icons -->
                 <svg id="svg-theme-icon" class="w-6 h-6 text-amber-400" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                  <path
+                    d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" />
                 </svg>
               </span>
               <span id="text-theme-mode">Light Mode</span>
             </div>
-            <span class="text-xs px-2.5 py-1 rounded-full bg-slate-800 text-slate-400 font-mono" id="theme-badge">Dark</span>
+            <span class="text-xs px-2.5 py-1 rounded-full bg-slate-800 text-slate-400 font-mono"
+              id="theme-badge">Dark</span>
           </button>
         </div>
 
@@ -450,7 +644,8 @@
           <!-- Fullscreen Option -->
           <button id="btn-toggle-fullscreen" onclick="toggleFullscreen(); closeAllModals();"
             class="w-full flex items-center gap-4 px-4 py-3.5 text-base sm:text-lg font-semibold text-slate-900 dark:text-slate-100 hover:text-slate-950 dark:hover:text-white bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200/80 dark:hover:bg-slate-700/80 border border-slate-200 dark:border-slate-700/80 rounded-2xl transition cursor-pointer shadow-sm">
-            <i id="icon-toggle-fullscreen" class="fa-solid fa-expand text-slate-900 dark:text-sky-300 text-xl w-6 text-center"></i>
+            <i id="icon-toggle-fullscreen"
+              class="fa-solid fa-expand text-slate-900 dark:text-sky-300 text-xl w-6 text-center"></i>
             <span id="text-toggle-fullscreen">Fullscreen</span>
           </button>
 
@@ -471,7 +666,8 @@
 
         <!-- Monthly WhatsApp & PDF Summary Share (Item 10) -->
         <div class="pt-3 border-t border-slate-200 dark:border-slate-800 space-y-2">
-          <div class="px-2 text-xs uppercase tracking-wider font-bold text-slate-500 dark:text-slate-400" id="label-menu-share">
+          <div class="px-2 text-xs uppercase tracking-wider font-bold text-slate-500 dark:text-slate-400"
+            id="label-menu-share">
             Monthly Summary & Sharing
           </div>
           <div class="grid grid-cols-2 gap-2 text-xs">
@@ -488,14 +684,18 @@
 
         <!-- Firebase Multi-Device Cloud Sync Controls (Item 4, 7, 8) -->
         <div class="pt-3 border-t border-slate-200 dark:border-slate-800 space-y-2">
-          <div class="px-2 flex items-center justify-between text-xs uppercase tracking-wider font-bold text-slate-500 dark:text-slate-400">
+          <div
+            class="px-2 flex items-center justify-between text-xs uppercase tracking-wider font-bold text-slate-500 dark:text-slate-400">
             <span>Firebase Cloud Sync</span>
-            <span id="firebase-sync-badge" class="text-[10px] px-2.5 py-0.5 rounded-full bg-slate-700 !text-white font-semibold">Offline</span>
+            <span id="firebase-sync-badge"
+              class="text-[10px] px-2.5 py-0.5 rounded-full bg-slate-700 !text-white font-semibold">Offline</span>
           </div>
-          <div class="p-3 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-2.5 text-xs">
+          <div
+            class="p-3 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-2.5 text-xs">
             <div class="flex items-center justify-between">
               <span class="text-slate-400">Household Sync Room:</span>
-              <strong id="firebase-room-label" class="text-brand-500 dark:text-brand-400 font-mono">Not Configured</strong>
+              <strong id="firebase-room-label" class="text-brand-500 dark:text-brand-400 font-mono">Not
+                Configured</strong>
             </div>
             <div class="flex gap-2">
               <button id="btn-firebase-sync-now" onclick="syncFirebaseNow()"
@@ -503,30 +703,39 @@
                 <i class="fa-solid fa-cloud-arrow-up !text-white"></i> <span class="!text-white">Sync Now</span>
               </button>
               <button id="btn-firebase-config" onclick="configureFirebaseModal()"
-                class="px-3 py-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 !text-white font-medium transition cursor-pointer shadow-sm" title="Configure Firebase project credentials">
+                class="px-3 py-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 !text-white font-medium transition cursor-pointer shadow-sm"
+                title="Configure Firebase project credentials">
                 <i class="fa-solid fa-gear !text-white"></i>
               </button>
             </div>
             <!-- Live Sync Progress Details (Item 8) -->
-            <div id="firebase-sync-progress-box" onclick="configureFirebaseModal()" class="hidden pt-2 border-t border-slate-200 dark:border-slate-800 space-y-1.5 cursor-pointer" title="Click to open Cloud Keys Vault">
+            <div id="firebase-sync-progress-box" onclick="configureFirebaseModal()"
+              class="hidden pt-2 border-t border-slate-200 dark:border-slate-800 space-y-1.5 cursor-pointer"
+              title="Click to open Cloud Keys Vault">
               <div class="flex items-center justify-between text-[11px]">
-                <span id="firebase-sync-step-text" class="text-slate-700 dark:text-slate-200 font-semibold flex items-center gap-1.5">
+                <span id="firebase-sync-step-text"
+                  class="text-slate-700 dark:text-slate-200 font-semibold flex items-center gap-1.5">
                   <i id="firebase-sync-spinner" class="fa-solid fa-rotate fa-spin text-brand-500"></i>
                   <span id="firebase-sync-step-msg">Initializing sync...</span>
                 </span>
-                <span id="firebase-sync-pct-text" class="font-mono font-bold text-brand-600 dark:text-brand-400">0%</span>
+                <span id="firebase-sync-pct-text"
+                  class="font-mono font-bold text-brand-600 dark:text-brand-400">0%</span>
               </div>
               <div class="w-full bg-slate-200 dark:bg-slate-950 rounded-full h-1.5 overflow-hidden">
-                <div id="firebase-sync-progress-bar" class="bg-gradient-to-r from-brand-500 to-cyan-400 h-1.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+                <div id="firebase-sync-progress-bar"
+                  class="bg-gradient-to-r from-brand-500 to-cyan-400 h-1.5 rounded-full transition-all duration-300"
+                  style="width: 0%"></div>
               </div>
-              <div id="firebase-sync-detail-log" class="text-[10px] font-mono text-slate-600 dark:text-slate-400 space-y-0.5 leading-relaxed"></div>
+              <div id="firebase-sync-detail-log"
+                class="text-[10px] font-mono text-slate-600 dark:text-slate-400 space-y-0.5 leading-relaxed"></div>
             </div>
           </div>
         </div>
 
         <!-- Moved Data Management & Export/Import Options (Replicated btn-theme-toggle design) -->
         <div class="pt-3 border-t border-slate-200 dark:border-slate-800 space-y-2.5">
-          <div class="px-2 text-xs uppercase tracking-wider font-bold text-slate-500 dark:text-slate-400" id="label-menu-data">
+          <div class="px-2 text-xs uppercase tracking-wider font-bold text-slate-500 dark:text-slate-400"
+            id="label-menu-data">
             Data Backup & Invoices
           </div>
           <div class="grid grid-cols-2 gap-2 text-xs">
@@ -562,9 +771,15 @@
             <button onclick="setLanguage('en')" id="btn-lang-en"
               class="group flex items-center justify-center w-12 h-9 p-1 rounded-xl border-2 transition cursor-pointer border-brand-500 bg-brand-500/10 shadow-sm"
               title="English">
-              <svg class="w-10 h-6 rounded shadow border border-slate-700/60 group-hover:scale-105 transition flex-shrink-0" viewBox="0 0 60 36">
-                <clipPath id="uk-clip"><path d="M0,0 v36 h60 v-36 z" /></clipPath>
-                <clipPath id="uk-diag"><path d="M30,18 h30 v18 z v18 h-30 z h-30 v-18 z v-18 h30 z" /></clipPath>
+              <svg
+                class="w-10 h-6 rounded shadow border border-slate-700/60 group-hover:scale-105 transition flex-shrink-0"
+                viewBox="0 0 60 36">
+                <clipPath id="uk-clip">
+                  <path d="M0,0 v36 h60 v-36 z" />
+                </clipPath>
+                <clipPath id="uk-diag">
+                  <path d="M30,18 h30 v18 z v18 h-30 z h-30 v-18 z v-18 h30 z" />
+                </clipPath>
                 <g clip-path="url(#uk-clip)">
                   <path d="M0,0 v36 h60 v-36 z" fill="#012169" />
                   <path d="M0,0 L60,36 M60,0 L0,36" stroke="#fff" stroke-width="7" />
@@ -579,7 +794,9 @@
             <button onclick="setLanguage('es')" id="btn-lang-es"
               class="group flex items-center justify-center w-12 h-9 p-1 rounded-xl border-2 transition cursor-pointer border-transparent hover:border-slate-700 shadow-sm"
               title="Español (Castellano)">
-              <svg class="w-10 h-6 rounded shadow border border-slate-700/60 group-hover:scale-105 transition flex-shrink-0" viewBox="0 0 60 36">
+              <svg
+                class="w-10 h-6 rounded shadow border border-slate-700/60 group-hover:scale-105 transition flex-shrink-0"
+                viewBox="0 0 60 36">
                 <rect width="60" height="9" fill="#AA151B" />
                 <rect y="9" width="60" height="18" fill="#F1BF00" />
                 <rect y="27" width="60" height="9" fill="#AA151B" />
@@ -595,9 +812,10 @@
       <div class="pt-6 border-t border-slate-800">
         <div class="flex items-center gap-2.5 text-sm sm:text-base text-slate-400">
           <i class="fa-regular fa-copyright text-brand-400"></i>
-          <span id="menu-credits-text">created by <strong class="text-white font-semibold">Marc Bailey 2026</strong></span>
+          <span id="menu-credits-text">created by <strong class="text-white font-semibold">Marc Bailey
+              2026</strong></span>
         </div>
-        <div class="text-xs text-slate-500 mt-1">DuoSpend v0.13.7 — Android Ready Architecture</div>
+        <div class="text-xs text-slate-500 mt-1">DuoSpend v0.13.8 — Android Ready Architecture</div>
       </div>
 
     </div>
@@ -616,7 +834,8 @@
         class="glass-card rounded-2xl p-4 sm:p-5 relative overflow-hidden group min-w-0 cursor-pointer hover:border-indigo-500/50 transition"
         title="Tap to view full household breakdown">
         <div id="card-total-spend-header" class="flex items-center justify-between text-slate-400 mb-1">
-          <span id="text-card-total-spend" class="text-xs uppercase tracking-wider font-semibold">Total Household Spend</span>
+          <span id="text-card-total-spend" class="text-xs uppercase tracking-wider font-semibold">Total Household
+            Spend</span>
           <div id="card-total-spend-icon"
             class="w-8 h-8 rounded-lg bg-indigo-500/10 text-indigo-400 flex items-center justify-center">
             <i class="fa-solid fa-wallet"></i>
@@ -634,7 +853,8 @@
             <span id="budget-percent-display" class="font-bold text-slate-300">0%</span>
           </div>
           <div class="w-full bg-slate-900 rounded-full h-2 overflow-hidden border border-slate-800">
-            <div id="budget-progress-bar" class="h-2 rounded-full transition-all duration-500 bg-emerald-500" style="width: 0%"></div>
+            <div id="budget-progress-bar" class="h-2 rounded-full transition-all duration-500 bg-emerald-500"
+              style="width: 0%"></div>
           </div>
           <div class="flex items-center justify-between text-[10px] text-slate-400 pt-0.5">
             <span id="budget-status-text">Safe pace</span>
@@ -663,7 +883,7 @@
         <div id="p1-total-paid-amount" class="text-2xl sm:text-3xl font-extrabold text-cyan-400 mt-1">€0.00</div>
         <div id="card-person1-footer"
           class="text-xs text-slate-400 mt-3 pt-3 border-t border-slate-800 flex justify-between">
-          
+
           <span id="p1-spend-percentage" class="font-semibold text-slate-300">0%</span>
         </div>
       </div>
@@ -683,7 +903,7 @@
         <div id="p2-total-paid-amount" class="text-2xl sm:text-3xl font-extrabold text-pink-400 mt-1">€0.00</div>
         <div id="card-person2-footer"
           class="text-xs text-slate-400 mt-3 pt-3 border-t border-slate-800 flex justify-between">
-          
+
           <span id="p2-spend-percentage" class="font-semibold text-slate-300">0%</span>
         </div>
       </div>
@@ -698,7 +918,8 @@
               <i class="fa-solid fa-scale-balanced text-brand-400"></i> Split Settlement
             </span>
             <span id="badge-settlement-fairshare"
-              class="text-[10px] px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">Fair Share</span>
+              class="text-[10px] px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">Fair
+              Share</span>
           </div>
           <div id="settlement-verdict-text"
             class="text-xl sm:text-2xl font-bold text-white mt-1 flex items-baseline gap-1">
@@ -748,19 +969,24 @@
               class="text-sm font-bold text-slate-200 uppercase tracking-wide flex items-center gap-2">
               <i class="fa-solid fa-chart-simple text-indigo-400"></i> Spending Distribution
             </h2>
-            <p class="text-[11px] text-slate-400 mt-0.5" id="desc-chart-tap">Tap any category bar to inspect monthly records</p>
+            <p class="text-[11px] text-slate-400 mt-0.5" id="desc-chart-tap">Tap any category bar to inspect monthly
+              records</p>
           </div>
           <!-- Toggle Chart View: By Category (Default), Split Comparison, By Merchant -->
           <div id="chart-mode-toggle-group"
             class="inline-flex rounded-xl bg-slate-900 p-1 border border-slate-800 text-xs">
             <button id="btn-chart-mode-category" onclick="switchChartMode('category')"
-              class="px-3 py-1 rounded-lg text-white bg-brand-600 font-medium transition cursor-pointer">By Category</button>
+              class="px-3 py-1 rounded-lg text-white bg-brand-600 font-medium transition cursor-pointer">By
+              Category</button>
             <button id="btn-chart-mode-merchant" onclick="switchChartMode('merchant')"
-              class="px-3 py-1 rounded-lg text-slate-400 hover:text-white transition cursor-pointer">By Merchant</button>
+              class="px-3 py-1 rounded-lg text-slate-400 hover:text-white transition cursor-pointer">By
+              Merchant</button>
             <button id="btn-chart-mode-purchaser" onclick="switchChartMode('purchaser')"
-              class="px-3 py-1 rounded-lg text-slate-400 hover:text-white transition cursor-pointer">Split Comparison</button>
+              class="px-3 py-1 rounded-lg text-slate-400 hover:text-white transition cursor-pointer">Split
+              Comparison</button>
             <button id="btn-chart-mode-trend" onclick="switchChartMode('trend')"
-              class="px-3 py-1 rounded-lg text-slate-400 hover:text-white transition cursor-pointer">Monthly Trend</button>
+              class="px-3 py-1 rounded-lg text-slate-400 hover:text-white transition cursor-pointer">Monthly
+              Trend</button>
           </div>
         </div>
         <div id="distribution-chart-wrapper" class="relative flex-1 min-h-[220px] w-full max-w-full pt-2">
@@ -857,14 +1083,16 @@
           <i class="fa-solid fa-receipt"></i>
         </div>
         <h3 id="text-empty-title" class="text-sm font-semibold text-slate-300">No expenses found</h3>
-        <p id="text-empty-desc" class="text-xs text-slate-500 max-w-sm mx-auto mt-1">Scan a receipt or click "Add Expense" above to start logging household purchases.</p>
+        <p id="text-empty-desc" class="text-xs text-slate-500 max-w-sm mx-auto mt-1">Scan a receipt or click "Add
+          Expense" above to start logging household purchases.</p>
       </div>
 
       <!-- Footer Stats (Item 2: clearAllExpenses removed) -->
       <div id="ledger-footer-toolbar"
         class="bg-slate-50 dark:bg-slate-900/50 px-4 py-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs text-slate-600 dark:text-slate-400">
         <span id="ledger-filtered-count-info">Showing 0 of 0 entries</span>
-        <span class="text-slate-500 text-[11px]"><i class="fa-solid fa-calendar-check text-cyan-400 mr-1"></i> Current Month View Active</span>
+        <span class="text-slate-500 text-[11px]"><i class="fa-solid fa-calendar-check text-cyan-400 mr-1"></i> Current
+          Month View Active</span>
       </div>
     </div>
 
@@ -888,7 +1116,8 @@
           </div>
           <div id="receipt-modal-title-text-group">
             <h3 id="receipt-modal-title-text" class="text-sm sm:text-base font-bold text-white">Add Expense Entry</h3>
-            <p id="receipt-modal-subtitle-text" class="text-[11px] text-slate-400">Enter receipt details or select a quick merchant preset</p>
+            <p id="receipt-modal-subtitle-text" class="text-[11px] text-slate-400">Enter receipt details or select a
+              quick merchant preset</p>
           </div>
         </div>
         <button onclick="closeAllModals()"
@@ -902,7 +1131,8 @@
         <!-- Quick 5 Merchant Presets Only: AlCash, Lidl, Aldi, Mercadona, Deza -->
         <div id="receipt-presets-section" class="bg-slate-950/60 border border-slate-800 rounded-2xl p-3.5 space-y-2">
           <div id="receipt-presets-header" class="flex items-center justify-between text-[11px] text-slate-400">
-            <span id="text-presets-heading" class="font-semibold text-slate-300 uppercase tracking-wider">Quick Merchants:</span>
+            <span id="text-presets-heading" class="font-semibold text-slate-300 uppercase tracking-wider">Quick
+              Merchants:</span>
             <span class="text-slate-500" id="text-presets-subheading">Click to autofill merchant</span>
           </div>
           <div id="receipt-presets-buttons-group" class="flex flex-wrap gap-2 pt-1">
@@ -934,8 +1164,8 @@
             </span>
           </div>
 
-          
-          
+
+
           <!-- Manual Attach Image / Invoice Option (Item 9) -->
           <div id="manual-attach-image-section"
             class="flex items-center justify-between p-2.5 rounded-xl border border-dashed border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-950/60">
@@ -952,17 +1182,23 @@
           </div>
 
           <!-- Captured Photo Thumbnail in Form (Item 2) -->
-          <div id="form-receipt-photo-preview" class="hidden rounded-xl overflow-hidden border border-slate-800 bg-slate-950/80 p-2.5 flex items-center justify-between gap-3">
+          <div id="form-receipt-photo-preview"
+            class="hidden rounded-xl overflow-hidden border border-slate-800 bg-slate-950/80 p-2.5 flex items-center justify-between gap-3">
             <div class="flex items-center gap-3 min-w-0">
-              <img id="form-receipt-thumbnail-img" src="" alt="Receipt Thumbnail" class="w-12 h-12 object-cover rounded-lg border border-slate-700 cursor-pointer" onclick="viewCapturedPhotoFull()">
+              <img id="form-receipt-thumbnail-img" src="" alt="Receipt Thumbnail"
+                class="w-12 h-12 object-cover rounded-lg border border-slate-700 cursor-pointer"
+                onclick="viewCapturedPhotoFull()">
               <div class="truncate">
                 <div class="text-xs font-bold text-white flex items-center gap-1.5">
-                  <i class="fa-solid fa-camera text-cyan-400"></i> <span id="form-receipt-photo-label">Receipt Photo Captured</span>
+                  <i class="fa-solid fa-camera text-cyan-400"></i> <span id="form-receipt-photo-label">Receipt Photo
+                    Captured</span>
                 </div>
-                <div class="text-[10px] text-slate-400 truncate" id="form-receipt-photo-sub">Click thumbnail to inspect full receipt</div>
+                <div class="text-[10px] text-slate-400 truncate" id="form-receipt-photo-sub">Click thumbnail to inspect
+                  full receipt</div>
               </div>
             </div>
-            <button type="button" onclick="viewCapturedPhotoFull()" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-cyan-400 border border-slate-700 transition cursor-pointer">
+            <button type="button" onclick="viewCapturedPhotoFull()"
+              class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-cyan-400 border border-slate-700 transition cursor-pointer">
               Inspect
             </button>
           </div>
@@ -971,7 +1207,9 @@
 
             <!-- Merchant / Where -->
             <div id="field-wrapper-merchant">
-              <label id="label-merchant" for="expense-merchant-input" class="block text-xs font-medium text-slate-300 mb-1">Merchant / Where <span class="text-red-400">*</span></label>
+              <label id="label-merchant" for="expense-merchant-input"
+                class="block text-xs font-medium text-slate-300 mb-1">Merchant / Where <span
+                  class="text-red-400">*</span></label>
               <div id="input-container-merchant" class="relative">
                 <i class="fa-solid fa-store absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
                 <input type="text" id="expense-merchant-input" required
@@ -983,7 +1221,9 @@
             <!-- Amount + Travel Mode Live Currency Converter (v0.11 Item 5) -->
             <div id="field-wrapper-amount">
               <div class="flex items-center justify-between mb-1">
-                <label id="label-amount" for="expense-amount-input" class="block text-xs font-medium text-slate-300">Total Amount (<span class="currency-symbol-label">€</span>) <span class="text-red-400">*</span></label>
+                <label id="label-amount" for="expense-amount-input"
+                  class="block text-xs font-medium text-slate-300">Total Amount (<span
+                    class="currency-symbol-label">€</span>) <span class="text-red-400">*</span></label>
                 <div class="flex items-center gap-1" title="Travel Mode: Select receipt currency for live conversion">
                   <i class="fa-solid fa-plane-departure text-[10px] text-cyan-400"></i>
                   <select id="expense-entry-currency-select" onchange="updateTravelCurrencyPreview()"
@@ -1000,15 +1240,19 @@
                 </div>
               </div>
               <div id="input-container-amount" class="relative">
-                <span id="entry-amount-currency-prefix" class="currency-symbol-label absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs font-bold">€</span>
+                <span id="entry-amount-currency-prefix"
+                  class="currency-symbol-label absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs font-bold">€</span>
                 <input type="number" step="0.01" min="0.01" id="expense-amount-input" required placeholder="0.00"
                   oninput="updateTravelCurrencyPreview(); checkDuplicateReceiptLive();"
                   class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-8 pr-3 py-2 text-xs font-bold text-slate-100 placeholder-slate-500 focus:outline-none focus:border-brand-500">
               </div>
               <!-- Live Travel Currency Conversion Preview Box -->
-              <div id="travel-currency-converter-box" class="hidden mt-1.5 p-2 rounded-xl bg-cyan-950/40 border border-cyan-500/30 text-[11px] space-y-1.5">
+              <div id="travel-currency-converter-box"
+                class="hidden mt-1.5 p-2 rounded-xl bg-cyan-950/40 border border-cyan-500/30 text-[11px] space-y-1.5">
                 <div class="flex items-center justify-between text-cyan-300">
-                  <span class="font-semibold flex items-center gap-1"><i class="fa-solid fa-arrows-rotate text-[10px]"></i> <span id="travel-conv-summary-text">£0.00 = €0.00</span></span>
+                  <span class="font-semibold flex items-center gap-1"><i
+                      class="fa-solid fa-arrows-rotate text-[10px]"></i> <span id="travel-conv-summary-text">£0.00 =
+                      €0.00</span></span>
                   <div class="flex items-center gap-1">
                     <span class="text-[10px] text-slate-400">Rate:</span>
                     <input type="number" id="travel-exchange-rate-input" step="0.0001" min="0.0001" value="1.1765"
@@ -1017,15 +1261,18 @@
                   </div>
                 </div>
                 <label class="flex items-center gap-1.5 text-[10px] text-slate-300 cursor-pointer">
-                  <input type="checkbox" id="travel-auto-convert-checkbox" checked onchange="updateTravelCurrencyPreview()" class="rounded text-brand-500 focus:ring-0">
-                  <span>Save converted amount in household currency (<span class="currency-symbol-label">€</span>)</span>
+                  <input type="checkbox" id="travel-auto-convert-checkbox" checked
+                    onchange="updateTravelCurrencyPreview()" class="rounded text-brand-500 focus:ring-0">
+                  <span>Save converted amount in household currency (<span
+                      class="currency-symbol-label">€</span>)</span>
                 </label>
               </div>
             </div>
 
             <!-- Date -->
             <div id="field-wrapper-date">
-              <label id="label-date" for="expense-date-input" class="block text-xs font-medium text-slate-300 mb-1">Date <span class="text-red-400">*</span></label>
+              <label id="label-date" for="expense-date-input" class="block text-xs font-medium text-slate-300 mb-1">Date
+                <span class="text-red-400">*</span></label>
               <div id="input-container-date" class="relative">
                 <i class="fa-regular fa-calendar absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
                 <input type="date" id="expense-date-input" required
@@ -1035,7 +1282,9 @@
 
             <!-- Category (Updated options: Food Shopping, Eating Out, Fuel, Clothes, Other) -->
             <div id="field-wrapper-category">
-              <label id="label-category" for="expense-category-select" class="block text-xs font-medium text-slate-300 mb-1">Category <span class="text-red-400">*</span></label>
+              <label id="label-category" for="expense-category-select"
+                class="block text-xs font-medium text-slate-300 mb-1">Category <span
+                  class="text-red-400">*</span></label>
               <select id="expense-category-select" required
                 class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-brand-500 pr-8">
                 <option value="Groceries">Food Shopping</option>
@@ -1048,16 +1297,19 @@
 
             <!-- Who Paid -->
             <div id="field-wrapper-purchaser">
-              <span id="label-who-paid" class="block text-xs font-medium text-slate-300 mb-1">Who Paid? <span class="text-red-400">*</span></span>
+              <span id="label-who-paid" class="block text-xs font-medium text-slate-300 mb-1">Who Paid? <span
+                  class="text-red-400">*</span></span>
               <div id="purchaser-radio-group" class="grid grid-cols-2 gap-2">
                 <label for="expense-payer-person1-radio"
                   class="flex items-center gap-2 p-2 rounded-xl bg-slate-950 border border-slate-800 cursor-pointer hover:border-cyan-500 transition">
-                  <input type="radio" id="expense-payer-person1-radio" name="formPurchaser" value="p1" checked class="text-cyan-500 focus:ring-0">
+                  <input type="radio" id="expense-payer-person1-radio" name="formPurchaser" value="p1" checked
+                    class="text-cyan-500 focus:ring-0">
                   <span id="expense-payer-person1-label" class="text-xs font-semibold text-cyan-400">Member 1</span>
                 </label>
                 <label for="expense-payer-person2-radio"
                   class="flex items-center gap-2 p-2 rounded-xl bg-slate-950 border border-slate-800 cursor-pointer hover:border-pink-500 transition">
-                  <input type="radio" id="expense-payer-person2-radio" name="formPurchaser" value="p2" class="text-pink-500 focus:ring-0">
+                  <input type="radio" id="expense-payer-person2-radio" name="formPurchaser" value="p2"
+                    class="text-pink-500 focus:ring-0">
                   <span id="expense-payer-person2-label" class="text-xs font-semibold text-pink-400">Member 2</span>
                 </label>
               </div>
@@ -1065,7 +1317,8 @@
 
             <!-- Split Policy (Home Account is Default) -->
             <div id="field-wrapper-split">
-              <label id="label-split-policy" for="expense-split-policy-select" class="block text-xs font-medium text-slate-300 mb-1">Expense Attribution / Split</label>
+              <label id="label-split-policy" for="expense-split-policy-select"
+                class="block text-xs font-medium text-slate-300 mb-1">Expense Attribution / Split</label>
               <select id="expense-split-policy-select"
                 class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-brand-500 pr-8">
                 <option value="home_account" selected id="splitOptHome">Home Account (Joint Household Account)</option>
@@ -1078,13 +1331,15 @@
           </div>
 
           <!-- Interactive Extracted Receipt Line Items Section (v0.12: Tiered AI + ML Kit + Regex) -->
-          <div id="extracted-line-items-section" class="p-3 rounded-xl bg-slate-950/90 border border-slate-800 space-y-2.5">
+          <div id="extracted-line-items-section"
+            class="p-3 rounded-xl bg-slate-950/90 border border-slate-800 space-y-2.5">
             <div class="flex flex-wrap items-center justify-between gap-2">
               <div class="flex items-center gap-2">
                 <span class="text-xs font-semibold text-cyan-400 flex items-center gap-1.5">
                   <i class="fa-solid fa-list-check"></i> <span id="label-line-items-heading">Receipt Line Items</span>
                 </span>
-                <span id="ocr-engine-source-badge" class="hidden text-[10px] px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-mono">
+                <span id="ocr-engine-source-badge"
+                  class="hidden text-[10px] px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-mono">
                   On-Device OCR
                 </span>
               </div>
@@ -1109,7 +1364,8 @@
               Scan a receipt or click "+ Add Item" to itemize products and split personal vs. shared items.
             </div>
 
-            <div id="receipt-line-items-summary" class="hidden pt-2 border-t border-slate-800/80 flex flex-wrap items-center justify-between text-[11px] text-slate-300 gap-2">
+            <div id="receipt-line-items-summary"
+              class="hidden pt-2 border-t border-slate-800/80 flex flex-wrap items-center justify-between text-[11px] text-slate-300 gap-2">
               <span>Items Sum: <strong id="line-items-sum-display" class="text-white">€0.00</strong></span>
               <span id="line-items-personal-split-display" class="text-amber-300 font-semibold"></span>
             </div>
@@ -1117,13 +1373,15 @@
 
           <!-- Notes -->
           <div id="field-wrapper-notes">
-            <label id="label-notes" for="expense-notes-textarea" class="block text-xs font-medium text-slate-300 mb-1">Notes</label>
+            <label id="label-notes" for="expense-notes-textarea"
+              class="block text-xs font-medium text-slate-300 mb-1">Notes</label>
             <textarea id="expense-notes-textarea" rows="2" placeholder="e.g. Weekly shopping, detergent, olive oil..."
               class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-brand-500"></textarea>
           </div>
 
           <!-- Duplicate Receipt Detection Warning Banner (v0.11 Item 1) -->
-          <div id="duplicate-receipt-warning-box" class="hidden p-3 rounded-xl bg-amber-500/15 border border-amber-500/50 text-xs space-y-2">
+          <div id="duplicate-receipt-warning-box"
+            class="hidden p-3 rounded-xl bg-amber-500/15 border border-amber-500/50 text-xs space-y-2">
             <div class="flex items-start gap-2.5">
               <i class="fa-solid fa-triangle-exclamation text-amber-400 text-sm mt-0.5"></i>
               <div class="space-y-0.5 flex-1">
@@ -1179,48 +1437,58 @@
       <form onsubmit="saveSettings(event)" class="p-5 space-y-4 max-h-[75vh] overflow-y-auto">
         <!-- Monthly Budget Target (Item 5) -->
         <div id="settings-field-wrapper-budget" class="p-3 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
-          <label id="label-settings-budget" for="settings-budget-input" class="block text-xs font-semibold text-brand-400">
-            <i class="fa-solid fa-bullseye mr-1"></i> Monthly Household Budget Target (<span class="currency-symbol-label">€</span>)
+          <label id="label-settings-budget" for="settings-budget-input"
+            class="block text-xs font-semibold text-brand-400">
+            <i class="fa-solid fa-bullseye mr-1"></i> Monthly Household Budget Target (<span
+              class="currency-symbol-label">€</span>)
           </label>
           <div class="flex items-center gap-2">
             <span class="currency-symbol-label text-slate-400 text-sm font-bold">€</span>
             <input type="number" id="settings-budget-input" min="50" step="10" value="500" placeholder="500"
               class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs font-bold text-slate-100 focus:outline-none focus:border-brand-500">
           </div>
-          <p class="text-[10px] text-slate-400">Progress bar alerts at 80% (amber) and 100% (red) with daily safe spend calculation.</p>
+          <p class="text-[10px] text-slate-400">Progress bar alerts at 80% (amber) and 100% (red) with daily safe spend
+            calculation.</p>
         </div>
 
         <!-- Category-Specific Monthly Sub-Budgets (v0.11 Item 3) -->
-        <div id="settings-category-budgets-section" class="p-3 rounded-xl bg-slate-950 border border-slate-800 space-y-2.5">
+        <div id="settings-category-budgets-section"
+          class="p-3 rounded-xl bg-slate-950 border border-slate-800 space-y-2.5">
           <div class="flex items-center justify-between">
             <label class="block text-xs font-semibold text-emerald-400">
-              <i class="fa-solid fa-chart-pie mr-1"></i> Category Monthly Sub-Budgets (<span class="currency-symbol-label">€</span>)
+              <i class="fa-solid fa-chart-pie mr-1"></i> Category Monthly Sub-Budgets (<span
+                class="currency-symbol-label">€</span>)
             </label>
             <span class="text-[10px] text-slate-400">Optional monthly caps</span>
           </div>
           <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
             <div class="p-2 rounded-lg bg-slate-900 border border-slate-800">
-              <label for="subbudget-groceries" class="block text-[10px] text-emerald-400 font-semibold mb-1 truncate">Food Shopping</label>
+              <label for="subbudget-groceries"
+                class="block text-[10px] text-emerald-400 font-semibold mb-1 truncate">Food Shopping</label>
               <input type="number" id="subbudget-groceries" min="0" step="10" value="300"
                 class="w-full bg-slate-950 border border-slate-800 rounded px-2 py-1 text-xs font-bold text-white focus:outline-none focus:border-brand-500">
             </div>
             <div class="p-2 rounded-lg bg-slate-900 border border-slate-800">
-              <label for="subbudget-dining" class="block text-[10px] text-amber-400 font-semibold mb-1 truncate">Eating Out</label>
+              <label for="subbudget-dining" class="block text-[10px] text-amber-400 font-semibold mb-1 truncate">Eating
+                Out</label>
               <input type="number" id="subbudget-dining" min="0" step="10" value="100"
                 class="w-full bg-slate-950 border border-slate-800 rounded px-2 py-1 text-xs font-bold text-white focus:outline-none focus:border-brand-500">
             </div>
             <div class="p-2 rounded-lg bg-slate-900 border border-slate-800">
-              <label for="subbudget-transit" class="block text-[10px] text-sky-400 font-semibold mb-1 truncate">Fuel</label>
+              <label for="subbudget-transit"
+                class="block text-[10px] text-sky-400 font-semibold mb-1 truncate">Fuel</label>
               <input type="number" id="subbudget-transit" min="0" step="10" value="60"
                 class="w-full bg-slate-950 border border-slate-800 rounded px-2 py-1 text-xs font-bold text-white focus:outline-none focus:border-brand-500">
             </div>
             <div class="p-2 rounded-lg bg-slate-900 border border-slate-800">
-              <label for="subbudget-clothes" class="block text-[10px] text-purple-400 font-semibold mb-1 truncate">Clothes</label>
+              <label for="subbudget-clothes"
+                class="block text-[10px] text-purple-400 font-semibold mb-1 truncate">Clothes</label>
               <input type="number" id="subbudget-clothes" min="0" step="10" value="40"
                 class="w-full bg-slate-950 border border-slate-800 rounded px-2 py-1 text-xs font-bold text-white focus:outline-none focus:border-brand-500">
             </div>
             <div class="p-2 rounded-lg bg-slate-900 border border-slate-800">
-              <label for="subbudget-other" class="block text-[10px] text-slate-400 font-semibold mb-1 truncate">Other</label>
+              <label for="subbudget-other"
+                class="block text-[10px] text-slate-400 font-semibold mb-1 truncate">Other</label>
               <input type="number" id="subbudget-other" min="0" step="10" value="50"
                 class="w-full bg-slate-950 border border-slate-800 rounded px-2 py-1 text-xs font-bold text-white focus:outline-none focus:border-brand-500">
             </div>
@@ -1267,12 +1535,14 @@
           </label>
           <input type="text" id="settings-custom-categories-input" placeholder="e.g. Pharmacy, Pets, DIY, Holidays"
             class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-brand-500">
-          <p class="text-[10px] text-slate-400">Comma-separated list of additional categories to include in forms and filters.</p>
+          <p class="text-[10px] text-slate-400">Comma-separated list of additional categories to include in forms and
+            filters.</p>
         </div>
 
         <!-- Multi-Currency Selector (Euros default) -->
         <div id="settings-field-wrapper-currency">
-          <label id="label-setting-currency" for="settings-currency-symbol-input" class="block text-xs font-medium text-slate-300 mb-1">Household Currency</label>
+          <label id="label-setting-currency" for="settings-currency-symbol-input"
+            class="block text-xs font-medium text-slate-300 mb-1">Household Currency</label>
           <select id="settings-currency-symbol-input"
             class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-brand-500 pr-8">
             <option value="€">EUR (€) — Euro (Default)</option>
@@ -1284,7 +1554,8 @@
             <option value="A$">AUD (A$) — Australian Dollar</option>
             <option value="zł">PLN (zł) — Polish Złoty</option>
           </select>
-          <p id="desc-setting-currency" class="text-[10px] text-slate-500 mt-1">Select your household display currency.</p>
+          <p id="desc-setting-currency" class="text-[10px] text-slate-500 mt-1">Select your household display currency.
+          </p>
         </div>
 
         <div id="settings-modal-actions" class="pt-3 border-t border-slate-800 flex justify-end gap-2">
@@ -1308,10 +1579,11 @@
     class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
     <div onclick="event.stopPropagation()"
       class="glass-modal rounded-2xl w-full max-w-3xl my-auto overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200">
-      
+
       <div class="px-5 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-900/90">
         <div class="flex items-center gap-3">
-          <div id="member-modal-badge" class="w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs text-white shadow-sm bg-cyan-500">
+          <div id="member-modal-badge"
+            class="w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs text-white shadow-sm bg-cyan-500">
             M1
           </div>
           <div>
@@ -1325,7 +1597,8 @@
             <option value="CURRENT">Current Month</option>
             <option value="ALL">All Time</option>
           </select>
-          <button onclick="closeAllModals()" class="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition cursor-pointer">
+          <button onclick="closeAllModals()"
+            class="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition cursor-pointer">
             <i class="fa-solid fa-xmark text-sm"></i>
           </button>
         </div>
@@ -1335,7 +1608,8 @@
         <div class="w-full overflow-x-hidden">
           <table class="w-full table-fixed text-left border-collapse text-[11px] sm:text-xs">
             <thead>
-              <tr class="bg-slate-900/80 text-slate-400 uppercase tracking-wider font-semibold border-b border-slate-800">
+              <tr
+                class="bg-slate-900/80 text-slate-400 uppercase tracking-wider font-semibold border-b border-slate-800">
                 <th class="py-2 px-1.5 sm:px-2.5 w-[24%]">Date</th>
                 <th class="py-2 px-1.5 sm:px-2.5 w-[34%]">Merchant</th>
                 <th class="py-2 px-1.5 sm:px-2.5 w-[22%]">Category</th>
@@ -1353,7 +1627,8 @@
       </div>
 
       <div class="px-5 py-3 border-t border-slate-800 flex justify-end">
-        <button onclick="closeAllModals()" class="px-4 py-1.5 text-xs rounded-xl bg-slate-800 hover:bg-slate-700 !text-white font-semibold font-medium cursor-pointer">
+        <button onclick="closeAllModals()"
+          class="px-4 py-1.5 text-xs rounded-xl bg-slate-800 hover:bg-slate-700 !text-white font-semibold font-medium cursor-pointer">
           Close
         </button>
       </div>
@@ -1367,25 +1642,31 @@
     class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
     <div onclick="event.stopPropagation()"
       class="glass-modal rounded-2xl w-full max-w-2xl my-auto overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200">
-      
+
       <div class="px-5 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-900/90">
         <div class="flex items-center gap-3">
-          <div class="w-9 h-9 rounded-xl flex items-center justify-center text-base bg-brand-500/20 text-brand-400" id="cat-modal-icon">
+          <div class="w-9 h-9 rounded-xl flex items-center justify-center text-base bg-brand-500/20 text-brand-400"
+            id="cat-modal-icon">
             <i class="fa-solid fa-basket-shopping"></i>
           </div>
           <div>
-            <h3 id="cat-modal-title" class="text-sm sm:text-base font-bold text-white">Food Shopping (Current Month)</h3>
-            <p id="cat-modal-subtitle" class="text-[11px] text-slate-400">Total Spent: <span id="cat-modal-total" class="font-bold text-brand-400">€0.00</span> <span id="cat-modal-subbudget-info" class="ml-1 text-[10px] text-slate-400"></span></p>
+            <h3 id="cat-modal-title" class="text-sm sm:text-base font-bold text-white">Food Shopping (Current Month)
+            </h3>
+            <p id="cat-modal-subtitle" class="text-[11px] text-slate-400">Total Spent: <span id="cat-modal-total"
+                class="font-bold text-brand-400">€0.00</span> <span id="cat-modal-subbudget-info"
+                class="ml-1 text-[10px] text-slate-400"></span></p>
           </div>
         </div>
-        <button onclick="closeAllModals()" class="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition cursor-pointer">
+        <button onclick="closeAllModals()"
+          class="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition cursor-pointer">
           <i class="fa-solid fa-xmark text-sm"></i>
         </button>
       </div>
       <!-- Category Sub-Budget Bar inside Modal (v0.11 Item 3) -->
       <div id="cat-modal-budget-bar-wrapper" class="px-5 py-2 bg-slate-950/70 border-b border-slate-800/80 hidden">
         <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
-          <div id="cat-modal-budget-bar" class="bg-emerald-500 h-1.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+          <div id="cat-modal-budget-bar" class="bg-emerald-500 h-1.5 rounded-full transition-all duration-300"
+            style="width: 0%"></div>
         </div>
       </div>
 
@@ -1393,7 +1674,8 @@
         <div class="w-full overflow-x-hidden">
           <table class="w-full table-fixed text-left border-collapse text-[11px] sm:text-xs">
             <thead>
-              <tr class="bg-slate-900/80 text-slate-400 uppercase tracking-wider font-semibold border-b border-slate-800">
+              <tr
+                class="bg-slate-900/80 text-slate-400 uppercase tracking-wider font-semibold border-b border-slate-800">
                 <th class="py-2 px-1.5 sm:px-2.5 w-[24%]">Date</th>
                 <th class="py-2 px-1.5 sm:px-2.5 w-[34%]">Merchant</th>
                 <th class="py-2 px-1.5 sm:px-2.5 w-[22%]">Who Paid</th>
@@ -1408,7 +1690,8 @@
       </div>
 
       <div class="px-5 py-3 border-t border-slate-800 flex justify-end">
-        <button onclick="closeAllModals()" class="px-4 py-1.5 text-xs rounded-xl bg-slate-800 hover:bg-slate-700 !text-white font-semibold font-medium cursor-pointer">
+        <button onclick="closeAllModals()"
+          class="px-4 py-1.5 text-xs rounded-xl bg-slate-800 hover:bg-slate-700 !text-white font-semibold font-medium cursor-pointer">
           Close
         </button>
       </div>
@@ -1422,25 +1705,29 @@
     class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
     <div onclick="event.stopPropagation()"
       class="glass-modal rounded-2xl w-full max-w-md my-auto overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200">
-      
+
       <div class="px-5 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-900/90">
         <h3 class="text-sm sm:text-base font-bold text-white flex items-center gap-2">
           <i class="fa-solid fa-hand-holding-dollar text-emerald-400"></i> Record Settlement Payment
         </h3>
-        <button onclick="closeAllModals()" class="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition cursor-pointer">
+        <button onclick="closeAllModals()"
+          class="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition cursor-pointer">
           <i class="fa-solid fa-xmark text-sm"></i>
         </button>
       </div>
 
       <form onsubmit="handleSettleUp(event)" class="p-5 space-y-4">
-        <div id="settle-summary-box" class="p-3.5 rounded-xl bg-slate-950/80 border border-slate-800 text-center space-y-1">
-          <div class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Suggested Balance Equalization</div>
+        <div id="settle-summary-box"
+          class="p-3.5 rounded-xl bg-slate-950/80 border border-slate-800 text-center space-y-1">
+          <div class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Suggested Balance Equalization
+          </div>
           <div class="text-xl sm:text-2xl font-extrabold text-white" id="settle-amount-display">€0.00</div>
           <p class="text-[11px] text-slate-400" id="settle-direction-text">No outstanding debt between members.</p>
         </div>
 
         <div>
-          <label for="settle-payment-method-select" class="block text-xs font-medium text-slate-300 mb-1">Payment Method</label>
+          <label for="settle-payment-method-select" class="block text-xs font-medium text-slate-300 mb-1">Payment
+            Method</label>
           <select id="settle-payment-method-select"
             class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-brand-500 pr-8">
             <option value="Bizum">Bizum (Instant Transfer)</option>
@@ -1458,7 +1745,8 @@
         </div>
 
         <div class="pt-3 border-t border-slate-800 flex justify-end gap-2">
-          <button type="button" onclick="closeAllModals()" class="px-3 py-1.5 rounded-xl text-xs bg-slate-800 hover:bg-slate-700 !text-white font-semibold bg-slate-800 cursor-pointer">
+          <button type="button" onclick="closeAllModals()"
+            class="px-3 py-1.5 rounded-xl text-xs bg-slate-800 hover:bg-slate-700 !text-white font-semibold bg-slate-800 cursor-pointer">
             Cancel
           </button>
           <button type="submit" id="btn-confirm-settle"
@@ -1477,26 +1765,29 @@
     class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
     <div onclick="event.stopPropagation()"
       class="glass-modal rounded-2xl w-full max-w-lg my-auto overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200">
-      
+
       <div class="px-5 py-3.5 border-b border-slate-800 flex items-center justify-between bg-slate-900/90">
         <div>
           <h3 id="receipt-preview-merchant" class="text-sm font-bold text-white">Receipt Preview</h3>
           <p id="receipt-preview-date" class="text-[11px] text-slate-400">Date & Details</p>
         </div>
-        <button onclick="closeReceiptPreviewModal()" class="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition cursor-pointer">
+        <button onclick="closeReceiptPreviewModal()"
+          class="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition cursor-pointer">
           <i class="fa-solid fa-xmark text-sm"></i>
         </button>
       </div>
 
       <div class="p-5 flex flex-col items-center justify-center space-y-4">
         <!-- Receipt Image / Simulated Invoice Display -->
-        <div id="receipt-preview-content" class="w-full max-h-[60vh] flex items-center justify-center overflow-hidden rounded-xl border border-slate-800 bg-slate-950/60 p-2">
+        <div id="receipt-preview-content"
+          class="w-full max-h-[60vh] flex items-center justify-center overflow-hidden rounded-xl border border-slate-800 bg-slate-950/60 p-2">
           <!-- Populated dynamically: image or clean receipt bill format -->
         </div>
-        
+
         <div class="w-full flex items-center justify-between text-xs px-2 text-slate-300">
           <div><span class="text-slate-500">Paid by:</span> <strong id="receipt-preview-payer">Member 1</strong></div>
-          <div><span class="text-slate-500">Amount:</span> <strong class="text-base text-white font-bold" id="receipt-preview-amount">€0.00</strong></div>
+          <div><span class="text-slate-500">Amount:</span> <strong class="text-base text-white font-bold"
+              id="receipt-preview-amount">€0.00</strong></div>
         </div>
       </div>
 
@@ -1515,36 +1806,44 @@
             title="Delete this expense">
             <i class="fa-solid fa-trash-can"></i>
           </button>
-          <input type="file" id="preview-replace-photo-input" accept="image/*" class="hidden" onchange="handleReplaceReceiptPhoto(event)">
+          <input type="file" id="preview-replace-photo-input" accept="image/*" class="hidden"
+            onchange="handleReplaceReceiptPhoto(event)">
         </div>
-        <button onclick="closeReceiptPreviewModal()" class="px-4 py-1.5 text-xs rounded-xl bg-slate-800 hover:bg-slate-700 !text-white font-semibold font-medium cursor-pointer ml-auto">
+        <button onclick="closeReceiptPreviewModal()"
+          class="px-4 py-1.5 text-xs rounded-xl bg-slate-800 hover:bg-slate-700 !text-white font-semibold font-medium cursor-pointer ml-auto">
           Close
         </button>
       </div>
     </div>
   </div>
 
-  
+
   <!-- ========================================== -->
   <!-- REAL OCR SCANNING OVERLAY MODAL (Item 2)   -->
   <!-- ========================================== -->
-  <div id="ocr-scanning-overlay" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden flex flex-col items-center justify-center p-4">
-    <div class="glass-modal rounded-3xl p-6 sm:p-8 max-w-sm w-full text-center space-y-5 border border-cyan-500/40 shadow-2xl animate-in zoom-in-95 duration-200">
+  <div id="ocr-scanning-overlay"
+    class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden flex flex-col items-center justify-center p-4">
+    <div
+      class="glass-modal rounded-3xl p-6 sm:p-8 max-w-sm w-full text-center space-y-5 border border-cyan-500/40 shadow-2xl animate-in zoom-in-95 duration-200">
       <div class="relative w-20 h-20 mx-auto">
         <div class="absolute inset-0 rounded-2xl bg-cyan-500/20 animate-ping"></div>
-        <div class="relative w-20 h-20 rounded-2xl bg-gradient-to-tr from-cyan-600 to-indigo-600 flex items-center justify-center text-white text-3xl shadow-lg shadow-cyan-500/30">
+        <div
+          class="relative w-20 h-20 rounded-2xl bg-gradient-to-tr from-cyan-600 to-indigo-600 flex items-center justify-center text-white text-3xl shadow-lg shadow-cyan-500/30">
           <i class="fa-solid fa-receipt"></i>
         </div>
       </div>
       <div>
-        <h4 class="text-base sm:text-lg font-bold text-white flex items-center justify-center gap-2" id="ocr-modal-title">
+        <h4 class="text-base sm:text-lg font-bold text-white flex items-center justify-center gap-2"
+          id="ocr-modal-title">
           <i class="fa-solid fa-wand-magic-sparkles text-cyan-400"></i> Smart Receipt OCR
         </h4>
         <p class="text-xs text-slate-400 mt-1" id="ocr-status-text">Analyzing receipt image & text...</p>
       </div>
       <!-- Progress Bar -->
       <div class="w-full bg-slate-950 rounded-full h-2.5 overflow-hidden border border-slate-800">
-        <div id="ocr-progress-bar" class="bg-gradient-to-r from-cyan-500 to-indigo-500 h-2.5 rounded-full transition-all duration-300" style="width: 15%"></div>
+        <div id="ocr-progress-bar"
+          class="bg-gradient-to-r from-cyan-500 to-indigo-500 h-2.5 rounded-full transition-all duration-300"
+          style="width: 15%"></div>
       </div>
       <div class="flex items-center justify-center gap-2 text-[11px] text-slate-400 font-mono">
         <i class="fa-solid fa-shield-halved text-emerald-400"></i> 100% On-Device Client OCR
@@ -1563,27 +1862,35 @@
         <h3 class="text-sm sm:text-base font-bold text-white flex items-center gap-2">
           <i class="fa-solid fa-shield-halved text-emerald-400"></i> Private Cloud & AI Keys Vault
         </h3>
-        <button onclick="closeAllModals()" class="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition cursor-pointer">
+        <button onclick="closeAllModals()"
+          class="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition cursor-pointer">
           <i class="fa-solid fa-xmark text-sm"></i>
         </button>
       </div>
       <form onsubmit="saveFirebaseConfig(event)" class="p-5 space-y-3.5 text-xs">
-        <div class="p-2.5 rounded-xl bg-emerald-950/40 border border-emerald-500/30 text-[11px] text-emerald-300 flex items-start gap-2">
+        <div
+          class="p-2.5 rounded-xl bg-emerald-950/40 border border-emerald-500/30 text-[11px] text-emerald-300 flex items-start gap-2">
           <i class="fa-solid fa-lock mt-0.5 text-emerald-400"></i>
-          <span><strong>Private Storage Only:</strong> Keys entered here are stored strictly in your device's encrypted <code>localStorage</code> (or git-ignored <code>secrets.local.js</code>) and are <strong>never</strong> committed to public GitHub.</span>
+          <span><strong>Private Storage Only:</strong> Keys entered here are stored strictly in your device's encrypted
+            <code>localStorage</code> (or git-ignored <code>secrets.local.js</code>) and are <strong>never</strong>
+            committed to public GitHub.</span>
         </div>
         <div>
-          <label for="firebase-project-id-input" class="block text-slate-300 font-medium mb-1">Firebase Project ID</label>
+          <label for="firebase-project-id-input" class="block text-slate-300 font-medium mb-1">Firebase Project
+            ID</label>
           <input type="text" id="firebase-project-id-input" placeholder="e.g. your-firebase-project-id" required
             class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-brand-500">
         </div>
         <div>
-          <label for="firebase-api-key-input" class="block text-slate-300 font-medium mb-1">Firebase Web API Key (Private)</label>
+          <label for="firebase-api-key-input" class="block text-slate-300 font-medium mb-1">Firebase Web API Key
+            (Private)</label>
           <div class="relative">
-            <input type="password" id="firebase-api-key-input" placeholder="Loaded from local vault or paste Firebase API key..."
+            <input type="password" id="firebase-api-key-input"
+              placeholder="Loaded from local vault or paste Firebase API key..."
               class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-3 pr-9 py-2 text-slate-100 focus:outline-none focus:border-brand-500 font-mono">
             <button type="button" onclick="toggleSecretInputVisibility('firebase-api-key-input')"
-              class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white cursor-pointer" title="Show/Hide Key">
+              class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white cursor-pointer"
+              title="Show/Hide Key">
               <i class="fa-solid fa-eye text-xs"></i>
             </button>
           </div>
@@ -1593,32 +1900,40 @@
             <i class="fa-solid fa-wand-magic-sparkles mr-1"></i> Gemini 2.5 Flash Vision API Key (Option 3 Line-Item AI)
           </label>
           <div class="relative">
-            <input type="password" id="gemini-api-key-input" placeholder="Optional: Paste AI Studio key for 99% AI item extraction..."
+            <input type="password" id="gemini-api-key-input"
+              placeholder="Optional: Paste AI Studio key for 99% AI item extraction..."
               class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-3 pr-9 py-2 text-slate-100 focus:outline-none focus:border-cyan-500 font-mono">
             <button type="button" onclick="toggleSecretInputVisibility('gemini-api-key-input')"
-              class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white cursor-pointer" title="Show/Hide Key">
+              class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white cursor-pointer"
+              title="Show/Hide Key">
               <i class="fa-solid fa-eye text-xs"></i>
             </button>
           </div>
-          <span class="text-[10px] text-slate-400">When present, receipts use Gemini 2.5 Flash Vision (with automatic fallback to Android ML Kit v2 &amp; Tesseract offline).</span>
+          <span class="text-[10px] text-slate-400">When present, receipts use Gemini 2.5 Flash Vision (with automatic
+            fallback to Android ML Kit v2 &amp; Tesseract offline).</span>
         </div>
         <div>
-          <label for="firebase-room-code-input" class="block text-slate-300 font-medium mb-1">Sync Room / Household Code</label>
+          <label for="firebase-room-code-input" class="block text-slate-300 font-medium mb-1">Sync Room / Household
+            Code</label>
           <div class="flex gap-2">
-            <input type="text" id="firebase-room-code-input" placeholder="12+ characters, e.g. generated code" required minlength="12" autocomplete="off"
+            <input type="text" id="firebase-room-code-input" placeholder="12+ characters, e.g. generated code" required
+              minlength="12" autocomplete="off"
               class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-brand-500">
             <button type="button" onclick="generateSecureRoomCode()" title="Generate a long random room code"
               class="shrink-0 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 !text-white font-semibold cursor-pointer">
               <i class="fa-solid fa-dice"></i>
             </button>
           </div>
-          <span class="text-[10px] text-slate-500">Devices entering this code join the same private ledger. Treat it like a password: use a long random code (min 12 chars) and share it only with your household.</span>
+          <span class="text-[10px] text-slate-500">Devices entering this code join the same private ledger. Treat it
+            like a password: use a long random code (min 12 chars) and share it only with your household.</span>
         </div>
         <div class="pt-3 border-t border-slate-800 flex justify-end gap-2">
-          <button type="button" onclick="closeAllModals()" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 !text-white font-semibold cursor-pointer">
+          <button type="button" onclick="closeAllModals()"
+            class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 !text-white font-semibold cursor-pointer">
             Cancel
           </button>
-          <button type="submit" class="px-4 py-1.5 rounded-xl text-white font-semibold bg-brand-600 hover:bg-brand-500 shadow-md cursor-pointer">
+          <button type="submit"
+            class="px-4 py-1.5 rounded-xl text-white font-semibold bg-brand-600 hover:bg-brand-500 shadow-md cursor-pointer">
             Save & Connect
           </button>
         </div>
@@ -1633,11 +1948,12 @@
     class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
     <div onclick="event.stopPropagation()"
       class="glass-modal rounded-3xl w-full max-w-lg my-auto overflow-hidden shadow-2xl border border-slate-700/80 animate-in fade-in zoom-in-95 duration-200">
-      
+
       <!-- Modal Header -->
       <div class="px-5 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-900/90">
         <div class="flex items-center gap-2.5">
-          <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-600 via-indigo-500 to-cyan-400 flex items-center justify-center text-white shadow-lg shadow-brand-500/20">
+          <div
+            class="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-600 via-indigo-500 to-cyan-400 flex items-center justify-center text-white shadow-lg shadow-brand-500/20">
             <i class="fa-solid fa-graduation-cap text-base"></i>
           </div>
           <div>
@@ -1645,7 +1961,8 @@
             <p class="text-[11px] text-slate-400">Quick start guide & smart features walkthrough</p>
           </div>
         </div>
-        <button onclick="closeTutorialModal()" class="w-8 h-8 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 flex items-center justify-center transition cursor-pointer">
+        <button onclick="closeTutorialModal()"
+          class="w-8 h-8 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 flex items-center justify-center transition cursor-pointer">
           <i class="fa-solid fa-xmark text-sm"></i>
         </button>
       </div>
@@ -1659,7 +1976,9 @@
             <span>Scan or Snap Supermarket Receipts</span>
           </div>
           <p class="text-[11px] text-slate-400 leading-relaxed">
-            Tap <strong class="text-white">Scan Receipt</strong> to take a photo. DuoSpend's 3-tier OCR automatically detects the store, purchase date, total amount, and itemizes products from tickets (Mercadona, Lidl, Aldi, Carrefour, etc.).
+            Tap <strong class="text-white">Scan Receipt</strong> to take a photo. DuoSpend's 3-tier OCR automatically
+            detects the store, purchase date, total amount, and itemizes products from tickets (Mercadona, Lidl, Aldi,
+            Carrefour, etc.).
           </p>
         </div>
 
@@ -1670,7 +1989,9 @@
             <span>Fair Split & Personal Items</span>
           </div>
           <p class="text-[11px] text-slate-400 leading-relaxed">
-            Allocate expenses to your joint <strong class="text-white">Home Account</strong> or split 50/50. When buying personal items on a shared supermarket trip, tag them as <strong class="text-amber-400">Personal</strong> to deduct them from the shared total!
+            Allocate expenses to your joint <strong class="text-white">Home Account</strong> or split 50/50. When buying
+            personal items on a shared supermarket trip, tag them as <strong class="text-amber-400">Personal</strong> to
+            deduct them from the shared total!
           </p>
         </div>
 
@@ -1681,7 +2002,8 @@
             <span>Manage Household & Budget</span>
           </div>
           <p class="text-[11px] text-slate-400 leading-relaxed">
-            Open <strong class="text-white">Manage Household Members</strong> from the top pill or drawer menu to add partners/roommates, customize initial badges and accent colors, and configure monthly sub-budgets.
+            Open <strong class="text-white">Manage Household Members</strong> from the top pill or drawer menu to add
+            partners/roommates, customize initial badges and accent colors, and configure monthly sub-budgets.
           </p>
         </div>
 
@@ -1692,7 +2014,8 @@
             <span>100% Offline & Private Cloud Sync</span>
           </div>
           <p class="text-[11px] text-slate-400 leading-relaxed">
-            DuoSpend works offline in poor-signal supermarkets. When connected, sync receipts in real-time across devices via your private Firebase sync room code.
+            DuoSpend works offline in poor-signal supermarkets. When connected, sync receipts in real-time across
+            devices via your private Firebase sync room code.
           </p>
         </div>
       </div>
@@ -1700,7 +2023,8 @@
       <!-- Footer Actions -->
       <div class="px-5 py-3.5 border-t border-slate-800 flex items-center justify-between bg-slate-900/80">
         <label class="flex items-center gap-2 text-[11px] text-slate-400 cursor-pointer">
-          <input type="checkbox" id="tutorial-dont-show-checkbox" checked class="rounded bg-slate-950 border-slate-700 text-brand-500 focus:ring-0">
+          <input type="checkbox" id="tutorial-dont-show-checkbox" checked
+            class="rounded bg-slate-950 border-slate-700 text-brand-500 focus:ring-0">
           <span>Don't show automatically on launch</span>
         </label>
         <button type="button" onclick="closeTutorialModal()"
@@ -1713,7 +2037,8 @@
   </div>
 
   <!-- TOAST NOTIFICATION CONTAINER -->
-  <div id="toast-notifications-container" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
+  <div id="toast-notifications-container" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none">
+  </div>
 
   <!-- ========================================== -->
   <!-- JAVASCRIPT LOGIC                           -->
@@ -1855,7 +2180,7 @@
       if (budgetDisplay) budgetDisplay.innerText = `${household.currency}${(household.monthlyBudget || 500).toFixed(0)}`;
     }
 
-        // DATA STATE
+    // DATA STATE
     const STORAGE_KEY = 'duospend_expenses_v1';
     const SETTINGS_KEY = 'duospend_settings_v1';
     const LANG_KEY = 'duospend_lang_v1';
@@ -1883,9 +2208,9 @@
       members: (window.DUOSPEND_LOCAL_SECRETS && Array.isArray(window.DUOSPEND_LOCAL_SECRETS.members))
         ? window.DUOSPEND_LOCAL_SECRETS.members.map(m => ({ ...m }))
         : [
-            { id: 'p1', name: 'Member 1', badge: 'M1', color: '#06b6d4' },
-            { id: 'p2', name: 'Member 2', badge: 'M2', color: '#ec4899' }
-          ],
+          { id: 'p1', name: 'Member 1', badge: 'M1', color: '#06b6d4' },
+          { id: 'p2', name: 'Member 2', badge: 'M2', color: '#ec4899' }
+        ],
       quickMerchants: ['AlCash', 'Lidl', 'Aldi', 'Mercadona', 'Deza'], // Item 9
       customCategories: [] // Item 9: e.g. Pharmacy, Pets, DIY, Holiday
     };
@@ -2158,7 +2483,7 @@
       loadFirebaseConfig();
       loadExpensesFromStorage();
       loadSettlementsFromStorage();
-      
+
       applyTranslations();
       updateHouseholdUI();
       populateLedgerMonthFilter(); // Item 8
@@ -2287,7 +2612,7 @@
       document.getElementById('text-btn-import-json').innerText = t.importJSON;
       const invBtn = document.getElementById('text-btn-invoice-json');
       if (invBtn) invBtn.innerText = t.invoicesJSON || 'Invoices JSON';
-      
+
       document.getElementById('ledger-search-input').placeholder = t.searchPlaceholder;
       document.getElementById('text-btn-clear-filters').innerText = t.clearFilters;
 
@@ -2300,7 +2625,7 @@
 
       document.getElementById('text-empty-title').innerText = t.noExpenses;
       document.getElementById('text-empty-desc').innerText = t.noExpensesDesc;
-      
+
 
       document.getElementById('receipt-modal-title-text').innerText = t.addExpenseTitle;
       document.getElementById('receipt-modal-subtitle-text').innerText = t.addExpenseSubtitle;
@@ -2442,7 +2767,7 @@
           if (history.state && history.state.duospendModal) {
             history.back();
           }
-        } catch (err) {}
+        } catch (err) { }
       }
     }
 
@@ -2465,7 +2790,7 @@
           if (history.state && history.state.duospendModal) {
             history.back();
           }
-        } catch (err) {}
+        } catch (err) { }
       }
     }
 
@@ -2499,7 +2824,7 @@
           if (history.state && history.state.duospendModal) {
             history.back();
           }
-        } catch (err) {}
+        } catch (err) { }
       }
     }
 
@@ -2835,7 +3160,7 @@
       });
     }
 
-    
+
     // IMAGE COMPRESSION (Item 1: Prevents 5MB localStorage QuotaExceededError)
     function compressImage(dataUrl, maxDim = 1000, quality = 0.72) {
       return new Promise((resolve) => {
@@ -2894,7 +3219,7 @@
             // Contrast enhancement factor
             const contrast = 1.35;
             const factor = (259 * (contrast + 255)) / (255 * (259 - contrast));
-            
+
             for (let i = 0; i < d.length; i += 4) {
               // Grayscale luminance
               const gray = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
@@ -2928,7 +3253,7 @@
       showOcrScanning('Optimizing & compressing receipt image...');
 
       const reader = new FileReader();
-      reader.onload = async function(evt) {
+      reader.onload = async function (evt) {
         const rawDataUrl = evt.target.result;
         // Item 1: Compress for storage
         const compressedStoragePhoto = await compressImage(rawDataUrl, 1000, 0.72);
@@ -3188,13 +3513,13 @@
       }
     }
 
-    
+
     function handleManualImageAttach(e) {
       const file = e.target.files[0];
       if (!file) return;
 
       const reader = new FileReader();
-      reader.onload = async function(evt) {
+      reader.onload = async function (evt) {
         const rawPhoto = evt.target.result;
         // Item 1: Compress before attaching
         const photoDataUrl = await compressImage(rawPhoto, 1000, 0.72);
@@ -3473,7 +3798,7 @@
       }
     }
 
-        // EXPENSES STORAGE & SEEDING
+    // EXPENSES STORAGE & SEEDING
     function loadExpensesFromStorage() {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
@@ -3505,7 +3830,7 @@
             localStorage.setItem(STORAGE_KEY, JSON.stringify(stripped));
             showToast('Device storage is full: expenses saved, but receipt photos could not be stored. Export a JSON backup and remove old photos.', 'error');
             return true;
-          } catch (err2) {}
+          } catch (err2) { }
         }
         showToast('Could not save data: device storage is full. Please export a backup now.', 'error');
         return false;
@@ -3531,9 +3856,9 @@
       }
     }
 
-    
 
-    
+
+
 
     // MULTI-CURRENCY LIVE CONVERSION ON ENTRY (v0.11 Item 5: Travel Mode)
     async function fetchLiveExchangeRates() {
@@ -3544,7 +3869,7 @@
           if (parsed && parsed.rates) {
             fxRatesPerEur = { ...fxRatesPerEur, ...parsed.rates };
           }
-        } catch (err) {}
+        } catch (err) { }
       }
       try {
         const res = await fetch('https://open.er-api.com/v6/latest/EUR');
@@ -4099,7 +4424,7 @@
       }
     }
     // TABLE RENDERING & FILTERING (Item 2: Current Calendar Month default, Item 13: Border-left highlight)
-    
+
     function onLedgerMonthChange() {
       calculateMetricsAndSettlement();
       renderTable();
@@ -4385,6 +4710,7 @@
       [bCategory, bMerchant, bPurchaser, bTrend].filter(Boolean).forEach(b => {
         b.className = 'px-3 py-1 rounded-lg text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition cursor-pointer';
         b.classList.remove('active-chart-mode', 'bg-brand-600', '!text-white');
+        b.style.color = '';
       });
 
       let activeBtn = bCategory;
@@ -4393,8 +4719,7 @@
       else if (mode === 'trend') activeBtn = bTrend;
 
       if (activeBtn) {
-        activeBtn.className = 'px-3 py-1 rounded-lg bg-brand-600 !text-white font-medium transition cursor-pointer shadow-sm active-chart-mode';
-        activeBtn.style.color = '#ffffff';
+        activeBtn.className = 'px-3 py-1 rounded-lg bg-brand-600 font-medium transition cursor-pointer shadow-sm active-chart-mode';
       }
 
       renderBarChart();
@@ -4990,7 +5315,7 @@
       if (!file || !targetId) return;
 
       const reader = new FileReader();
-      reader.onload = async function(evt) {
+      reader.onload = async function (evt) {
         const compressed = await compressImage(evt.target.result, 1000, 0.72);
         const idx = expenses.findIndex(e => e.id === targetId);
         if (idx !== -1) {
@@ -5060,7 +5385,7 @@
     function exportToJSON() {
       const backupData = {
         app: 'DuoSpend',
-        version: 'v0.13.7',
+        version: 'v0.13.8',
         exportedAt: new Date().toISOString(),
         household,
         settlements,
@@ -5069,7 +5394,7 @@
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
       const downloadAnchor = document.createElement('a');
       downloadAnchor.setAttribute("href", dataStr);
-      downloadAnchor.setAttribute("download", `DuoSpend_Backup_v0.13.7_${new Date().toISOString().split('T')[0]}.json`);
+      downloadAnchor.setAttribute("download", `DuoSpend_Backup_v0.13.8_${new Date().toISOString().split('T')[0]}.json`);
       document.body.appendChild(downloadAnchor);
       downloadAnchor.click();
       downloadAnchor.remove();
@@ -5128,7 +5453,7 @@
 
       // Item 7: Dark text in light mode, light text in dark mode
       toast.className = `glass-card bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 text-xs font-semibold px-4 py-3 rounded-xl shadow-2xl flex items-center justify-between gap-3 pointer-events-auto transform translate-y-2 opacity-0 transition-all duration-300`;
-      
+
       let inner = `<div class="flex items-center gap-2.5"><i class="fa-solid ${icon} text-sm"></i> <span>${escapeHtml(message)}</span></div>`;
       if (undoCallback && typeof undoCallback === 'function') {
         inner += `<button type="button" class="px-2.5 py-1 text-xs font-bold text-brand-600 dark:text-brand-300 hover:underline bg-brand-50 dark:bg-brand-950/60 rounded-lg cursor-pointer ml-2 transition" id="toast-undo-btn">${escapeHtml(undoText)}</button>`;
@@ -5158,7 +5483,7 @@
       }, displayTime);
     }
 
-    
+
     // 1-CLICK MONTHLY WHATSAPP & PDF SUMMARY SHARE (Item 10)
     function shareMonthlyWhatsApp() {
       const activeExpenses = getActiveFilteredExpenses();
@@ -5194,7 +5519,7 @@
       let text = `*📊 DuoSpend Household Summary (${periodTitle})*\n\n`;
       text += `💰 *Total Spend:* ${cur}${total.toFixed(2)}\n`;
       text += `🎯 *Monthly Budget:* ${cur}${(household.monthlyBudget || 500).toFixed(0)} (${Math.round((total / (household.monthlyBudget || 500)) * 100)}%)\n\n`;
-      
+
       text += `*👥 Who Paid:*\n`;
       Object.keys(paidByMember).forEach(name => {
         text += `• ${name}: ${cur}${paidByMember[name].toFixed(2)}\n`;
@@ -5325,7 +5650,7 @@
         // Realtime listener + Smart Auto-Sync on App Load
         if (!isFirebaseListening && firebaseConfig.roomCode) {
           isFirebaseListening = true;
-          ensureAuth().catch(() => {});
+          ensureAuth().catch(() => { });
           const roomRef = firestoreDb.collection('households').doc(firebaseConfig.roomCode);
           roomRef.onSnapshot(doc => {
             if (doc.exists) {
@@ -5334,9 +5659,9 @@
                 try {
                   const u = firebase.auth && firebase.auth().currentUser;
                   if (u && Array.isArray(data.members) && !data.members.includes(u.uid)) {
-                    roomRef.set({ members: firebase.firestore.FieldValue.arrayUnion(u.uid) }, { merge: true }).catch(() => {});
+                    roomRef.set({ members: firebase.firestore.FieldValue.arrayUnion(u.uid) }, { merge: true }).catch(() => { });
                   }
-                } catch(e) {}
+                } catch (e) { }
                 const cloudExpenses = Array.isArray(data.expenses) ? data.expenses : [];
                 const merged = mergeExpenseLists(expenses, cloudExpenses);
                 const countChanged = merged.length !== expenses.length;
@@ -5486,7 +5811,7 @@
         }
 
         const roomRef = firestoreDb.collection('households').doc(roomCode);
-        await ensureAuth().catch(() => {});
+        await ensureAuth().catch(() => { });
         if (!silent) {
           setFirebaseSyncProgress(75, 'Uploading to Cloud Firestore...', `Writing to /households/${roomCode} ...`);
         }
@@ -5503,10 +5828,10 @@
           if (authUser && authUser.uid) {
             payload.members = firebase.firestore.FieldValue.arrayUnion(authUser.uid);
           }
-        } catch (e) {}
+        } catch (e) { }
 
         const writePromise = roomRef.set(payload, { merge: true });
-        const timeoutPromise = new Promise((_, reject) => 
+        const timeoutPromise = new Promise((_, reject) =>
           setTimeout(() => reject(new Error('Network timeout writing to Firestore (10s). Check that Cloud Firestore is created in Firebase Console or check internet.')), 10000)
         );
         await Promise.race([writePromise, timeoutPromise]);
@@ -5537,7 +5862,7 @@
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
     }
-  
+
   </script>
 </body>
 

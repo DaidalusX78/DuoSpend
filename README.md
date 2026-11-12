@@ -2,7 +2,7 @@
 
 > **Modern, privacy-first household expense & receipt tracker with smart OCR, real-time sync, and fair bill-splitting.**
 
-![Version](https://img.shields.io/badge/version-v0.13.7-indigo.svg)
+![Version](https://img.shields.io/badge/version-v0.13.8-indigo.svg)
 ![PWA](https://img.shields.io/badge/PWA-100%25%20Offline%20Ready-emerald.svg)
 ![Architecture](https://img.shields.io/badge/architecture-Client--Side%20%2F%20Serverless-cyan.svg)
 ![Privacy](https://img.shields.io/badge/privacy-Zero%20Telemetry%20%7C%20Local--First-blue.svg)
