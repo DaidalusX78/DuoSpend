@@ -24,6 +24,7 @@
   <!-- Firebase App & Firestore SDKs (v9 compat for zero-build vanilla JS) -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <!-- Font Awesome for clean icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
@@ -1603,9 +1604,15 @@
         </div>
         <div>
           <label for="firebase-room-code-input" class="block text-slate-300 font-medium mb-1">Sync Room / Household Code</label>
-          <input type="text" id="firebase-room-code-input" placeholder="e.g. my-household-room" required
-            class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-brand-500">
-          <span class="text-[10px] text-slate-500">Both devices using this room code share the exact same ledger.</span>
+          <div class="flex gap-2">
+            <input type="text" id="firebase-room-code-input" placeholder="12+ characters, e.g. generated code" required minlength="12" autocomplete="off"
+              class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-brand-500">
+            <button type="button" onclick="generateSecureRoomCode()" title="Generate a long random room code"
+              class="shrink-0 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 !text-white font-semibold cursor-pointer">
+              <i class="fa-solid fa-dice"></i>
+            </button>
+          </div>
+          <span class="text-[10px] text-slate-500">Devices entering this code join the same private ledger. Treat it like a password: use a long random code (min 12 chars) and share it only with your household.</span>
         </div>
         <div class="pt-3 border-t border-slate-800 flex justify-end gap-2">
           <button type="button" onclick="closeAllModals()" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 !text-white font-semibold cursor-pointer">
@@ -5296,9 +5303,10 @@
         firestoreDb = firebase.firestore();
         updateFirebaseStatus('Connected', true);
 
-        // Realtime listener + Smart Auto-Sync on App Load
+        // Realtime listener + Smart Auto-Sync on App Load (after anonymous auth + household membership)
         if (!isFirebaseListening && firebaseConfig.roomCode) {
           isFirebaseListening = true;
+          ensureAuthAndMembership(firebaseConfig.roomCode).then(() => {
           const roomRef = firestoreDb.collection('households').doc(firebaseConfig.roomCode);
           roomRef.onSnapshot(doc => {
             if (doc.exists) {
@@ -5336,13 +5344,82 @@
             }
           }, err => {
             console.warn('Firebase realtime listener warning:', err.message);
+            isFirebaseListening = false;
             updateFirebaseStatus('Offline', false);
+          });
+          }).catch(err => {
+            isFirebaseListening = false;
+            console.warn('Firebase auth/membership failed:', err && err.message);
+            updateFirebaseStatus(err && err.code === 'permission-denied' ? 'Access denied' : 'Offline', false);
+            if (manual || (err && err.code === 'permission-denied')) {
+              showToast(err && err.code === 'permission-denied'
+                ? 'Cloud sync: this device is not authorized for that room code.'
+                : 'Cloud sync could not sign in. Check connection / enable Anonymous sign-in in Firebase.', 'error');
+            }
           });
         }
       } catch (err) {
         console.warn('Firebase init error:', err);
         updateFirebaseStatus('Offline', false);
         if (manual) showToast('Firebase credentials required for live sync.', 'error');
+      }
+    }
+
+    // Generate a long, random, unguessable room code (v0.14 security)
+    function generateSecureRoomCode() {
+      const alphabet = 'abcdefghjkmnpqrstuvwxyz23456789';
+      const bytes = new Uint8Array(20);
+      crypto.getRandomValues(bytes);
+      let code = '';
+      bytes.forEach((b, i) => {
+        code += alphabet[b % alphabet.length];
+        if (i % 5 === 4 && i < bytes.length - 1) code += '-';
+      });
+      const inp = document.getElementById('firebase-room-code-input');
+      if (inp) inp.value = code;
+      showToast('Secure room code generated. Save, then enter the same code on your other device.');
+    }
+
+    // Anonymous sign-in + household membership (v0.14). Falls back silently if the Auth SDK is unavailable.
+    async function ensureAuthAndMembership(roomCode) {
+      if (!firebase.auth) {
+        console.warn('Firebase Auth SDK not loaded: syncing without authentication.');
+        return;
+      }
+      window._membershipOk = window._membershipOk || {};
+      if (window._membershipOk[roomCode] && firebase.auth().currentUser) return;
+      await ensureAuthAndMembershipInner(roomCode);
+      window._membershipOk[roomCode] = true;
+    }
+
+    async function ensureAuthAndMembershipInner(roomCode) {
+      const auth = firebase.auth();
+      if (!auth.currentUser) {
+        await auth.signInAnonymously();
+      }
+      const uid = auth.currentUser.uid;
+      const roomRef = firestoreDb.collection('households').doc(roomCode);
+      const FieldValue = firebase.firestore.FieldValue;
+
+      let snap;
+      try {
+        snap = await roomRef.get();
+      } catch (err) {
+        if (err.code !== 'permission-denied') throw err;
+        // Not a member yet: request to join this household using the room code
+        await roomRef.update({ members: FieldValue.arrayUnion(uid) });
+        return;
+      }
+      if (!snap.exists) {
+        await roomRef.set({ members: [uid], createdAt: new Date().toISOString() });
+        return;
+      }
+      const members = snap.data().members;
+      if (!Array.isArray(members) || members.length === 0) {
+        // Legacy room created before v0.14: this device claims it
+        await roomRef.update({ members: [uid] });
+      } else if (!members.includes(uid)) {
+        await roomRef.update({ members: FieldValue.arrayUnion(uid) });
       }
     }
 
@@ -5421,6 +5498,7 @@
         }
 
         const roomRef = firestoreDb.collection('households').doc(roomCode);
+        await ensureAuthAndMembership(roomCode);
         if (!silent) {
           setFirebaseSyncProgress(75, 'Uploading to Cloud Firestore...', `Writing to /households/${roomCode} ...`);
         }

@@ -1,0 +1,61 @@
+rules_version = '2';
+
+// DuoSpend Firestore security rules
+// Paste into Firebase Console > Firestore Database > Rules, then Publish.
+// Requires: Authentication > Sign-in method > Anonymous = Enabled.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /households/{roomId} {
+
+      function signedIn() {
+        return request.auth != null;
+      }
+      function currentMembers() {
+        return resource.data.get('members', []);
+      }
+      function isMember() {
+        return signedIn() && request.auth.uid in currentMembers();
+      }
+      function isLegacy() {
+        // Room created before auth was introduced (no members list yet)
+        return signedIn() && currentMembers().size() == 0;
+      }
+
+      // Single-document reads only (no listing/enumeration of households).
+      // resource == null lets a device learn that a room does not exist yet, so it can create it.
+      allow get: if signedIn() && (resource == null || isMember() || isLegacy());
+      allow list: if false;
+
+      // Create a new household: long unguessable id, creator becomes the only member.
+      allow create: if signedIn()
+                    && roomId.size() >= 12
+                    && request.resource.data.members == [request.auth.uid];
+
+      // Members update ledger data but cannot change the members list here.
+      allow update: if isMember()
+                    && request.resource.data.members == resource.data.members;
+
+      // First device claims a legacy room.
+      allow update: if isLegacy()
+                    && request.resource.data.members == [request.auth.uid];
+
+      // Join: a new device that knows the room id adds ONLY itself (max 6 members).
+      allow update: if signedIn()
+                    && !isMember()
+                    && currentMembers().size() > 0
+                    && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['members'])
+                    && request.resource.data.members.hasAll(currentMembers())
+                    && request.resource.data.members.size() == currentMembers().size() + 1
+                    && request.auth.uid in request.resource.data.members
+                    && request.resource.data.members.size() <= 6;
+
+      allow delete: if false;
+    }
+
+    // Everything else is locked.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
