@@ -8,7 +8,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#0b0f19">
-  <title>DuoSpend v0.13 — Household Receipt & Expense Tracker</title>
+  <title>DuoSpend v0.13.5 — Household Receipt & Expense Tracker</title>
 
   <!-- Private Local API Keys Vault (git-ignored, never pushed to public repo) -->
   <script src="./secrets.local.js" onerror="window._noLocalSecrets=true"></script>
@@ -305,7 +305,7 @@
             <div id="brand-title-row" class="flex items-center gap-2">
               <span class="font-extrabold text-xl tracking-tight text-slate-900 dark:text-white">Duo<span class="text-brand-500">Spend</span></span>
               <span id="app-version-badge"
-                class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-brand-50 text-brand-600 border border-brand-200 dark:bg-slate-800 dark:!text-white dark:border-brand-500/40">v0.13</span>
+                class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-brand-50 text-brand-600 border border-brand-200 dark:bg-slate-800 dark:!text-white dark:border-brand-500/40">v0.13.5</span>
             </div>
             <p id="brand-subtitle" class="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">Receipt scanning & balanced expense splitting</p>
           </div>
@@ -395,7 +395,7 @@
             </div>
             <div>
               <span class="text-xl sm:text-2xl font-extrabold text-white">Duo<span class="text-brand-500">Spend</span></span>
-              <span id="drawer-version-badge" class="text-xs font-bold px-2 py-0.5 rounded-full bg-brand-50 text-brand-600 border border-brand-200 dark:bg-slate-800 dark:!text-white dark:border-brand-500/40 ml-1">v0.13</span>
+              <span id="drawer-version-badge" class="text-xs font-bold px-2 py-0.5 rounded-full bg-brand-50 text-brand-600 border border-brand-200 dark:bg-slate-800 dark:!text-white dark:border-brand-500/40 ml-1">v0.13.5</span>
             </div>
           </div>
           <button onclick="closeAllModals()"
@@ -597,7 +597,7 @@
           <i class="fa-regular fa-copyright text-brand-400"></i>
           <span id="menu-credits-text">created by <strong class="text-white font-semibold">Marc Bailey 2026</strong></span>
         </div>
-        <div class="text-xs text-slate-500 mt-1">DuoSpend v0.13 — Android Ready Architecture</div>
+        <div class="text-xs text-slate-500 mt-1">DuoSpend v0.13.5 — Android Ready Architecture</div>
       </div>
 
     </div>
@@ -5060,7 +5060,7 @@
     function exportToJSON() {
       const backupData = {
         app: 'DuoSpend',
-        version: 'v0.13',
+        version: 'v0.13.5',
         exportedAt: new Date().toISOString(),
         household,
         settlements,
@@ -5069,7 +5069,7 @@
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
       const downloadAnchor = document.createElement('a');
       downloadAnchor.setAttribute("href", dataStr);
-      downloadAnchor.setAttribute("download", `DuoSpend_Backup_v0.13_${new Date().toISOString().split('T')[0]}.json`);
+      downloadAnchor.setAttribute("download", `DuoSpend_Backup_v0.13.5_${new Date().toISOString().split('T')[0]}.json`);
       document.body.appendChild(downloadAnchor);
       downloadAnchor.click();
       downloadAnchor.remove();
@@ -5322,15 +5322,21 @@
         firestoreDb = firebase.firestore();
         updateFirebaseStatus('Connected', true);
 
-        // Realtime listener + Smart Auto-Sync on App Load (after anonymous auth + household membership)
+        // Realtime listener + Smart Auto-Sync on App Load
         if (!isFirebaseListening && firebaseConfig.roomCode) {
           isFirebaseListening = true;
-          ensureAuthAndMembership(firebaseConfig.roomCode).then(() => {
+          ensureAuth().catch(() => {});
           const roomRef = firestoreDb.collection('households').doc(firebaseConfig.roomCode);
           roomRef.onSnapshot(doc => {
             if (doc.exists) {
               const data = doc.data();
               if (data) {
+                try {
+                  const u = firebase.auth && firebase.auth().currentUser;
+                  if (u && Array.isArray(data.members) && !data.members.includes(u.uid)) {
+                    roomRef.set({ members: firebase.firestore.FieldValue.arrayUnion(u.uid) }, { merge: true }).catch(() => {});
+                  }
+                } catch(e) {}
                 const cloudExpenses = Array.isArray(data.expenses) ? data.expenses : [];
                 const merged = mergeExpenseLists(expenses, cloudExpenses);
                 const countChanged = merged.length !== expenses.length;
@@ -5360,21 +5366,13 @@
             } else if (expenses.length > 0) {
               // Room doc doesn't exist yet on Firestore — seed it automatically on load
               syncFirebaseNow(true);
+            } else {
+              updateFirebaseStatus('Synced', true);
             }
           }, err => {
             console.warn('Firebase realtime listener warning:', err.message);
             isFirebaseListening = false;
             updateFirebaseStatus('Offline', false);
-          });
-          }).catch(err => {
-            isFirebaseListening = false;
-            console.warn('Firebase auth/membership failed:', err && err.message);
-            updateFirebaseStatus(err && err.code === 'permission-denied' ? 'Access denied' : 'Offline', false);
-            if (manual || (err && err.code === 'permission-denied')) {
-              showToast(err && err.code === 'permission-denied'
-                ? 'Cloud sync: this device is not authorized for that room code.'
-                : 'Cloud sync could not sign in. Check connection / enable Anonymous sign-in in Firebase.', 'error');
-            }
           });
         }
       } catch (err) {
@@ -5399,52 +5397,17 @@
       showToast('Secure room code generated. Save, then enter the same code on your other device.');
     }
 
-    // Anonymous sign-in + household membership (v0.14). Falls back silently if the Auth SDK is unavailable.
-    async function ensureAuthAndMembership(roomCode) {
-      if (!firebase.auth) {
-        console.warn('Firebase Auth SDK not loaded: syncing without authentication.');
-        return;
-      }
-      window._membershipOk = window._membershipOk || {};
-      if (window._membershipOk[roomCode] && firebase.auth().currentUser) return;
-      await ensureAuthAndMembershipInner(roomCode);
-      window._membershipOk[roomCode] = true;
-    }
-
-    async function ensureAuthAndMembershipInner(roomCode) {
-      const auth = firebase.auth();
-      if (!auth.currentUser) {
-        try {
-          await auth.signInAnonymously();
-        } catch (authErr) {
-          console.warn('Anonymous auth sign-in skipped (enable in Firebase Console > Authentication):', authErr && authErr.message);
-          return;
-        }
-      }
-      if (!auth.currentUser) return;
-      const uid = auth.currentUser.uid;
-      const roomRef = firestoreDb.collection('households').doc(roomCode);
-      const FieldValue = firebase.firestore.FieldValue;
-
-      let snap;
+    // Non-blocking silent authentication (Anonymous sign-in)
+    async function ensureAuth() {
+      if (!window.firebase || !firebase.auth) return null;
       try {
-        snap = await roomRef.get();
+        const auth = firebase.auth();
+        if (auth.currentUser) return auth.currentUser.uid;
+        const res = await auth.signInAnonymously();
+        return res.user ? res.user.uid : null;
       } catch (err) {
-        if (err.code !== 'permission-denied') throw err;
-        // Not a member yet: request to join this household using the room code
-        await roomRef.update({ members: FieldValue.arrayUnion(uid) });
-        return;
-      }
-      if (!snap.exists) {
-        await roomRef.set({ members: [uid], createdAt: new Date().toISOString() });
-        return;
-      }
-      const members = snap.data().members;
-      if (!Array.isArray(members) || members.length === 0) {
-        // Legacy room created before v0.14: this device claims it
-        await roomRef.update({ members: [uid] });
-      } else if (!members.includes(uid)) {
-        await roomRef.update({ members: FieldValue.arrayUnion(uid) });
+        console.warn('Anonymous auth sign-in notice (enable in Firebase Console > Authentication):', err && err.message);
+        return null;
       }
     }
 
@@ -5523,18 +5486,26 @@
         }
 
         const roomRef = firestoreDb.collection('households').doc(roomCode);
-        await ensureAuthAndMembership(roomCode);
+        await ensureAuth().catch(() => {});
         if (!silent) {
           setFirebaseSyncProgress(75, 'Uploading to Cloud Firestore...', `Writing to /households/${roomCode} ...`);
         }
 
-        await roomRef.set({
+        const payload = {
           updatedAt: new Date().toISOString(),
           updatedBy: window._clientId,
           household: household,
           expenses: expenses,
           settlements: settlements
-        }, { merge: true });
+        };
+        try {
+          const authUser = firebase.auth && firebase.auth().currentUser;
+          if (authUser && authUser.uid) {
+            payload.members = firebase.firestore.FieldValue.arrayUnion(authUser.uid);
+          }
+        } catch (e) {}
+
+        await roomRef.set(payload, { merge: true });
 
         const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
         setFirebaseSyncProgress(100, 'Cloud Sync Complete!', `Synced ${expenseCount} receipt(s) to "${roomCode}" at ${timeStr}`);
