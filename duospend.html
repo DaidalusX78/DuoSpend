@@ -455,14 +455,14 @@
           </button>
 
           <!-- Household Settings Option (Item 9: Opens Manage Household Members) -->
-          <button id="btn-menu-settings" onclick="closeAllModals(); openSettingsModal('members');"
+          <button id="btn-menu-settings" onclick="openSettingsModal('members');"
             class="w-full flex items-center gap-4 px-4 py-3.5 text-base sm:text-lg font-semibold text-slate-900 dark:text-slate-100 hover:text-slate-950 dark:hover:text-white bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200/80 dark:hover:bg-slate-700/80 border border-slate-200 dark:border-slate-700/80 rounded-2xl transition cursor-pointer shadow-sm">
             <i class="fa-solid fa-sliders text-slate-900 dark:text-sky-300 text-xl w-6 text-center"></i>
             <span id="text-menu-settings">Manage Household Members</span>
           </button>
 
           <!-- User Guide / Tutorial Option (v0.13 Item 1) -->
-          <button id="btn-menu-guide" onclick="closeAllModals(); openTutorialModal();"
+          <button id="btn-menu-guide" onclick="openTutorialModal();"
             class="w-full flex items-center gap-4 px-4 py-3.5 text-base sm:text-lg font-semibold text-slate-900 dark:text-slate-100 hover:text-slate-950 dark:hover:text-white bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200/80 dark:hover:bg-slate-700/80 border border-slate-200 dark:border-slate-700/80 rounded-2xl transition cursor-pointer shadow-sm">
             <i class="fa-solid fa-circle-question text-slate-900 dark:text-sky-300 text-xl w-6 text-center"></i>
             <span id="text-menu-guide">How to Use & Guide</span>
@@ -2402,9 +2402,28 @@
       });
     }
 
+    // HIDE ALL MODALS (used when transitioning/switching between modals without touching browser history)
+    function hideAllModals() {
+      const modals = [
+        'receipt-modal-backdrop',
+        'household-settings-modal-backdrop',
+        'hamburger-drawer-overlay',
+        'member-expenses-modal',
+        'category-expenses-modal',
+        'settle-up-modal',
+        'receipt-image-modal',
+        'firebase-config-modal',
+        'user-tutorial-modal-backdrop'
+      ];
+      modals.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.add('hidden');
+      });
+    }
+
     // TUTORIAL & USER GUIDE (v0.13 Item 1)
     function openTutorialModal() {
-      closeAllModals();
+      hideAllModals();
       pushModalHistoryState();
       const modal = document.getElementById('user-tutorial-modal-backdrop');
       if (modal) modal.classList.remove('hidden');
@@ -3405,7 +3424,7 @@
     }
 
     function openSettingsModal(focusSection = null) {
-      closeAllModals();
+      hideAllModals();
       pushModalHistoryState();
       // Populate monthly budget
       const bInput = document.getElementById('settings-budget-input');
@@ -3652,7 +3671,7 @@
 
     // MODAL & RECEIPT PRESETS INTERACTION
     function openReceiptModal(mode = 'manual', editId = null) {
-      closeAllModals();
+      hideAllModals();
       pushModalHistoryState();
       const modal = document.getElementById('receipt-modal-backdrop');
       const detectedBadge = document.getElementById('ocr-detected-badge');
@@ -4614,7 +4633,7 @@
     }
     // POPUP: MEMBER EXPENSES MODAL (Item 15)
     function openMemberExpensesModal(memberId) {
-      closeAllModals();
+      hideAllModals();
       pushModalHistoryState();
       currentMemberModalMode = memberId;
       const modal = document.getElementById('member-expenses-modal');
@@ -4719,7 +4738,7 @@
 
     // POPUP: CATEGORY EXPENSES MODAL (Item 18 & v0.11 Item 3 Sub-Budgets)
     function openCategoryExpensesModal(categoryKey) {
-      closeAllModals();
+      hideAllModals();
       pushModalHistoryState();
       const modal = document.getElementById('category-expenses-modal');
       const title = document.getElementById('cat-modal-title');
@@ -4793,7 +4812,7 @@
 
     // POPUP: SETTLE UP MODAL & TRANSACTION HANDLING (Item 16)
     function openSettleUpModal() {
-      closeAllModals();
+      hideAllModals();
       const modal = document.getElementById('settle-up-modal');
       const cur = household.currency;
       const amtDisplay = document.getElementById('settle-amount-display');
@@ -4874,7 +4893,7 @@
         parentModal = 'category-expenses-modal';
         catModal.classList.add('hidden');
       } else {
-        closeAllModals();
+        hideAllModals();
       }
       window._parentModalBeforeReceiptView = parentModal;
 
@@ -5243,7 +5262,7 @@
     }
 
     function configureFirebaseModal() {
-      closeAllModals();
+      hideAllModals();
       pushModalHistoryState();
       document.getElementById('firebase-project-id-input').value = firebaseConfig.projectId || '';
       document.getElementById('firebase-api-key-input').value = firebaseConfig.apiKey || DEFAULT_FIREBASE_API_KEY;

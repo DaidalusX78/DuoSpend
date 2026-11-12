@@ -1,5 +1,5 @@
-// DuoSpend Service Worker v0.13.3
-const CACHE_NAME = 'duospend-cache-v0.13.3';
+// DuoSpend Service Worker v0.13.4
+const CACHE_NAME = 'duospend-cache-v0.13.4';
 const ASSETS_TO_CACHE = [
   './duospend.html',
   './manifest.json',
