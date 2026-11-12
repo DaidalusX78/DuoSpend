@@ -8,7 +8,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#0b0f19">
-  <title>DuoSpend v0.13.8 — Household Receipt & Expense Tracker</title>
+  <title>DuoSpend v0.13.9 — Household Receipt & Expense Tracker</title>
 
   <!-- Private Local API Keys Vault (git-ignored, never pushed to public repo) -->
   <script src="./secrets.local.js" onerror="window._noLocalSecrets=true"></script>
@@ -66,7 +66,15 @@
       color: #e2e8f0;
     }
 
-    html.dark .glass-card,
+    html.dark .glass-card {
+      background: rgb(24, 24, 24) !important;
+      background-image: none !important;
+      backdrop-filter: blur(12px);
+      border-top-color: rgba(255, 255, 255, 0.09) !important;
+      border-right-color: rgba(255, 255, 255, 0.09) !important;
+      border-bottom-color: rgba(255, 255, 255, 0.09) !important;
+    }
+
     html.dark .glass-modal,
     html.dark #hamburger-drawer-panel,
     html.dark #settlement-card {
@@ -155,7 +163,7 @@
     html.dark #firebase-room-label,
     html.dark #firebase-sync-spinner,
     html.dark #firebase-sync-pct-text,
-    html.dark #menu-credits-text ~ i,
+    html.dark #menu-credits-text~i,
     html.dark #hamburger-drawer-panel .fa-copyright {
       color: #FFD230 !important;
     }
@@ -485,7 +493,7 @@
               <span class="font-extrabold text-xl tracking-tight text-slate-900 dark:text-white">Duo<span
                   class="text-brand-500">Spend</span></span>
               <span id="app-version-badge"
-                class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-brand-50 text-brand-600 border border-brand-200 dark:bg-slate-800 dark:!text-white dark:border-brand-500/40">v0.13.8</span>
+                class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-brand-50 text-brand-600 border border-brand-200 dark:bg-slate-800 dark:!text-white dark:border-brand-500/40">v0.13.9</span>
             </div>
             <p id="brand-subtitle" class="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">Receipt scanning &
               balanced expense splitting</p>
@@ -580,7 +588,7 @@
               <span class="text-xl sm:text-2xl font-extrabold text-white">Duo<span
                   class="text-brand-500">Spend</span></span>
               <span id="drawer-version-badge"
-                class="text-xs font-bold px-2 py-0.5 rounded-full bg-brand-50 text-brand-600 border border-brand-200 dark:bg-slate-800 dark:!text-white dark:border-brand-500/40 ml-1">v0.13.8</span>
+                class="text-xs font-bold px-2 py-0.5 rounded-full bg-brand-50 text-brand-600 border border-brand-200 dark:bg-slate-800 dark:!text-white dark:border-brand-500/40 ml-1">v0.13.9</span>
             </div>
           </div>
           <button onclick="closeAllModals()"
@@ -743,6 +751,10 @@
               class="px-3 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 dark:bg-slate-800/80 dark:hover:bg-slate-700/90 dark:text-slate-100 dark:border-slate-700/80 font-semibold flex items-center justify-center gap-2 transition cursor-pointer shadow-sm">
               <i class="fa-solid fa-file-csv text-emerald-500"></i> <span id="text-btn-export-csv">Export CSV</span>
             </button>
+            <button onclick="triggerCSVImport()"
+              class="px-3 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 dark:bg-slate-800/80 dark:hover:bg-slate-700/90 dark:text-slate-100 dark:border-slate-700/80 font-semibold flex items-center justify-center gap-2 transition cursor-pointer shadow-sm">
+              <i class="fa-solid fa-file-import text-emerald-400"></i> <span id="text-btn-import-csv">Import CSV</span>
+            </button>
             <button onclick="exportToJSON()"
               class="px-3 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 dark:bg-slate-800/80 dark:hover:bg-slate-700/90 dark:text-slate-100 dark:border-slate-700/80 font-semibold flex items-center justify-center gap-2 transition cursor-pointer shadow-sm">
               <i class="fa-solid fa-download text-indigo-500"></i> <span id="text-btn-backup-json">Backup JSON</span>
@@ -752,13 +764,15 @@
               <i class="fa-solid fa-upload text-cyan-500"></i> <span id="text-btn-import-json">Import JSON</span>
             </button>
             <button onclick="invoiceToJSON()"
-              class="px-3 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 dark:bg-slate-800/80 dark:hover:bg-slate-700/90 dark:text-slate-100 dark:border-slate-700/80 font-semibold flex items-center justify-center gap-2 transition cursor-pointer shadow-sm"
+              class="col-span-2 px-3 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 dark:bg-slate-800/80 dark:hover:bg-slate-700/90 dark:text-slate-100 dark:border-slate-700/80 font-semibold flex items-center justify-center gap-2 transition cursor-pointer shadow-sm"
               title="Export all receipts and invoices as JSON">
               <i class="fa-solid fa-receipt text-amber-500"></i> <span id="text-btn-invoice-json">Invoices JSON</span>
             </button>
           </div>
           <input type="file" id="json-import-input" accept=".json,application/json" class="hidden"
             onchange="handleJSONImport(event)">
+          <input type="file" id="csv-import-input" accept=".csv,text/csv" class="hidden"
+            onchange="handleCSVImport(event)">
         </div>
 
         <!-- Language Selector: SVG Flags Only -->
@@ -812,10 +826,10 @@
       <div class="pt-6 border-t border-slate-800">
         <div class="flex items-center gap-2.5 text-sm sm:text-base text-slate-400">
           <i class="fa-regular fa-copyright text-brand-400"></i>
-          <span id="menu-credits-text">created by <strong class="text-white font-semibold">Marc Bailey
+          <span id="menu-credits-text">Designed & created by <strong class="text-white font-semibold">Marc Bailey
               2026</strong></span>
         </div>
-        <div class="text-xs text-slate-500 mt-1">DuoSpend v0.13.8 — Android Ready Architecture</div>
+        <div class="text-xs text-slate-500 mt-1">DuoSpend v0.13.9 — Android Ready Architecture</div>
       </div>
 
     </div>
@@ -1059,15 +1073,14 @@
 
       <!-- Desktop Table / Mobile Card Layout (With Who-Paid border highlight & Receipt viewer, Item 11, 13) -->
       <div id="ledger-table-container" class="overflow-x-auto w-full max-w-full">
-        <table class="w-full text-left border-collapse text-xs min-w-[640px]">
+        <table class="w-full text-left border-collapse text-xs">
           <thead>
             <tr class="bg-slate-900/80 text-slate-400 uppercase tracking-wider font-semibold border-b border-slate-800">
-              <th id="th-date" class="py-3 px-4">Date</th>
-              <th id="th-merchant" class="py-3 px-4">Merchant</th>
-              <th id="th-category" class="py-3 px-4">Category</th>
-              <th id="th-payer" class="py-3 px-4">Who Paid</th>
-              <th id="th-amount" class="py-3 px-4 text-right">Amount</th>
-              <th id="th-actions" class="py-3 px-4 text-center">Actions</th>
+              <th id="th-date" class="py-3 px-2.5 sm:px-3">Date</th>
+              <th id="th-merchant" class="py-3 px-2.5 sm:px-3">Merchant</th>
+              <th id="th-category" class="py-3 px-2.5 sm:px-3">Category</th>
+              <th id="th-amount" class="py-3 px-2.5 sm:px-3 text-right">Amount</th>
+              <th id="th-actions" class="py-3 px-2.5 sm:px-3 text-center">Actions</th>
             </tr>
           </thead>
           <tbody id="ledger-table-body" class="divide-y divide-slate-800/60 font-medium">
@@ -1626,7 +1639,10 @@
         </div>
       </div>
 
-      <div class="px-5 py-3 border-t border-slate-800 flex justify-end">
+      <div class="px-5 py-3 border-t border-slate-800 flex items-center justify-between">
+        <div class="text-xs text-slate-400">
+          Total: <span id="member-modal-total-paid" class="text-sm font-bold text-slate-900 dark:text-white ml-1">€0.00</span>
+        </div>
         <button onclick="closeAllModals()"
           class="px-4 py-1.5 text-xs rounded-xl bg-slate-800 hover:bg-slate-700 !text-white font-semibold font-medium cursor-pointer">
           Close
@@ -2104,7 +2120,7 @@
 
           card.innerHTML = `
             <div class="flex items-center justify-between text-slate-400 mb-1">
-              <span class="text-xs uppercase tracking-wider font-semibold member-card-name-label">${escapeHtml(m.name)} ${currentLang === 'es' ? 'Pagó' : 'Paid'}</span>
+              <span class="text-xs uppercase tracking-wider font-semibold member-card-name-label">${escapeHtml(m.name)}</span>
               <div class="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs" style="background-color: ${m.color}20; color: ${m.color}">
                 ${escapeHtml(m.badge || computeBadge(m.name))}
               </div>
@@ -2619,7 +2635,8 @@
       document.getElementById('th-date').innerText = t.thDate;
       document.getElementById('th-merchant').innerText = t.thMerchant;
       document.getElementById('th-category').innerText = t.thCategory;
-      document.getElementById('th-payer').innerText = t.thPayer;
+      const thPayerEl = document.getElementById('th-payer');
+      if (thPayerEl) thPayerEl.innerText = t.thPayer;
       document.getElementById('th-amount').innerText = t.thAmount;
       document.getElementById('th-actions').innerText = t.thActions;
 
@@ -4339,21 +4356,21 @@
       const countLabel = activeExpenses.length === 1 ? t.receiptLogged : t.receiptsLogged;
       document.getElementById('summary-expense-count-label').innerText = `${activeExpenses.length} ${countLabel}`;
 
-      // Update Dynamic Member Cards
-      const personalPaidSum = Object.values(paidByMember).reduce((a, b) => a + b, 0);
+      // Update Dynamic Member Cards (% spent of monthly budget)
+      const budgetTarget = household.monthlyBudget || 500;
+      const ofBudgetLabel = currentLang === 'es' ? 'del presupuesto' : 'of budget';
       members.forEach(m => {
         const amtEl = document.getElementById(`${m.id}-total-paid-amount`);
         const pctEl = document.getElementById(`${m.id}-spend-percentage`);
         const paid = paidByMember[m.id] || 0;
         if (amtEl) amtEl.innerText = `${cur}${paid.toFixed(2)}`;
         if (pctEl) {
-          const pct = personalPaidSum > 0 ? Math.round((paid / personalPaidSum) * 100) : 0;
-          pctEl.innerText = `${pct}% ${t.ofSpend}`;
+          const pct = budgetTarget > 0 ? Math.round((paid / budgetTarget) * 100) : 0;
+          pctEl.innerText = `${pct}% ${ofBudgetLabel}`;
         }
       });
 
       // Item 5: Monthly Budget Target & Safe-to-Spend Calculation
-      const budgetTarget = household.monthlyBudget || 500;
       const budgetPct = budgetTarget > 0 ? (total / budgetTarget) * 100 : 0;
       const barEl = document.getElementById('budget-progress-bar');
       const pctDisplay = document.getElementById('budget-percent-display');
@@ -4431,6 +4448,16 @@
       renderCharts();
     }
 
+    function formatShortDate(dateStr) {
+      if (!dateStr) return '';
+      const parts = String(dateStr).split('-');
+      if (parts.length !== 3) return dateStr;
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const mIdx = parseInt(parts[1], 10) - 1;
+      const day = parts[2].padStart(2, '0');
+      return months[mIdx] ? `${day} ${months[mIdx]}` : dateStr;
+    }
+
     function renderTable() {
       const tbody = document.getElementById('ledger-table-body');
       const emptyState = document.getElementById('ledger-empty-state');
@@ -4472,29 +4499,12 @@
 
       filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
 
+      const members = household.members || [
+        { id: 'p1', name: household.p1Name || 'Member 1', color: '#06b6d4' },
+        { id: 'p2', name: household.p2Name || 'Member 2', color: '#ec4899' }
+      ];
+
       tbody.innerHTML = filtered.map(item => {
-        const isP1 = item.purchaser === 'p1';
-        const purchaserName = isP1 ? household.p1Name : household.p2Name;
-        const purchaserBadge = isP1
-          ? `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-cyan-500/10 text-cyan-400 border border-cyan-500/30">
-               <span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>${purchaserName}
-             </span>`
-          : `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-pink-500/10 text-pink-400 border border-pink-500/30">
-               <span class="w-1.5 h-1.5 rounded-full bg-pink-400"></span>${purchaserName}
-             </span>`;
-
-        // Split policy badge
-        let splitBadge = '';
-        if (item.split === 'home_account') {
-          splitBadge = `<span class="!text-white text-white bg-indigo-950/60 px-2 py-0.5 rounded text-[10px] font-medium border border-indigo-700/60 badge-white-text">${t.homeAccountBadge}</span>`;
-        } else if (item.split === '50/50') {
-          splitBadge = `<span class="!text-white text-white bg-slate-800 px-2 py-0.5 rounded text-[10px] font-medium border border-slate-700 badge-white-text">${t.sharedBadge}</span>`;
-        } else if (item.split === '100_P1') {
-          splitBadge = `<span class="text-cyan-300 bg-cyan-950/60 px-2 py-0.5 rounded text-[10px] font-medium border border-cyan-800">100% ${household.p1Name}</span>`;
-        } else {
-          splitBadge = `<span class="text-pink-300 bg-pink-950/60 px-2 py-0.5 rounded text-[10px] font-medium border border-pink-800">100% ${household.p2Name}</span>`;
-        }
-
         // Translated Category Label
         const catMap = {
           'Groceries': t.catFoodShopping,
@@ -4506,48 +4516,43 @@
         const catLabel = catMap[item.category] || item.category;
         const catColor = CATEGORY_COLORS[item.category] || '#94a3b8';
 
-        // Item 13: Left-hand color highlight corresponding to who paid (Cyan for P1, Pink for P2, Indigo for Home Account)
-        let rowBorderColor = 'border-l-cyan-500';
-        if (item.split === 'home_account') rowBorderColor = 'border-l-indigo-500';
-        else if (item.purchaser === 'p2') rowBorderColor = 'border-l-pink-500';
+        // Left-hand color highlight matching user's highlight colour (or Indigo for Home Account)
+        const mObj = members.find(m => m.id === item.purchaser);
+        const rowAccentColor = item.split === 'home_account'
+          ? '#6366f1'
+          : (mObj?.color || (item.purchaser === 'p2' ? '#ec4899' : '#06b6d4'));
+        const merchantStyle = item.receiptImage ? 'style="color: rgb(34, 211, 238);"' : '';
 
         return `
-          <tr onclick="viewReceiptImage('${item.id}')" class="hover:bg-slate-100/70 dark:hover:bg-slate-800/40 transition group border-l-4 ${rowBorderColor} cursor-pointer" title="Click to view receipt">
+          <tr onclick="viewReceiptImage('${item.id}')" style="border-left: 4px solid ${rowAccentColor};" class="hover:bg-slate-100/70 dark:hover:bg-slate-800/40 transition group cursor-pointer" title="Click to view receipt">
             <!-- Date -->
-            <td class="py-3.5 px-4 whitespace-nowrap text-slate-500 dark:text-slate-400 text-xs">
-              <i class="fa-regular fa-calendar-days mr-1.5 text-slate-400"></i>${item.date}
+            <td class="py-2.5 px-2.5 sm:px-3 whitespace-nowrap text-slate-500 dark:text-slate-400 text-xs">
+              ${formatShortDate(item.date)}
             </td>
             
             <!-- Merchant & Notes -->
-            <td class="py-3.5 px-4">
-              <div class="font-bold text-slate-900 dark:text-white text-xs sm:text-sm group-hover:text-brand-500 dark:group-hover:text-brand-300 transition flex items-center gap-2">
+            <td class="py-2.5 px-2.5 sm:px-3">
+              <div ${merchantStyle} class="font-bold text-slate-900 dark:text-white text-xs sm:text-sm group-hover:text-brand-500 dark:group-hover:text-brand-300 transition flex items-center gap-2" title="${item.receiptImage ? 'Receipt image attached' : ''}">
                 ${escapeHtml(item.merchant)}
-                ${item.receiptImage ? '<i class="fa-solid fa-paperclip text-[10px] text-cyan-400" title="Receipt image attached"></i>' : ''}
               </div>
-              ${item.notes ? `<div class="text-[11px] text-slate-500 dark:text-slate-400 truncate max-w-xs mt-0.5">${escapeHtml(item.notes)}</div>` : ''}
+              ${item.notes ? `<div class="text-[11px] text-slate-500 dark:text-slate-400 truncate max-w-[160px] sm:max-w-xs mt-0.5">${escapeHtml(item.notes)}</div>` : ''}
             </td>
 
             <!-- Category -->
-            <td class="py-3.5 px-4 whitespace-nowrap">
+            <td class="py-2.5 px-2.5 sm:px-3 whitespace-nowrap">
               <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg text-[11px] font-medium bg-slate-100 text-slate-700 border border-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700">
                 <span class="w-2 h-2 rounded-full" style="background-color: ${catColor}"></span>
                 ${catLabel}
               </span>
             </td>
 
-            <!-- Purchaser -->
-            <td class="py-3.5 px-4 whitespace-nowrap">
-              ${purchaserBadge}
-            </td>
-
-
             <!-- Amount -->
-            <td class="py-3.5 px-4 text-right whitespace-nowrap font-bold text-slate-900 dark:text-white text-sm">
+            <td class="py-2.5 px-2.5 sm:px-3 text-right whitespace-nowrap font-bold text-slate-900 dark:text-white text-xs sm:text-sm">
               ${cur}${Number(item.amount).toFixed(2)}
             </td>
 
             <!-- Actions (Edit & Delete with stopPropagation) -->
-            <td class="py-3.5 px-4 text-center whitespace-nowrap">
+            <td class="py-2.5 px-2.5 sm:px-3 text-center whitespace-nowrap">
               <div class="inline-flex items-center gap-1.5">
                 <button onclick="event.stopPropagation(); openReceiptModal('manual', '${item.id}')" class="p-1.5 rounded-lg text-slate-400 hover:text-brand-500 hover:bg-slate-200 dark:hover:bg-slate-800 transition cursor-pointer" title="Edit Expense">
                   <i class="fa-solid fa-pen text-xs"></i>
@@ -4826,6 +4831,15 @@
           options: {
             responsive: true,
             maintainAspectRatio: false,
+            onClick: (event, elements) => {
+              if (elements && elements.length > 0) {
+                const idx = elements[0].index;
+                const selectedMerchant = sortedMerchants[idx];
+                if (selectedMerchant) {
+                  openMerchantExpensesModal(selectedMerchant);
+                }
+              }
+            },
             scales: {
               x: { grid: { display: false }, ticks: { color: textColor, font: { size: 10 } } },
               y: {
@@ -4837,7 +4851,7 @@
               legend: { display: false },
               tooltip: {
                 callbacks: {
-                  label: ctx => ` ${ctx.dataset.label || 'Total'}: ${cur}${ctx.raw.toFixed(2)}`
+                  label: ctx => ` ${ctx.dataset.label || 'Total'}: ${cur}${ctx.raw.toFixed(2)} (Tap to inspect)`
                 }
               }
             }
@@ -4880,6 +4894,16 @@
           options: {
             responsive: true,
             maintainAspectRatio: false,
+            onClick: (event, elements) => {
+              if (elements && elements.length > 0) {
+                const idx = elements[0].index;
+                const mKey = sortedMonths[idx];
+                const mLabel = monthLabels[idx];
+                if (mKey) {
+                  openMonthExpensesModal(mKey, mLabel);
+                }
+              }
+            },
             scales: {
               x: { grid: { display: false }, ticks: { color: textColor, font: { size: 10 } } },
               y: {
@@ -4891,7 +4915,7 @@
               legend: { display: false },
               tooltip: {
                 callbacks: {
-                  label: ctx => ` ${ctx.dataset.label}: ${cur}${ctx.raw.toFixed(2)}`
+                  label: ctx => ` ${ctx.dataset.label}: ${cur}${ctx.raw.toFixed(2)} (Tap to inspect)`
                 }
               }
             }
@@ -4934,6 +4958,16 @@
           options: {
             responsive: true,
             maintainAspectRatio: false,
+            onClick: (event, elements) => {
+              if (elements && elements.length > 0) {
+                const el = elements[0];
+                const selectedMember = members[el.datasetIndex];
+                const selectedCatKey = categories[el.index];
+                if (selectedMember && selectedCatKey) {
+                  openPurchaserCategoryModal(selectedMember, selectedCatKey, catMap[selectedCatKey] || selectedCatKey);
+                }
+              }
+            },
             scales: {
               x: { grid: { display: false }, ticks: { color: textColor, font: { size: 10 } } },
               y: {
@@ -4948,7 +4982,7 @@
               },
               tooltip: {
                 callbacks: {
-                  label: ctx => ` ${ctx.dataset.label}: ${cur}${ctx.raw.toFixed(2)}`
+                  label: ctx => ` ${ctx.dataset.label}: ${cur}${ctx.raw.toFixed(2)} (Tap to inspect)`
                 }
               }
             }
@@ -5039,7 +5073,7 @@
       filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
 
       const totalPaid = filtered.reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0);
-      totalDisplay.innerText = `${cur}${totalPaid.toFixed(2)}`;
+      if (totalDisplay) totalDisplay.innerText = `${cur}${totalPaid.toFixed(2)}`;
 
       if (filtered.length === 0) {
         tbody.innerHTML = '';
@@ -5061,8 +5095,8 @@
       `).join('');
     }
 
-    // POPUP: CATEGORY EXPENSES MODAL (Item 18 & v0.11 Item 3 Sub-Budgets)
-    function openCategoryExpensesModal(categoryKey) {
+    // POPUP: CATEGORY / CHART DRILLDOWN EXPENSES MODAL (Item 18 & Chart Modes)
+    function openChartDrilldownModal(titleText, filteredList, subBudgetCategoryKey = null) {
       hideAllModals();
       pushModalHistoryState();
       const modal = document.getElementById('category-expenses-modal');
@@ -5072,29 +5106,15 @@
       const barWrapper = document.getElementById('cat-modal-budget-bar-wrapper');
       const barEl = document.getElementById('cat-modal-budget-bar');
       const tbody = document.getElementById('cat-modal-table-body');
-      const t = TRANSLATIONS[currentLang];
       const cur = household.currency;
 
-      const catMap = {
-        'Groceries': t.catFoodShopping,
-        'Dining Out': t.catEatingOut,
-        'Transit': t.catFuel,
-        'Clothes': t.catClothes,
-        'Other': t.catOther
-      };
-      const catLabel = catMap[categoryKey] || categoryKey;
-
-      // Filter for this category in Active Month Filter
-      const activePool = getActiveFilteredExpenses();
-      const filtered = activePool.filter(e => e.category === categoryKey);
-      filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
-
+      const filtered = [...filteredList].sort((a, b) => new Date(b.date) - new Date(a.date));
       const totalSpent = filtered.reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0);
-      title.innerText = `${catLabel} (${t.currentMonth})`;
+      title.innerText = titleText;
       totalDisplay.innerText = `${cur}${totalSpent.toFixed(2)}`;
 
       // Category Sub-Budget Indicator (v0.11 Item 3)
-      const catCap = parseFloat((household.categoryBudgets || {})[categoryKey]) || 0;
+      const catCap = subBudgetCategoryKey ? (parseFloat((household.categoryBudgets || {})[subBudgetCategoryKey]) || 0) : 0;
       if (catCap > 0 && subBudgetInfo && barWrapper && barEl) {
         const pct = Math.round((totalSpent / catCap) * 100);
         subBudgetInfo.innerText = `/ ${cur}${catCap.toFixed(0)} sub-budget (${pct}%)`;
@@ -5109,7 +5129,7 @@
       }
 
       if (filtered.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" class="py-6 text-center text-slate-500">No expenses recorded for this category in the selected month.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="4" class="py-6 text-center text-slate-500">No expenses recorded for this selection.</td></tr>';
       } else {
         const members = household.members || [
           { id: 'p1', name: household.p1Name || 'Member 1' },
@@ -5133,6 +5153,38 @@
       }
 
       modal.classList.remove('hidden');
+    }
+
+    function openCategoryExpensesModal(categoryKey) {
+      const t = TRANSLATIONS[currentLang];
+      const catMap = {
+        'Groceries': t.catFoodShopping,
+        'Dining Out': t.catEatingOut,
+        'Transit': t.catFuel,
+        'Clothes': t.catClothes,
+        'Other': t.catOther
+      };
+      const catLabel = catMap[categoryKey] || categoryKey;
+      const filtered = getActiveFilteredExpenses().filter(e => e.category === categoryKey);
+      openChartDrilldownModal(`${catLabel} (${t.currentMonth})`, filtered, categoryKey);
+    }
+
+    function openMerchantExpensesModal(merchantName) {
+      const t = TRANSLATIONS[currentLang];
+      const target = (merchantName || '').trim().toLowerCase();
+      const filtered = getActiveFilteredExpenses().filter(e => ((e.merchant || 'Unknown').trim().toLowerCase() === target));
+      openChartDrilldownModal(`${merchantName} (${t.currentMonth})`, filtered);
+    }
+
+    function openMonthExpensesModal(monthKey, monthLabel) {
+      const filtered = expenses.filter(e => e.date && e.date.startsWith(monthKey));
+      openChartDrilldownModal(`${monthLabel}`, filtered);
+    }
+
+    function openPurchaserCategoryModal(memberObj, categoryKey, catLabel) {
+      const t = TRANSLATIONS[currentLang];
+      const filtered = getActiveFilteredExpenses().filter(e => e.purchaser === memberObj.id && e.category === categoryKey);
+      openChartDrilldownModal(`${memberObj.name} — ${catLabel} (${t.currentMonth})`, filtered);
     }
 
     // POPUP: SETTLE UP MODAL & TRANSACTION HANDLING (Item 16)
@@ -5382,10 +5434,136 @@
       showToast(TRANSLATIONS[currentLang].toastExportCSV);
     }
 
+    function triggerCSVImport() {
+      document.getElementById('csv-import-input').click();
+    }
+
+    function parseCSVText(text) {
+      const rows = [];
+      let row = [];
+      let curVal = '';
+      let inQuotes = false;
+      for (let i = 0; i < text.length; i++) {
+        const ch = text[i];
+        const next = text[i + 1];
+        if (inQuotes) {
+          if (ch === '"' && next === '"') {
+            curVal += '"';
+            i++;
+          } else if (ch === '"') {
+            inQuotes = false;
+          } else {
+            curVal += ch;
+          }
+        } else {
+          if (ch === '"') {
+            inQuotes = true;
+          } else if (ch === ',') {
+            row.push(curVal);
+            curVal = '';
+          } else if (ch === '\r' && next === '\n') {
+            row.push(curVal);
+            rows.push(row);
+            row = [];
+            curVal = '';
+            i++;
+          } else if (ch === '\n' || ch === '\r') {
+            row.push(curVal);
+            rows.push(row);
+            row = [];
+            curVal = '';
+          } else {
+            curVal += ch;
+          }
+        }
+      }
+      if (curVal.length > 0 || row.length > 0) {
+        row.push(curVal);
+        rows.push(row);
+      }
+      return rows.filter(r => r.some(cell => cell.trim() !== ''));
+    }
+
+    function handleCSVImport(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const rows = parseCSVText(e.target.result || '');
+          if (rows.length < 2) throw new Error('CSV has no data rows');
+
+          const headers = rows[0].map(h => h.trim().toLowerCase());
+          const colIdx = {
+            id: headers.findIndex(h => h === 'id'),
+            date: headers.findIndex(h => h === 'date'),
+            merchant: headers.findIndex(h => h === 'merchant'),
+            category: headers.findIndex(h => h === 'category'),
+            amount: headers.findIndex(h => h.startsWith('amount')),
+            purchaser: headers.findIndex(h => h === 'purchaser' || h === 'who paid' || h === 'payer'),
+            split: headers.findIndex(h => h.startsWith('split')),
+            notes: headers.findIndex(h => h === 'notes')
+          };
+          if (colIdx.date === -1 || colIdx.merchant === -1 || colIdx.amount === -1) {
+            throw new Error('Missing required CSV columns (Date, Merchant, Amount)');
+          }
+
+          const members = household.members || [
+            { id: 'p1', name: household.p1Name || 'Member 1' },
+            { id: 'p2', name: household.p2Name || 'Member 2' }
+          ];
+          const existingById = new Map(expenses.map(item => [item.id, item]));
+          let importedCount = 0;
+
+          rows.slice(1).forEach((cols, idx) => {
+            const rawAmount = parseFloat((cols[colIdx.amount] || '').replace(/[^0-9.-]/g, ''));
+            if (isNaN(rawAmount)) return;
+
+            const id = (colIdx.id >= 0 && cols[colIdx.id]?.trim())
+              ? cols[colIdx.id].trim()
+              : `csv_${Date.now()}_${idx}`;
+            const rawPurchaser = (colIdx.purchaser >= 0 ? (cols[colIdx.purchaser] || '').trim().toLowerCase() : '');
+            const matchedMember = members.find(m => m.id.toLowerCase() === rawPurchaser || (m.name || '').trim().toLowerCase() === rawPurchaser);
+            const purchaser = matchedMember ? matchedMember.id : (rawPurchaser === (household.p2Name || '').toLowerCase() ? 'p2' : 'p1');
+
+            const prev = existingById.get(id) || {};
+            existingById.set(id, {
+              ...prev,
+              id,
+              date: (cols[colIdx.date] || '').trim(),
+              merchant: (cols[colIdx.merchant] || 'Unknown').trim(),
+              category: colIdx.category >= 0 && cols[colIdx.category]?.trim() ? cols[colIdx.category].trim() : 'Other',
+              amount: rawAmount,
+              purchaser,
+              split: colIdx.split >= 0 && cols[colIdx.split]?.trim() ? cols[colIdx.split].trim() : '50/50',
+              notes: colIdx.notes >= 0 ? (cols[colIdx.notes] || '').trim() : ''
+            });
+            importedCount++;
+          });
+
+          if (importedCount === 0) throw new Error('No valid rows found in CSV');
+          expenses = Array.from(existingById.values());
+          saveExpensesToStorage();
+          populateLedgerMonthFilter();
+          updateHouseholdUI();
+          refreshDashboard();
+          if (firestoreDb) syncFirebaseNow(true);
+          closeAllModals();
+          showToast(`Imported ${importedCount} expense(s) from CSV!`);
+        } catch (err) {
+          console.error(err);
+          showToast(`Invalid CSV file: ${err.message}`, 'error');
+        }
+        document.getElementById('csv-import-input').value = '';
+      };
+      reader.readAsText(file);
+    }
+
     function exportToJSON() {
       const backupData = {
         app: 'DuoSpend',
-        version: 'v0.13.8',
+        version: 'v0.13.9',
         exportedAt: new Date().toISOString(),
         household,
         settlements,
@@ -5394,7 +5572,7 @@
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
       const downloadAnchor = document.createElement('a');
       downloadAnchor.setAttribute("href", dataStr);
-      downloadAnchor.setAttribute("download", `DuoSpend_Backup_v0.13.8_${new Date().toISOString().split('T')[0]}.json`);
+      downloadAnchor.setAttribute("download", `DuoSpend_Backup_v0.13.9_${new Date().toISOString().split('T')[0]}.json`);
       document.body.appendChild(downloadAnchor);
       downloadAnchor.click();
       downloadAnchor.remove();
