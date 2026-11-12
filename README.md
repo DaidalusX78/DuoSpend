@@ -32,16 +32,15 @@ Built with a **local-first, privacy-respecting architecture**, DuoSpend runs any
 - **Custom Household Members**: Define members, initials, custom avatar badges, and theme accent colors.
 - **Joint Account vs. 50/50 Splitting**: Attribute purchases to a joint "Home Account" or split directly between partners.
 - **Personal Item Deductions**: Bought personal items on a shared grocery run? Mark individual items on the receipt as **Personal** to automatically subtract them from the shared total!
-- **Settlement Calculator**: Real-time balance calculations showing exactly who owes whom and convenient one-tap settlement logging (Cash, Bizum, Revolut, Bank Transfer).
 
 ### 🔄 3. Frictionless Multi-Device Sync
-- **Private Room Codes**: Sync instantaneously across phones, tablets, and computers using a private 6-digit sync room code.
+- **Private Room Codes**: Sync across phones, tablets, and computers using a private sync room code.
 - **Firebase Firestore Integration**: Serverless, zero-maintenance real-time syncing.
 - **Auto-Sync & Smart Merging**: Timestamp-based bidirectional merging ensures offline changes reconcile seamlessly once an internet connection is re-established.
 
 ### 📶 4. 100% Offline-First Progressive Web App (PWA)
 - Full **Service Worker caching** (`sw.js`) guarantees the app opens instantly, even in airplane mode.
-- Installable directly to your home screen on Android, iOS Safari, macOS, and Windows.
+- Add to your home screen on Android, iOS Safari, macOS, and Windows (a native Android app is planned).
 - Native Android hardware back-button support with stateful modal stack management.
 
 ### 📊 5. Monthly Sub-Budgets & Analytics

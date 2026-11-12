@@ -3460,7 +3460,30 @@
     }
 
     function saveExpensesToStorage() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(expenses));
+      const json = JSON.stringify(expenses);
+      try {
+        localStorage.setItem(STORAGE_KEY, json);
+        return true;
+      } catch (err) {
+        // Storage full (typically ~5 MB): retry without receipt photos so no data is lost
+        const isQuota = err && (err.name === 'QuotaExceededError' || err.name === 'NS_ERROR_DOM_QUOTA_REACHED' || err.code === 22);
+        if (isQuota) {
+          try {
+            const stripped = expenses.map(e => {
+              if (!e.receiptImage) return e;
+              const copy = Object.assign({}, e);
+              delete copy.receiptImage;
+              copy._imageDropped = true;
+              return copy;
+            });
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(stripped));
+            showToast('Device storage is full: expenses saved, but receipt photos could not be stored. Export a JSON backup and remove old photos.', 'error');
+            return true;
+          } catch (err2) {}
+        }
+        showToast('Could not save data: device storage is full. Please export a backup now.', 'error');
+        return false;
+      }
     }
 
     function loadSettlementsFromStorage() {
@@ -3475,7 +3498,11 @@
     }
 
     function saveSettlementsToStorage() {
-      localStorage.setItem(SETTLEMENTS_KEY, JSON.stringify(settlements));
+      try {
+        localStorage.setItem(SETTLEMENTS_KEY, JSON.stringify(settlements));
+      } catch (err) {
+        showToast('Could not save settlements: device storage is full.', 'error');
+      }
     }
 
     
