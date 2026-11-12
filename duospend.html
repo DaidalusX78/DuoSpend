@@ -8,7 +8,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#0b0f19">
-  <title>DuoSpend v0.13.6 — Household Receipt & Expense Tracker</title>
+  <title>DuoSpend v0.13.7 — Household Receipt & Expense Tracker</title>
 
   <!-- Private Local API Keys Vault (git-ignored, never pushed to public repo) -->
   <script src="./secrets.local.js" onerror="window._noLocalSecrets=true"></script>
@@ -305,7 +305,7 @@
             <div id="brand-title-row" class="flex items-center gap-2">
               <span class="font-extrabold text-xl tracking-tight text-slate-900 dark:text-white">Duo<span class="text-brand-500">Spend</span></span>
               <span id="app-version-badge"
-                class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-brand-50 text-brand-600 border border-brand-200 dark:bg-slate-800 dark:!text-white dark:border-brand-500/40">v0.13.6</span>
+                class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-brand-50 text-brand-600 border border-brand-200 dark:bg-slate-800 dark:!text-white dark:border-brand-500/40">v0.13.7</span>
             </div>
             <p id="brand-subtitle" class="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">Receipt scanning & balanced expense splitting</p>
           </div>
@@ -395,7 +395,7 @@
             </div>
             <div>
               <span class="text-xl sm:text-2xl font-extrabold text-white">Duo<span class="text-brand-500">Spend</span></span>
-              <span id="drawer-version-badge" class="text-xs font-bold px-2 py-0.5 rounded-full bg-brand-50 text-brand-600 border border-brand-200 dark:bg-slate-800 dark:!text-white dark:border-brand-500/40 ml-1">v0.13.6</span>
+              <span id="drawer-version-badge" class="text-xs font-bold px-2 py-0.5 rounded-full bg-brand-50 text-brand-600 border border-brand-200 dark:bg-slate-800 dark:!text-white dark:border-brand-500/40 ml-1">v0.13.7</span>
             </div>
           </div>
           <button onclick="closeAllModals()"
@@ -597,7 +597,7 @@
           <i class="fa-regular fa-copyright text-brand-400"></i>
           <span id="menu-credits-text">created by <strong class="text-white font-semibold">Marc Bailey 2026</strong></span>
         </div>
-        <div class="text-xs text-slate-500 mt-1">DuoSpend v0.13.6 — Android Ready Architecture</div>
+        <div class="text-xs text-slate-500 mt-1">DuoSpend v0.13.7 — Android Ready Architecture</div>
       </div>
 
     </div>
@@ -5060,7 +5060,7 @@
     function exportToJSON() {
       const backupData = {
         app: 'DuoSpend',
-        version: 'v0.13.6',
+        version: 'v0.13.7',
         exportedAt: new Date().toISOString(),
         household,
         settlements,
@@ -5069,7 +5069,7 @@
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
       const downloadAnchor = document.createElement('a');
       downloadAnchor.setAttribute("href", dataStr);
-      downloadAnchor.setAttribute("download", `DuoSpend_Backup_v0.13.6_${new Date().toISOString().split('T')[0]}.json`);
+      downloadAnchor.setAttribute("download", `DuoSpend_Backup_v0.13.7_${new Date().toISOString().split('T')[0]}.json`);
       document.body.appendChild(downloadAnchor);
       downloadAnchor.click();
       downloadAnchor.remove();
@@ -5507,7 +5507,7 @@
 
         const writePromise = roomRef.set(payload, { merge: true });
         const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Network timeout writing to Firestore (10s). Check Firestore security rules or internet connection.')), 10000)
+          setTimeout(() => reject(new Error('Network timeout writing to Firestore (10s). Check that Cloud Firestore is created in Firebase Console or check internet.')), 10000)
         );
         await Promise.race([writePromise, timeoutPromise]);
 
