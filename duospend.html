@@ -508,7 +508,7 @@
               </button>
             </div>
             <!-- Live Sync Progress Details (Item 8) -->
-            <div id="firebase-sync-progress-box" class="hidden pt-2 border-t border-slate-200 dark:border-slate-800 space-y-1.5">
+            <div id="firebase-sync-progress-box" onclick="configureFirebaseModal()" class="hidden pt-2 border-t border-slate-200 dark:border-slate-800 space-y-1.5 cursor-pointer" title="Click to open Cloud Keys Vault">
               <div class="flex items-center justify-between text-[11px]">
                 <span id="firebase-sync-step-text" class="text-slate-700 dark:text-slate-200 font-semibold flex items-center gap-1.5">
                   <i id="firebase-sync-spinner" class="fa-solid fa-rotate fa-spin text-brand-500"></i>
@@ -5225,7 +5225,7 @@
         }
       }
       if (!firebaseConfig.projectId) {
-        firebaseConfig.projectId = (window.DUOSPEND_LOCAL_SECRETS && window.DUOSPEND_LOCAL_SECRETS.firebaseProjectId) || '';
+        firebaseConfig.projectId = (window.DUOSPEND_LOCAL_SECRETS && window.DUOSPEND_LOCAL_SECRETS.firebaseProjectId) || 'duospend-ef62c';
       }
       if ((!firebaseConfig.apiKey || !firebaseConfig.apiKey.trim()) && DEFAULT_FIREBASE_API_KEY) {
         firebaseConfig.apiKey = DEFAULT_FIREBASE_API_KEY;
@@ -5395,8 +5395,14 @@
     async function ensureAuthAndMembershipInner(roomCode) {
       const auth = firebase.auth();
       if (!auth.currentUser) {
-        await auth.signInAnonymously();
+        try {
+          await auth.signInAnonymously();
+        } catch (authErr) {
+          console.warn('Anonymous auth sign-in skipped (enable in Firebase Console > Authentication):', authErr && authErr.message);
+          return;
+        }
       }
+      if (!auth.currentUser) return;
       const uid = auth.currentUser.uid;
       const roomRef = firestoreDb.collection('households').doc(roomCode);
       const FieldValue = firebase.firestore.FieldValue;
