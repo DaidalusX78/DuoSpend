@@ -1,12 +1,14 @@
-// DuoSpend Service Worker v0.13.15
-const CACHE_NAME = 'duospend-cache-v0.13.15';
-const ASSETS_TO_CACHE = [
+// DuoSpend Service Worker v0.13.16
+const CACHE_NAME = 'duospend-cache-v0.13.16';
+const LOCAL_ASSETS = [
   './duospend.html',
   './manifest.json',
   './src/images/duospend_icon.svg',
   './src/images/DuoSpend_Theme_Logo.svg',
   './src/images/icon-192.png',
-  './src/images/icon-512.png',
+  './src/images/icon-512.png'
+];
+const CDN_ASSETS = [
   'https://cdn.tailwindcss.com',
   'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js',
   'https://cdn.jsdelivr.net/npm/chart.js',
@@ -15,10 +17,19 @@ const ASSETS_TO_CACHE = [
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS_TO_CACHE).catch(err => {
-        console.warn('Pre-caching assets warning:', err);
-      });
+    caches.open(CACHE_NAME).then(async (cache) => {
+      try {
+        await cache.addAll(LOCAL_ASSETS);
+      } catch (err) {
+        console.warn('Pre-caching local assets warning:', err);
+      }
+      await Promise.all(
+        CDN_ASSETS.map(url =>
+          fetch(url, { mode: 'no-cors' })
+            .then(res => cache.put(url, res))
+            .catch(() => { })
+        )
+      );
     }).then(() => self.skipWaiting())
   );
 });

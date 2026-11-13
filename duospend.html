@@ -8,7 +8,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#324069" />
-  <title>DuoSpend v0.13.15 — Household Receipt & Expense Tracker</title>
+  <title>DuoSpend v0.13.16 — Household Receipt & Expense Tracker</title>
 
   <!-- Private Local API Keys Vault (git-ignored, never pushed to public repo) -->
   <script src="./secrets.local.js" onerror="window._noLocalSecrets=true"></script>
@@ -208,6 +208,10 @@
     html.dark .bg-indigo-600\/10:hover,
     html.dark .hover\:bg-indigo-600\/20:hover {
       background-color: rgba(95, 204, 242, 0.25) !important;
+    }
+
+    html.dark #brand-logo-pill {
+      background-color: #5fccf2 !important;
     }
 
     html.dark #app-version-badge,
@@ -511,11 +515,11 @@
       <div id="brand-header-row" class="flex items-center justify-between w-full md:w-auto">
         <!-- Left Group: Brand Logo -->
         <div id="brand-logo-section" class="flex items-center space-x-3">
-          <div class="h-11 px-2.5 sm:px-3 rounded-xl bg-slate-100 dark:bg-slate-800/80 flex items-center justify-center shadow-sm">
+          <div id="brand-logo-pill" class="h-11 px-2.5 sm:px-3 rounded-xl bg-white dark:bg-[#5fccf2] flex items-center justify-center shadow-sm">
             <img src="./src/images/DuoSpend_Theme_Logo.svg" alt="DuoSpend" class="h-8 w-auto object-contain rounded-lg" />
           </div>
           <span id="app-version-badge"
-            class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-brand-50 text-brand-600 border border-brand-200 dark:bg-slate-800 dark:!text-white dark:border-brand-500/40">v0.13.15</span>
+            class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-brand-50 text-brand-600 border border-brand-200 dark:bg-slate-800 dark:!text-white dark:border-brand-500/40">v0.13.16</span>
         </div>
 
         <!-- Mobile Hamburger Button (inline to brand logo on mobile right) -->
@@ -606,7 +610,7 @@
               <span class="text-xl sm:text-2xl font-extrabold text-white">Duo<span
                   class="text-brand-500">Spend</span></span>
               <span id="drawer-version-badge"
-                class="text-xs font-bold px-2 py-0.5 rounded-full bg-brand-50 text-brand-600 border border-brand-200 dark:bg-slate-800 dark:!text-white dark:border-brand-500/40 ml-1">v0.13.15</span>
+                class="text-xs font-bold px-2 py-0.5 rounded-full bg-brand-50 text-brand-600 border border-brand-200 dark:bg-slate-800 dark:!text-white dark:border-brand-500/40 ml-1">v0.13.16</span>
             </div>
           </div>
           <button onclick="closeAllModals()"
@@ -842,7 +846,7 @@
           <span id="menu-credits-text">Designed & created by <strong class="text-white font-semibold">Marc Bailey
               2026</strong></span>
         </div>
-        <div class="text-xs text-slate-500 mt-1">DuoSpend v0.13.15 — Android Ready Architecture</div>
+        <div class="text-xs text-slate-500 mt-1">DuoSpend v0.13.16 — Android Ready Architecture</div>
       </div>
 
     </div>
@@ -2222,12 +2226,15 @@
 
     // DATA STATE
     const STORAGE_KEY = 'duospend_expenses_v1';
+    const DELETED_IDS_KEY = 'duospend_deleted_ids_v1';
     const SETTINGS_KEY = 'duospend_settings_v1';
     const LANG_KEY = 'duospend_lang_v1';
     const THEME_KEY = 'duospend_theme_v1';
     const SETTLEMENTS_KEY = 'duospend_settlements_v1';
     const FIREBASE_CONFIG_KEY = 'duospend_firebase_v1';
     const EXCHANGE_RATES_KEY = 'duospend_fx_rates_v1';
+
+    let deletedExpenseIds = [];
 
     let household = {
       p1Name: (window.DUOSPEND_LOCAL_SECRETS && window.DUOSPEND_LOCAL_SECRETS.p1Name) || 'Member 1',
@@ -3850,9 +3857,21 @@
           expenses = [];
         }
       }
+      const rawDeleted = localStorage.getItem(DELETED_IDS_KEY);
+      if (rawDeleted) {
+        try {
+          const parsedDel = JSON.parse(rawDeleted);
+          deletedExpenseIds = Array.isArray(parsedDel) ? parsedDel : [];
+        } catch (e) {
+          deletedExpenseIds = [];
+        }
+      }
     }
 
     function saveExpensesToStorage() {
+      try {
+        localStorage.setItem(DELETED_IDS_KEY, JSON.stringify(deletedExpenseIds.slice(-500)));
+      } catch (e) { }
       const json = JSON.stringify(expenses);
       try {
         localStorage.setItem(STORAGE_KEY, json);
@@ -4210,17 +4229,21 @@
 
       // Instant non-blocking delete (eliminates [Violation] 1400ms click handler freeze)
       expenses = expenses.filter(e => e.id !== id);
+      if (!deletedExpenseIds.includes(id)) deletedExpenseIds.push(id);
       saveExpensesToStorage();
       refreshDashboard();
       closeAllModals();
+      if (firestoreDb) syncFirebaseNow(true);
 
       // Non-blocking notification with 1-click Undo
       const t = TRANSLATIONS[currentLang];
       const undoText = currentLang === 'es' ? 'Deshacer' : 'Undo';
       showToast(`${currentLang === 'es' ? 'Eliminado' : 'Deleted'} "${name}".`, 'info', () => {
+        deletedExpenseIds = deletedExpenseIds.filter(x => x !== id);
         expenses.splice(deletedIndex, 0, deletedItem);
         saveExpensesToStorage();
         refreshDashboard();
+        if (firestoreDb) syncFirebaseNow(true);
         showToast(`${currentLang === 'es' ? 'Restaurado' : 'Restored'} "${name}".`);
       }, undoText);
     }
@@ -4266,9 +4289,10 @@
           if (!isNaN(val) && val > 0) {
             household.monthlyBudget = val;
             localStorage.setItem(SETTINGS_KEY, JSON.stringify(household));
-            const settingsBudgetInput = document.getElementById('setting-monthly-budget-input');
+            const settingsBudgetInput = document.getElementById('settings-budget-input');
             if (settingsBudgetInput) settingsBudgetInput.value = val;
             showToast(`Monthly budget updated to ${cur}${val.toFixed(0)}!`);
+            if (firestoreDb) syncFirebaseNow(true);
           }
           displayEl.innerHTML = `${cur}${(household.monthlyBudget || 500).toFixed(0)} <i class="fa-solid fa-pen text-[9px] opacity-70"></i>`;
           calculateMetricsAndSettlement();
@@ -5589,7 +5613,7 @@
     function exportToJSON() {
       const backupData = {
         app: 'DuoSpend',
-        version: 'v0.13.15',
+        version: 'v0.13.16',
         exportedAt: new Date().toISOString(),
         household,
         settlements,
@@ -5598,7 +5622,7 @@
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
       const downloadAnchor = document.createElement('a');
       downloadAnchor.setAttribute("href", dataStr);
-      downloadAnchor.setAttribute("download", `DuoSpend_Backup_v0.13.15_${new Date().toISOString().split('T')[0]}.json`);
+      downloadAnchor.setAttribute("download", `DuoSpend_Backup_v0.13.16_${new Date().toISOString().split('T')[0]}.json`);
       document.body.appendChild(downloadAnchor);
       downloadAnchor.click();
       downloadAnchor.remove();
@@ -5817,21 +5841,50 @@
       initFirebaseSync(true);
     }
 
-    // Smart ID-based Merge so offline local receipts are never overwritten on app load
-    function mergeExpenseLists(localList, cloudList) {
+    // Smart ID-based Merge with tombstone support and local receipt image preservation
+    function mergeExpenseLists(localList, cloudList, deletedSet = new Set(deletedExpenseIds)) {
+      const localById = new Map();
+      (Array.isArray(localList) ? localList : []).forEach(item => {
+        if (item && item.id) localById.set(item.id, item);
+      });
       const map = new Map();
       (Array.isArray(cloudList) ? cloudList : []).forEach(item => {
-        if (item && item.id) map.set(item.id, item);
+        if (item && item.id && !deletedSet.has(item.id)) {
+          const localItem = localById.get(item.id);
+          const mergedItem = (!item.receiptImage && localItem && localItem.receiptImage)
+            ? { ...item, receiptImage: localItem.receiptImage }
+            : item;
+          map.set(item.id, mergedItem);
+        }
       });
       (Array.isArray(localList) ? localList : []).forEach(item => {
-        if (item && item.id) {
+        if (item && item.id && !deletedSet.has(item.id)) {
           const existing = map.get(item.id);
           if (!existing || (item.updatedAt || 0) >= (existing.updatedAt || 0)) {
-            map.set(item.id, item);
+            const mergedItem = (!item.receiptImage && existing && existing.receiptImage)
+              ? { ...item, receiptImage: existing.receiptImage }
+              : item;
+            map.set(item.id, mergedItem);
           }
         }
       });
       return Array.from(map.values()).sort((a, b) => new Date(b.date) - new Date(a.date));
+    }
+
+    // Ensure Firestore payload stays well under Firestore's 1 MB document limit
+    function buildCloudSafeExpenses(list, maxBytes = 750000) {
+      const cloned = (Array.isArray(list) ? list : []).map(item => ({ ...item }));
+      if (JSON.stringify(cloned).length <= maxBytes) return cloned;
+      // Strip receiptImage from oldest items first in the cloud payload copy only (localStorage keeps full photos)
+      const byOldest = [...cloned].sort((a, b) => new Date(a.date || 0) - new Date(b.date || 0));
+      for (const item of byOldest) {
+        if (item.receiptImage) {
+          delete item.receiptImage;
+          item.hasReceiptImage = true;
+          if (JSON.stringify(cloned).length <= maxBytes) break;
+        }
+      }
+      return cloned;
     }
 
     function initFirebaseSync(manual = false) {
@@ -5867,7 +5920,11 @@
                   }
                 } catch (e) { }
                 const cloudExpenses = Array.isArray(data.expenses) ? data.expenses : [];
-                const merged = mergeExpenseLists(expenses, cloudExpenses);
+                const cloudDeleted = Array.isArray(data.deletedExpenseIds) ? data.deletedExpenseIds : [];
+                deletedExpenseIds = Array.from(new Set([...deletedExpenseIds, ...cloudDeleted])).slice(-500);
+                const deletedSet = new Set(deletedExpenseIds);
+                const cloudHadDeletedItems = cloudExpenses.some(c => c && c.id && deletedSet.has(c.id));
+                const merged = mergeExpenseLists(expenses, cloudExpenses, deletedSet);
                 const countChanged = merged.length !== expenses.length;
                 expenses = merged;
                 saveExpensesToStorage();
@@ -5885,8 +5942,8 @@
                 refreshDashboard();
                 updateFirebaseStatus('Synced', true);
 
-                // If local device had offline receipts not yet in cloud, push merged list back up
-                if (merged.length > cloudExpenses.length) {
+                // If local device had offline receipts or deletions not yet reflected in cloud, push merged state back up
+                if (merged.length > cloudExpenses.length || cloudHadDeletedItems) {
                   syncFirebaseNow(true);
                 } else if (countChanged && data.updatedBy !== window._clientId) {
                   showToast('Synced latest updates from household cloud!', 'info');
@@ -6020,11 +6077,13 @@
           setFirebaseSyncProgress(75, 'Uploading to Cloud Firestore...', `Writing to /households/${roomCode} ...`);
         }
 
+        const cloudSafeExpenses = buildCloudSafeExpenses(expenses);
         const payload = {
           updatedAt: new Date().toISOString(),
           updatedBy: window._clientId,
           household: household,
-          expenses: expenses,
+          expenses: cloudSafeExpenses,
+          deletedExpenseIds: deletedExpenseIds.slice(-500),
           settlements: settlements
         };
         try {
