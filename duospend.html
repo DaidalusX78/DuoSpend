@@ -8,7 +8,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#5fccf2" />
-  <title>DuoSpend v0.13.10 — Household Receipt & Expense Tracker</title>
+  <title>DuoSpend v0.13.11 — Household Receipt & Expense Tracker</title>
 
   <!-- Private Local API Keys Vault (git-ignored, never pushed to public repo) -->
   <script src="./secrets.local.js" onerror="window._noLocalSecrets=true"></script>
@@ -20,8 +20,8 @@
   <!-- Chart.js for interactive analytics -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link rel="manifest" href="./manifest.json">
-  <link rel="icon" href="./images/duospend_icon.svg" type="image/svg+xml" />
-  <link rel="apple-touch-icon" href="./images/icon-192.png" />
+  <link rel="icon" href="./src/images/duospend_icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="./src/images/icon-192.png" />
   <!-- Firebase App & Firestore SDKs (v9 compat for zero-build vanilla JS) -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
@@ -137,7 +137,6 @@
     }
 
     /* Dark Mode Highlights & Primary Buttons (#FFD230) */
-    html.dark #brand-logo-icon,
     html.dark #hamburger-drawer-panel .bg-gradient-to-tr,
     html.dark #user-tutorial-modal-backdrop .bg-gradient-to-tr {
       background: #FFD230 !important;
@@ -145,7 +144,6 @@
       box-shadow: 0 4px 16px rgba(255, 210, 48, 0.25) !important;
     }
 
-    html.dark #brand-logo-icon i,
     html.dark #hamburger-drawer-panel .bg-gradient-to-tr i,
     html.dark #user-tutorial-modal-backdrop .bg-gradient-to-tr i {
       color: #0b0f19 !important;
@@ -486,15 +484,15 @@
         <!-- Left Group: Brand Logo -->
         <div id="brand-logo-section" class="flex items-center space-x-3">
           <div id="brand-logo-icon"
-            class="h-10 w-10 rounded-xl bg-gradient-to-tr from-brand-600 via-indigo-500 to-cyan-400 flex items-center justify-center text-white shadow-lg shadow-brand-500/25">
-            <i class="fa-solid fa-receipt text-lg"></i>
+            class="h-10 w-10 rounded-xl overflow-hidden flex items-center justify-center shadow-lg shadow-brand-500/25 flex-shrink-0">
+            <img src="./src/images/logo-1024x1024.png" alt="DuoSpend Logo" class="h-full w-full object-cover" />
           </div>
           <div id="brand-title-group">
             <div id="brand-title-row" class="flex items-center gap-2">
               <span class="font-extrabold text-xl tracking-tight text-slate-900 dark:text-white">Duo<span
                   class="text-brand-500">Spend</span></span>
               <span id="app-version-badge"
-                class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-brand-50 text-brand-600 border border-brand-200 dark:bg-slate-800 dark:!text-white dark:border-brand-500/40">v0.13.10</span>
+                class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-brand-50 text-brand-600 border border-brand-200 dark:bg-slate-800 dark:!text-white dark:border-brand-500/40">v0.13.11</span>
             </div>
             <p id="brand-subtitle" class="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">Receipt scanning &
               balanced expense splitting</p>
@@ -582,14 +580,14 @@
         <div class="flex items-center justify-between pb-4 border-b border-slate-800">
           <div class="flex items-center gap-3">
             <div
-              class="h-10 w-10 rounded-xl bg-gradient-to-tr from-brand-600 via-indigo-500 to-cyan-400 flex items-center justify-center text-white shadow-lg">
-              <i class="fa-solid fa-receipt text-lg"></i>
+              class="h-10 w-10 rounded-xl overflow-hidden flex items-center justify-center shadow-lg flex-shrink-0">
+              <img src="./src/images/logo-1024x1024.png" alt="DuoSpend Logo" class="h-full w-full object-cover" />
             </div>
             <div>
               <span class="text-xl sm:text-2xl font-extrabold text-white">Duo<span
                   class="text-brand-500">Spend</span></span>
               <span id="drawer-version-badge"
-                class="text-xs font-bold px-2 py-0.5 rounded-full bg-brand-50 text-brand-600 border border-brand-200 dark:bg-slate-800 dark:!text-white dark:border-brand-500/40 ml-1">v0.13.10</span>
+                class="text-xs font-bold px-2 py-0.5 rounded-full bg-brand-50 text-brand-600 border border-brand-200 dark:bg-slate-800 dark:!text-white dark:border-brand-500/40 ml-1">v0.13.11</span>
             </div>
           </div>
           <button onclick="closeAllModals()"
@@ -830,7 +828,7 @@
           <span id="menu-credits-text">Designed & created by <strong class="text-white font-semibold">Marc Bailey
               2026</strong></span>
         </div>
-        <div class="text-xs text-slate-500 mt-1">DuoSpend v0.13.10 — Android Ready Architecture</div>
+        <div class="text-xs text-slate-500 mt-1">DuoSpend v0.13.11 — Android Ready Architecture</div>
       </div>
 
     </div>
@@ -5564,7 +5562,7 @@
     function exportToJSON() {
       const backupData = {
         app: 'DuoSpend',
-        version: 'v0.13.10',
+        version: 'v0.13.11',
         exportedAt: new Date().toISOString(),
         household,
         settlements,
@@ -5573,7 +5571,7 @@
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
       const downloadAnchor = document.createElement('a');
       downloadAnchor.setAttribute("href", dataStr);
-      downloadAnchor.setAttribute("download", `DuoSpend_Backup_v0.13.10_${new Date().toISOString().split('T')[0]}.json`);
+      downloadAnchor.setAttribute("download", `DuoSpend_Backup_v0.13.11_${new Date().toISOString().split('T')[0]}.json`);
       document.body.appendChild(downloadAnchor);
       downloadAnchor.click();
       downloadAnchor.remove();
