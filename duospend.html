@@ -8,7 +8,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#324069" />
-  <title>DuoSpend v0.13.14 — Household Receipt & Expense Tracker</title>
+  <title>DuoSpend v0.13.15 — Household Receipt & Expense Tracker</title>
 
   <!-- Private Local API Keys Vault (git-ignored, never pushed to public repo) -->
   <script src="./secrets.local.js" onerror="window._noLocalSecrets=true"></script>
@@ -511,11 +511,11 @@
       <div id="brand-header-row" class="flex items-center justify-between w-full md:w-auto">
         <!-- Left Group: Brand Logo -->
         <div id="brand-logo-section" class="flex items-center space-x-3">
-          <div class="h-11 px-2.5 sm:px-3 rounded-xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 flex items-center justify-center shadow-sm">
+          <div class="h-11 px-2.5 sm:px-3 rounded-xl bg-slate-100 dark:bg-slate-800/80 flex items-center justify-center shadow-sm">
             <img src="./src/images/DuoSpend_Theme_Logo.svg" alt="DuoSpend" class="h-8 w-auto object-contain rounded-lg" />
           </div>
           <span id="app-version-badge"
-            class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-brand-50 text-brand-600 border border-brand-200 dark:bg-slate-800 dark:!text-white dark:border-brand-500/40">v0.13.14</span>
+            class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-brand-50 text-brand-600 border border-brand-200 dark:bg-slate-800 dark:!text-white dark:border-brand-500/40">v0.13.15</span>
         </div>
 
         <!-- Mobile Hamburger Button (inline to brand logo on mobile right) -->
@@ -530,10 +530,10 @@
 
       <!-- Actions Group & Desktop Hamburger (Inline to Brand Logo on the Right with relevant padding) -->
       <div id="header-actions-group"
-        class="flex items-center justify-between md:justify-end gap-2.5 sm:gap-3 w-full md:w-auto">
+        class="flex flex-wrap sm:flex-nowrap items-center justify-between md:justify-end gap-2 sm:gap-3 w-full md:w-auto">
         <!-- Household Members Pill Button (No &, entire pill is clickable button) -->
         <button id="household-members-pill" onclick="openSettingsModal('members')"
-          class="h-11 px-3 sm:px-4 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800/80 dark:hover:bg-slate-700/80 border border-slate-200 dark:border-slate-700/80 text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-2 transition cursor-pointer shadow-sm active:scale-95"
+          class="h-11 px-3 sm:px-4 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800/80 dark:hover:bg-slate-700/80 border border-slate-200 dark:border-slate-700/80 text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-2 transition cursor-pointer shadow-sm active:scale-95 whitespace-nowrap"
           title="Manage Household Members">
           <div class="flex -space-x-1.5" id="members-avatars-group">
             <div id="avatar-circle-p1"
@@ -551,18 +551,18 @@
 
         <!-- Add Expense Manual Button -->
         <button id="btn-add-expense-manual" onclick="openReceiptModal('manual')"
-          class="h-11 px-3 sm:px-4 bg-brand-600 hover:bg-brand-500 text-white text-xs sm:text-sm font-semibold rounded-xl flex items-center gap-2 shadow-lg shadow-brand-500/20 transition duration-150 active:scale-95 cursor-pointer"
+          class="h-11 px-4 sm:px-5 bg-brand-600 hover:bg-brand-500 text-white text-sm font-bold rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-brand-500/20 transition duration-150 active:scale-95 cursor-pointer whitespace-nowrap flex-1 sm:flex-initial"
           title="Add expense record manually">
-          <i class="fa-solid fa-plus text-xs"></i>
+          <i class="fa-solid fa-plus text-sm"></i>
           <span class="hidden sm:inline" id="text-btn-add">Add Expense</span>
           <span class="sm:hidden" id="text-btn-add-short">Add</span>
         </button>
 
         <!-- Receipt Camera Import Button (Direct photo capture from device) -->
         <button id="btn-scan-receipt" onclick="triggerDirectScan()"
-          class="h-11 px-3 sm:px-4 bg-gradient-to-r from-cyan-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 text-white text-xs sm:text-sm font-semibold rounded-xl flex items-center gap-2 shadow-lg shadow-cyan-500/20 transition duration-150 active:scale-95 cursor-pointer"
+          class="h-11 px-4 sm:px-5 bg-gradient-to-r from-cyan-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 text-white text-sm font-bold rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-cyan-500/20 transition duration-150 active:scale-95 cursor-pointer whitespace-nowrap flex-1 sm:flex-initial"
           title="Take photo or import directly from device">
-          <i class="fa-solid fa-camera text-xs"></i>
+          <i class="fa-solid fa-camera text-sm"></i>
           <span id="text-btn-scan">Scan</span>
         </button>
         <input type="file" id="direct-camera-input" accept="image/*" capture="environment" class="hidden"
@@ -606,7 +606,7 @@
               <span class="text-xl sm:text-2xl font-extrabold text-white">Duo<span
                   class="text-brand-500">Spend</span></span>
               <span id="drawer-version-badge"
-                class="text-xs font-bold px-2 py-0.5 rounded-full bg-brand-50 text-brand-600 border border-brand-200 dark:bg-slate-800 dark:!text-white dark:border-brand-500/40 ml-1">v0.13.14</span>
+                class="text-xs font-bold px-2 py-0.5 rounded-full bg-brand-50 text-brand-600 border border-brand-200 dark:bg-slate-800 dark:!text-white dark:border-brand-500/40 ml-1">v0.13.15</span>
             </div>
           </div>
           <button onclick="closeAllModals()"
@@ -842,7 +842,7 @@
           <span id="menu-credits-text">Designed & created by <strong class="text-white font-semibold">Marc Bailey
               2026</strong></span>
         </div>
-        <div class="text-xs text-slate-500 mt-1">DuoSpend v0.13.14 — Android Ready Architecture</div>
+        <div class="text-xs text-slate-500 mt-1">DuoSpend v0.13.15 — Android Ready Architecture</div>
       </div>
 
     </div>
@@ -1460,69 +1460,9 @@
           <i class="fa-solid fa-xmark"></i>
         </button>
       </div>
-      <form onsubmit="saveSettings(event)" class="p-5 space-y-4 max-h-[75vh] overflow-y-auto">
-        <!-- Monthly Budget Target (Item 5) -->
-        <div id="settings-field-wrapper-budget" class="p-3 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
-          <label id="label-settings-budget" for="settings-budget-input"
-            class="block text-xs font-semibold text-brand-400">
-            <i class="fa-solid fa-bullseye mr-1"></i> Monthly Household Budget Target (<span
-              class="currency-symbol-label">€</span>)
-          </label>
-          <div class="flex items-center gap-2">
-            <span class="currency-symbol-label text-slate-400 text-sm font-bold">€</span>
-            <input type="number" id="settings-budget-input" min="50" step="10" value="500" placeholder="500"
-              class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs font-bold text-slate-100 focus:outline-none focus:border-brand-500">
-          </div>
-          <p class="text-[10px] text-slate-400">Progress bar alerts at 80% (amber) and 100% (red) with daily safe spend
-            calculation.</p>
-        </div>
-
-        <!-- Category-Specific Monthly Sub-Budgets (v0.11 Item 3) -->
-        <div id="settings-category-budgets-section"
-          class="p-3 rounded-xl bg-slate-950 border border-slate-800 space-y-2.5">
-          <div class="flex items-center justify-between">
-            <label class="block text-xs font-semibold text-emerald-400">
-              <i class="fa-solid fa-chart-pie mr-1"></i> Category Monthly Sub-Budgets (<span
-                class="currency-symbol-label">€</span>)
-            </label>
-            <span class="text-[10px] text-slate-400">Optional monthly caps</span>
-          </div>
-          <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
-            <div class="p-2 rounded-lg bg-slate-900 border border-slate-800">
-              <label for="subbudget-groceries"
-                class="block text-[10px] text-emerald-400 font-semibold mb-1 truncate">Food Shopping</label>
-              <input type="number" id="subbudget-groceries" min="0" step="10" value="300"
-                class="w-full bg-slate-950 border border-slate-800 rounded px-2 py-1 text-xs font-bold text-white focus:outline-none focus:border-brand-500">
-            </div>
-            <div class="p-2 rounded-lg bg-slate-900 border border-slate-800">
-              <label for="subbudget-dining" class="block text-[10px] text-amber-400 font-semibold mb-1 truncate">Eating
-                Out</label>
-              <input type="number" id="subbudget-dining" min="0" step="10" value="100"
-                class="w-full bg-slate-950 border border-slate-800 rounded px-2 py-1 text-xs font-bold text-white focus:outline-none focus:border-brand-500">
-            </div>
-            <div class="p-2 rounded-lg bg-slate-900 border border-slate-800">
-              <label for="subbudget-transit"
-                class="block text-[10px] text-sky-400 font-semibold mb-1 truncate">Fuel</label>
-              <input type="number" id="subbudget-transit" min="0" step="10" value="60"
-                class="w-full bg-slate-950 border border-slate-800 rounded px-2 py-1 text-xs font-bold text-white focus:outline-none focus:border-brand-500">
-            </div>
-            <div class="p-2 rounded-lg bg-slate-900 border border-slate-800">
-              <label for="subbudget-clothes"
-                class="block text-[10px] text-purple-400 font-semibold mb-1 truncate">Clothes</label>
-              <input type="number" id="subbudget-clothes" min="0" step="10" value="40"
-                class="w-full bg-slate-950 border border-slate-800 rounded px-2 py-1 text-xs font-bold text-white focus:outline-none focus:border-brand-500">
-            </div>
-            <div class="p-2 rounded-lg bg-slate-900 border border-slate-800">
-              <label for="subbudget-other"
-                class="block text-[10px] text-slate-400 font-semibold mb-1 truncate">Other</label>
-              <input type="number" id="subbudget-other" min="0" step="10" value="50"
-                class="w-full bg-slate-950 border border-slate-800 rounded px-2 py-1 text-xs font-bold text-white focus:outline-none focus:border-brand-500">
-            </div>
-          </div>
-        </div>
-
-        <!-- Dynamic Household Members Section (Item 7) -->
-        <div id="settings-members-section" class="space-y-2">
+      <form onsubmit="saveSettings(event)" novalidate class="p-5 space-y-4 max-h-[75vh] overflow-y-auto">
+        <!-- Dynamic Household Members Section (Moved to top of Household Settings) -->
+        <div id="settings-members-section" class="space-y-2 pb-2 border-b border-slate-800">
           <div class="flex items-center justify-between">
             <label class="block text-xs font-semibold text-slate-200">
               <i class="fa-solid fa-users mr-1 text-cyan-400"></i> Household Members
@@ -1535,6 +1475,77 @@
           <div id="settings-members-list-container" class="space-y-2">
             <!-- Dynamically populated rows for members -->
           </div>
+        </div>
+
+        <!-- Monthly Budget Target (Item 5) -->
+        <div id="settings-field-wrapper-budget" class="p-3 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
+          <label id="label-settings-budget" for="settings-budget-input"
+            class="block text-xs font-semibold text-brand-400">
+            <i class="fa-solid fa-bullseye mr-1"></i> Monthly Household Budget Target (<span
+              class="currency-symbol-label">€</span>)
+          </label>
+          <div class="flex items-center gap-2">
+            <span class="currency-symbol-label text-slate-400 text-sm font-bold">€</span>
+            <input type="number" id="settings-budget-input" min="1" step="any" value="500" placeholder="500"
+              oninput="updateSubBudgetSumWarning()"
+              class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs font-bold text-slate-100 focus:outline-none focus:border-brand-500">
+          </div>
+          <p class="text-[10px] text-slate-400">Progress bar alerts at 80% (amber) and 100% (red) with daily safe spend
+            calculation.</p>
+        </div>
+
+        <!-- Category-Specific Monthly Sub-Budgets (v0.11 Item 3) -->
+        <div id="settings-category-budgets-section"
+          class="p-3 rounded-xl bg-slate-950 border border-slate-800 space-y-2.5">
+          <div class="flex items-center justify-between gap-2">
+            <label class="block text-xs font-semibold text-emerald-400">
+              <i class="fa-solid fa-chart-pie mr-1"></i> Category Monthly Sub-Budgets (<span
+                class="currency-symbol-label">€</span>)
+            </label>
+            <button type="button" onclick="matchSubBudgetsToMonthly()"
+              class="px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-[10px] text-slate-300 font-semibold border border-slate-700 transition cursor-pointer whitespace-nowrap"
+              title="Proportionally adjust category caps to equal your monthly budget">
+              Match Budget
+            </button>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
+            <div class="p-2 rounded-lg bg-slate-900 border border-slate-800">
+              <label for="subbudget-groceries"
+                class="block text-[10px] text-emerald-400 font-semibold mb-1 truncate">Food Shopping</label>
+              <input type="number" id="subbudget-groceries" min="0" step="any" value="270"
+                oninput="updateSubBudgetSumWarning()"
+                class="w-full bg-slate-950 border border-slate-800 rounded px-2 py-1 text-xs font-bold text-white focus:outline-none focus:border-brand-500">
+            </div>
+            <div class="p-2 rounded-lg bg-slate-900 border border-slate-800">
+              <label for="subbudget-dining" class="block text-[10px] text-amber-400 font-semibold mb-1 truncate">Eating
+                Out</label>
+              <input type="number" id="subbudget-dining" min="0" step="any" value="90"
+                oninput="updateSubBudgetSumWarning()"
+                class="w-full bg-slate-950 border border-slate-800 rounded px-2 py-1 text-xs font-bold text-white focus:outline-none focus:border-brand-500">
+            </div>
+            <div class="p-2 rounded-lg bg-slate-900 border border-slate-800">
+              <label for="subbudget-transit"
+                class="block text-[10px] text-sky-400 font-semibold mb-1 truncate">Fuel</label>
+              <input type="number" id="subbudget-transit" min="0" step="any" value="55"
+                oninput="updateSubBudgetSumWarning()"
+                class="w-full bg-slate-950 border border-slate-800 rounded px-2 py-1 text-xs font-bold text-white focus:outline-none focus:border-brand-500">
+            </div>
+            <div class="p-2 rounded-lg bg-slate-900 border border-slate-800">
+              <label for="subbudget-clothes"
+                class="block text-[10px] text-purple-400 font-semibold mb-1 truncate">Clothes</label>
+              <input type="number" id="subbudget-clothes" min="0" step="any" value="40"
+                oninput="updateSubBudgetSumWarning()"
+                class="w-full bg-slate-950 border border-slate-800 rounded px-2 py-1 text-xs font-bold text-white focus:outline-none focus:border-brand-500">
+            </div>
+            <div class="p-2 rounded-lg bg-slate-900 border border-slate-800">
+              <label for="subbudget-other"
+                class="block text-[10px] text-slate-400 font-semibold mb-1 truncate">Other</label>
+              <input type="number" id="subbudget-other" min="0" step="any" value="45"
+                oninput="updateSubBudgetSumWarning()"
+                class="w-full bg-slate-950 border border-slate-800 rounded px-2 py-1 text-xs font-bold text-white focus:outline-none focus:border-brand-500">
+            </div>
+          </div>
+          <p id="subbudget-sum-warning" class="text-[10px] text-slate-400">Category caps total matches your monthly budget. Progress bars alert at 80% (amber) and 100% (red).</p>
         </div>
 
         <!-- 5 Quick Merchants Configuration (Item 9) -->
@@ -2612,7 +2623,8 @@
     function applyTranslations() {
       const t = TRANSLATIONS[currentLang];
 
-      document.getElementById('brand-subtitle').innerText = t.subtitle;
+      const brandSubtitleEl = document.getElementById('brand-subtitle');
+      if (brandSubtitleEl) brandSubtitleEl.innerText = t.subtitle;
       document.getElementById('text-btn-add').innerText = t.addExpense;
       document.getElementById('text-btn-add-short').innerText = t.add;
       document.getElementById('text-btn-scan').innerText = t.scan; // Just "Scan" (Item 10)
@@ -3637,6 +3649,7 @@
       const idx = container.children.length;
       const memId = 'p' + (idx + 1);
       const row = document.createElement('div');
+      const presetColors = ['#06b6d4', '#ec4899', '#5fccf2', '#10b981', '#f59e0b', '#a855f7', '#f43f5e', '#84cc16'];
       row.className = 'grid grid-cols-12 gap-2 items-center p-2 rounded-xl bg-slate-900 border border-slate-800 settings-member-row';
       row.innerHTML = `
         <div class="col-span-5">
@@ -3646,14 +3659,58 @@
           <input type="text" maxlength="3" class="member-row-badge w-full bg-slate-950 border border-slate-800 rounded-lg px-1.5 py-1.5 text-xs text-center font-bold text-brand-400 uppercase focus:outline-none focus:border-brand-500" placeholder="M3" value="${escapeHtml(badge)}">
         </div>
         <div class="col-span-3 flex items-center gap-1.5">
-          <input type="color" class="member-row-color w-7 h-7 rounded border border-slate-700 bg-transparent cursor-pointer p-0" value="${color}">
+          <input type="color" class="member-row-color w-7 h-7 rounded border border-slate-700 bg-transparent cursor-pointer p-0 flex-shrink-0" value="${color}" title="Custom colour (PC wheel / Android picker)">
           <span class="text-[10px] text-slate-400 font-mono">Accent</span>
         </div>
         <div class="col-span-1 text-center">
           ${idx >= 2 ? `<button type="button" onclick="this.closest('.settings-member-row').remove()" class="text-rose-400 hover:text-rose-300 p-1 cursor-pointer"><i class="fa-solid fa-trash-can text-xs"></i></button>` : ''}
         </div>
+        <div class="col-span-12 flex items-center gap-1.5 pt-1 border-t border-slate-800/60">
+          <span class="text-[9px] text-slate-400 mr-1">Swatches:</span>
+          ${presetColors.map(hex => `<button type="button" onclick="const inp = this.closest('.settings-member-row').querySelector('.member-row-color'); if(inp){ inp.value='${hex}'; }" class="w-4 h-4 rounded-full border border-white/30 cursor-pointer hover:scale-110 transition" style="background-color: ${hex}" title="${hex}"></button>`).join('')}
+        </div>
       `;
       container.appendChild(row);
+    }
+
+    function updateSubBudgetSumWarning() {
+      const warnEl = document.getElementById('subbudget-sum-warning');
+      if (!warnEl) return;
+      const cur = (document.getElementById('settings-currency-symbol-input')?.value) || household.currency || '€';
+      const target = parseFloat(document.getElementById('settings-budget-input')?.value) || 0;
+      const ids = ['subbudget-groceries', 'subbudget-dining', 'subbudget-transit', 'subbudget-clothes', 'subbudget-other'];
+      const sum = ids.reduce((acc, id) => acc + Math.max(0, parseFloat(document.getElementById(id)?.value) || 0), 0);
+      const diff = sum - target;
+      if (Math.abs(diff) < 0.01) {
+        warnEl.className = 'text-[10px] text-slate-400';
+        warnEl.innerText = `Category caps total (${cur}${sum.toFixed(0)}) matches your monthly budget. Progress bars alert at 80% (amber) and 100% (red).`;
+      } else {
+        const sign = diff > 0 ? `+${cur}${diff.toFixed(0)}` : `-${cur}${Math.abs(diff).toFixed(0)}`;
+        warnEl.className = 'text-[10px] text-amber-300 font-semibold';
+        warnEl.innerText = `Category caps total ${cur}${sum.toFixed(0)} vs ${cur}${target.toFixed(0)} monthly budget (${sign}). Progress bars alert at 80% (amber) and 100% (red).`;
+      }
+    }
+
+    function matchSubBudgetsToMonthly() {
+      const target = Math.max(1, parseFloat(document.getElementById('settings-budget-input')?.value) || 500);
+      const ids = ['subbudget-groceries', 'subbudget-dining', 'subbudget-transit', 'subbudget-clothes', 'subbudget-other'];
+      const defaults = [270, 90, 55, 40, 45];
+      const vals = ids.map((id, i) => Math.max(0, parseFloat(document.getElementById(id)?.value) || 0));
+      const base = vals.reduce((a, b) => a + b, 0) > 0 ? vals : defaults;
+      const baseSum = base.reduce((a, b) => a + b, 0);
+      let running = 0;
+      ids.forEach((id, i) => {
+        const inp = document.getElementById(id);
+        if (!inp) return;
+        if (i === ids.length - 1) {
+          inp.value = Math.max(0, Math.round(target - running));
+        } else {
+          const scaled = Math.round((base[i] / baseSum) * target);
+          inp.value = scaled;
+          running += scaled;
+        }
+      });
+      updateSubBudgetSumWarning();
     }
 
     function autoRankTopMerchants() {
@@ -3746,11 +3803,12 @@
       const st = document.getElementById('subbudget-transit');
       const sc = document.getElementById('subbudget-clothes');
       const so = document.getElementById('subbudget-other');
-      if (sg) sg.value = cb['Groceries'] ?? 300;
-      if (sd) sd.value = cb['Dining Out'] ?? 100;
-      if (st) st.value = cb['Transit'] ?? 60;
+      if (sg) sg.value = cb['Groceries'] ?? 270;
+      if (sd) sd.value = cb['Dining Out'] ?? 90;
+      if (st) st.value = cb['Transit'] ?? 55;
       if (sc) sc.value = cb['Clothes'] ?? 40;
-      if (so) so.value = cb['Other'] ?? 50;
+      if (so) so.value = cb['Other'] ?? 45;
+      updateSubBudgetSumWarning();
 
       // Populate Currency
       const curSelect = document.getElementById('settings-currency-symbol-input');
@@ -5531,7 +5589,7 @@
     function exportToJSON() {
       const backupData = {
         app: 'DuoSpend',
-        version: 'v0.13.14',
+        version: 'v0.13.15',
         exportedAt: new Date().toISOString(),
         household,
         settlements,
@@ -5540,7 +5598,7 @@
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
       const downloadAnchor = document.createElement('a');
       downloadAnchor.setAttribute("href", dataStr);
-      downloadAnchor.setAttribute("download", `DuoSpend_Backup_v0.13.14_${new Date().toISOString().split('T')[0]}.json`);
+      downloadAnchor.setAttribute("download", `DuoSpend_Backup_v0.13.15_${new Date().toISOString().split('T')[0]}.json`);
       document.body.appendChild(downloadAnchor);
       downloadAnchor.click();
       downloadAnchor.remove();
