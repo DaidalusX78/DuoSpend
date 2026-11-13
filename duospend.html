@@ -8,7 +8,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#324069" />
-  <title>DuoSpend v0.13.18 — Household Receipt & Expense Tracker</title>
+  <title>DuoSpend v0.13.19 — Household Receipt & Expense Tracker</title>
 
   <!-- Private Local API Keys Vault (git-ignored, never pushed to public repo) -->
   <script src="./secrets.local.js" onerror="window._noLocalSecrets=true"></script>
@@ -233,6 +233,7 @@
     html.dark #chart-mode-toggle-group button.active-chart-mode,
     html.dark #chart-mode-toggle-group button.bg-brand-600,
     html.dark .glass-modal button[type="submit"],
+    html.dark #account-auth-modal button.bg-brand-600,
     html.dark #user-tutorial-modal-backdrop button[onclick*="closeTutorialModal"] {
       background: #5fccf2 !important;
       background-color: #5fccf2 !important;
@@ -244,6 +245,7 @@
     html.dark #btn-scan-receipt:hover,
     html.dark #btn-settle-up:hover,
     html.dark #btn-firebase-sync-now:hover,
+    html.dark #account-auth-modal button.bg-brand-600:hover,
     html.dark .glass-modal button[type="submit"]:hover {
       background: #7ed8f6 !important;
       background-color: #7ed8f6 !important;
@@ -254,6 +256,7 @@
     html.dark #btn-scan-receipt *,
     html.dark #btn-settle-up *,
     html.dark #btn-firebase-sync-now *,
+    html.dark #account-auth-modal button.bg-brand-600 *,
     html.dark .glass-modal button[type="submit"] * {
       color: #1b2544 !important;
     }
@@ -672,7 +675,7 @@
       <p class="splash-credits-label text-xs sm:text-sm tracking-wide">
         Designed &amp; Created by <strong class="splash-author font-bold">Marc Bailey</strong>
       </p>
-      <span class="splash-version-pill text-[11px] font-bold px-2.5 py-0.5 rounded-full">v0.13.18</span>
+      <span class="splash-version-pill text-[11px] font-bold px-2.5 py-0.5 rounded-full">v0.13.19</span>
     </div>
   </div>
 
@@ -694,7 +697,7 @@
           <div class="flex items-center gap-2">
             <span class="text-xl sm:text-2xl font-extrabold tracking-tight text-[#324069] dark:text-white leading-none">Duo<span class="text-[#0891b2] dark:text-[#5fccf2]">Spend</span></span>
             <span id="app-version-badge"
-              class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-brand-50 text-brand-600 border border-brand-200 dark:bg-slate-800 dark:!text-white dark:border-brand-500/40">v0.13.18</span>
+              class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-brand-50 text-brand-600 border border-brand-200 dark:bg-slate-800 dark:!text-white dark:border-brand-500/40">v0.13.19</span>
           </div>
         </div>
 
@@ -786,7 +789,7 @@
               <span class="text-xl sm:text-2xl font-extrabold text-[#324069] dark:text-white">Duo<span
                   class="text-[#0891b2] dark:text-[#5fccf2]">Spend</span></span>
               <span id="drawer-version-badge"
-                class="text-xs font-bold px-2 py-0.5 rounded-full bg-brand-50 text-brand-600 border border-brand-200 dark:bg-slate-800 dark:!text-white dark:border-brand-500/40 ml-1">v0.13.18</span>
+                class="text-xs font-bold px-2 py-0.5 rounded-full bg-brand-50 text-brand-600 border border-brand-200 dark:bg-slate-800 dark:!text-white dark:border-brand-500/40 ml-1">v0.13.19</span>
             </div>
           </div>
           <button onclick="closeAllModals()"
@@ -796,16 +799,16 @@
           </button>
         </div>
 
-        <!-- Google User Account & Security Section -->
+        <!-- Account & Privacy Section (Local Account, Email & Password, or Google Sign-In) -->
         <div id="menu-account-card" class="glass-card rounded-2xl p-4 border border-slate-800 space-y-3">
           <div class="flex items-center justify-end text-xs">
             <span class="text-[10px] px-1 py-0.5 text-emerald-400 font-semibold flex items-center gap-1.5"
               id="account-status-badge">
-              <i class="fa-brands fa-google text-red-400"></i> Local Profile
+              <i class="fa-solid fa-user-shield text-slate-400"></i> Local Guest
             </span>
           </div>
           <div class="flex items-center gap-3">
-            <img id="user-avatar-img" src="" alt="Google Avatar"
+            <img id="user-avatar-img" src="" alt="Account Avatar"
               class="hidden w-10 h-10 rounded-full object-cover border border-brand-500/50 flex-shrink-0" />
             <div
               class="w-10 h-10 rounded-full bg-indigo-600/30 border border-indigo-500/50 flex items-center justify-center font-bold text-sm text-indigo-300 flex-shrink-0"
@@ -814,7 +817,7 @@
             </div>
             <div class="truncate">
               <div class="font-bold text-white text-sm" id="user-account-name">Household User</div>
-              <div class="text-xs text-slate-400 truncate" id="user-account-email">Sign in with Google</div>
+              <div class="text-xs text-slate-400 truncate" id="user-account-email">On-device profile only</div>
             </div>
           </div>
           <div class="pt-2 border-t border-slate-800/80 flex items-center justify-between gap-2 text-xs">
@@ -823,7 +826,7 @@
             <div class="flex items-center gap-2 flex-shrink-0">
               <button type="button" onclick="toggleAccountLogin()"
                 class="text-xs text-brand-400 hover:underline font-semibold cursor-pointer" id="btn-switch-account">
-                Google Sign-In
+                Account Options
               </button>
               <button type="button" onclick="signOutGoogleAccount()"
                 class="hidden text-xs text-rose-400 hover:underline font-semibold cursor-pointer" id="btn-signout-account">
@@ -1022,7 +1025,7 @@
           <span id="menu-credits-text">Designed & created by <strong class="text-white font-semibold">Marc Bailey
               2026</strong></span>
         </div>
-        <div class="text-xs text-slate-500 mt-1">DuoSpend v0.13.18 — Android Ready Architecture</div>
+        <div class="text-xs text-slate-500 mt-1">DuoSpend v0.13.19 — Android Ready Architecture</div>
       </div>
 
     </div>
@@ -2190,6 +2193,146 @@
   </div>
 
   <!-- ========================================== -->
+  <!-- ACCOUNT & PRIVACY SELECTOR MODAL (v0.13.19)-->
+  <!-- ========================================== -->
+  <div id="account-auth-modal" onclick="closeAllModals()"
+    class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div onclick="event.stopPropagation()"
+      class="glass-modal rounded-2xl w-full max-w-md my-auto overflow-hidden shadow-2xl border border-slate-700/80 animate-in fade-in zoom-in-95 duration-200">
+
+      <!-- Modal Header -->
+      <div class="px-5 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-900/90">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center">
+            <i class="fa-solid fa-user-shield text-sm"></i>
+          </div>
+          <div>
+            <h3 class="text-sm sm:text-base font-bold text-white">Account &amp; Privacy</h3>
+            <p id="auth-modal-current-badge" class="text-[11px] text-slate-400">Choose how you sign in</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeAllModals()"
+          class="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition cursor-pointer">
+          <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+      </div>
+
+      <!-- Mode Switcher Tabs -->
+      <div class="px-5 pt-4">
+        <div class="grid grid-cols-3 gap-1.5 p-1 rounded-xl bg-slate-950 border border-slate-800 text-[11px] font-semibold">
+          <button type="button" id="tab-auth-local" onclick="switchAuthModalTab('local')"
+            class="py-2 px-2 rounded-lg transition cursor-pointer flex items-center justify-center gap-1.5 bg-brand-600 text-white shadow-sm">
+            <i class="fa-solid fa-mobile-screen-button"></i> <span>Local</span>
+          </button>
+          <button type="button" id="tab-auth-email" onclick="switchAuthModalTab('email')"
+            class="py-2 px-2 rounded-lg transition cursor-pointer flex items-center justify-center gap-1.5 text-slate-400 hover:text-white">
+            <i class="fa-solid fa-envelope"></i> <span>Email</span>
+          </button>
+          <button type="button" id="tab-auth-google" onclick="switchAuthModalTab('google')"
+            class="py-2 px-2 rounded-lg transition cursor-pointer flex items-center justify-center gap-1.5 text-slate-400 hover:text-white">
+            <i class="fa-brands fa-google"></i> <span>Google</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Panel 1: Local Account (Zero Cloud Identity) -->
+      <form id="auth-panel-local" onsubmit="saveLocalAccountProfile(event)" class="p-5 space-y-3.5 text-xs">
+        <div class="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-[11px] text-slate-300 leading-relaxed">
+          <i class="fa-solid fa-lock text-emerald-400 mr-1"></i>
+          <strong>On-Device Only (Maximum GDPR Privacy):</strong> Your name and optional label are stored strictly on this device and are never uploaded to Firebase Auth or Firestore.
+        </div>
+        <div>
+          <label for="local-account-name-input" class="block text-slate-300 font-medium mb-1">Display Name</label>
+          <input type="text" id="local-account-name-input" placeholder="e.g. Marc" required
+            class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-brand-500">
+        </div>
+        <div>
+          <label for="local-account-email-input" class="block text-slate-300 font-medium mb-1">Local Email / Device Label <span class="text-slate-500">(optional)</span></label>
+          <input type="text" id="local-account-email-input" placeholder="e.g. Personal Phone"
+            class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-brand-500">
+        </div>
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" onclick="closeAllModals()"
+            class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 !text-white font-semibold cursor-pointer">
+            Cancel
+          </button>
+          <button type="submit"
+            class="px-4 py-1.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-semibold shadow-md cursor-pointer">
+            Save Local Account
+          </button>
+        </div>
+      </form>
+
+      <!-- Panel 2: Email & Password (Firebase Auth) -->
+      <div id="auth-panel-email" class="hidden p-5 space-y-3 text-xs">
+        <div class="p-3 rounded-xl bg-slate-950/80 border border-slate-800 text-[11px] text-slate-300 leading-relaxed">
+          <i class="fa-solid fa-envelope-circle-check text-cyan-400 mr-1"></i>
+          Sign in with your own email &amp; password (no Google OAuth needed). Display preferences stay local and never sync into shared Firestore household ledgers.
+        </div>
+        <div>
+          <label for="auth-email-name-input" class="block text-slate-300 font-medium mb-1">Display Name <span class="text-slate-500">(for new accounts)</span></label>
+          <input type="text" id="auth-email-name-input" placeholder="e.g. Marc"
+            class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-brand-500">
+        </div>
+        <div>
+          <label for="auth-email-input" class="block text-slate-300 font-medium mb-1">Email Address</label>
+          <input type="email" id="auth-email-input" autocomplete="email" placeholder="you@domain.com"
+            class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-brand-500">
+        </div>
+        <div>
+          <label for="auth-password-input" class="block text-slate-300 font-medium mb-1">Password <span class="text-slate-500">(min 6 chars)</span></label>
+          <input type="password" id="auth-password-input" autocomplete="current-password" minlength="6" placeholder="••••••••"
+            class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-brand-500">
+        </div>
+        <p id="auth-email-feedback" class="hidden text-[11px] text-amber-300 bg-amber-500/10 border border-amber-500/30 rounded-lg px-2.5 py-2"></p>
+        <div class="flex flex-wrap items-center justify-between gap-2 pt-2">
+          <button type="button" onclick="handlePasswordReset()"
+            class="text-[11px] text-cyan-400 hover:underline font-medium cursor-pointer">
+            Forgot Password?
+          </button>
+          <div class="flex items-center gap-2">
+            <button type="button" id="btn-email-signup" onclick="handleEmailPasswordAuth('signup')"
+              class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 !text-white font-semibold cursor-pointer">
+              Create Account
+            </button>
+            <button type="button" id="btn-email-signin" onclick="handleEmailPasswordAuth('signin')"
+              class="px-4 py-1.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-semibold shadow-md cursor-pointer">
+              Sign In
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Panel 3: Google Sign-In -->
+      <div id="auth-panel-google" class="hidden p-5 space-y-4 text-xs">
+        <div class="p-3 rounded-xl bg-slate-950/80 border border-slate-800 text-[11px] text-slate-300 leading-relaxed space-y-1">
+          <div><i class="fa-brands fa-google text-cyan-400 mr-1"></i> <strong>GDPR Disclosure:</strong></div>
+          <p>Google Sign-In shares only your basic profile (name, email, avatar URL) with Firebase Authentication. DuoSpend keeps those details on your device and strips them from shared West Europe Firestore syncs.</p>
+        </div>
+        <button type="button" id="btn-google-signin" onclick="signInWithGooglePopup()"
+          style="background-color: #ffffff; color: #0f172a;"
+          class="w-full py-2.5 px-4 rounded-xl border border-slate-300 hover:bg-slate-100 font-bold text-xs flex items-center justify-center gap-2.5 shadow-sm transition cursor-pointer">
+          <i class="fa-brands fa-google text-rose-500 text-sm"></i>
+          <span>Continue with Google</span>
+        </button>
+      </div>
+
+      <!-- Cloud Account Sign-Out & GDPR Erasure Footer -->
+      <div id="auth-modal-cloud-footer" class="hidden px-5 py-3 border-t border-slate-800 bg-slate-950/60 flex flex-wrap items-center justify-between gap-2 text-[11px]">
+        <button type="button" onclick="deleteCurrentAuthAccount()"
+          class="text-rose-400 hover:text-rose-300 hover:underline font-semibold cursor-pointer flex items-center gap-1">
+          <i class="fa-solid fa-trash-can"></i> Delete Cloud Account (GDPR)
+        </button>
+        <button type="button" onclick="signOutGoogleAccount(); closeAllModals();"
+          class="px-3 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 !text-white font-semibold cursor-pointer">
+          Sign Out
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========================================== -->
   <!-- USER ONBOARDING & HELP GUIDE MODAL (v0.13) -->
   <!-- ========================================== -->
   <div id="user-tutorial-modal-backdrop" onclick="closeTutorialModal()"
@@ -2312,10 +2455,11 @@
         `).join('');
       }
 
-      // Sync user profile avatar in menu drawer when no Google account is connected
-      if (!household.googleEmail) {
-        updateAccountCardUI(null);
-      }
+      // Refresh drawer Account card UI (preserves Local/Email/Google identity without overwriting)
+      const activeAuthUser = (window.firebase && firebase.apps && firebase.apps.length && firebase.auth)
+        ? firebase.auth().currentUser
+        : null;
+      updateAccountCardUI(activeAuthUser);
 
       // 2. Dynamic Summary Cards Grid (Item 7)
       const summaryGrid = document.getElementById('summary-cards-grid');
@@ -2430,6 +2574,7 @@
     const STORAGE_KEY = 'duospend_expenses_v1';
     const DELETED_IDS_KEY = 'duospend_deleted_ids_v1';
     const SETTINGS_KEY = 'duospend_settings_v1';
+    const LOCAL_PROFILE_KEY = 'duospend_local_profile_v1';
     const LANG_KEY = 'duospend_lang_v1';
     const THEME_KEY = 'duospend_theme_v1';
     const SETTLEMENTS_KEY = 'duospend_settlements_v1';
@@ -2437,14 +2582,73 @@
     const EXCHANGE_RATES_KEY = 'duospend_fx_rates_v1';
 
     let deletedExpenseIds = [];
+    let localProfile = {
+      mode: 'local', // 'local' | 'email' | 'google'
+      name: (window.DUOSPEND_LOCAL_SECRETS && window.DUOSPEND_LOCAL_SECRETS.userName) || '',
+      email: (window.DUOSPEND_LOCAL_SECRETS && window.DUOSPEND_LOCAL_SECRETS.userEmail) || '',
+      photo: '',
+      uid: ''
+    };
+
+    function stripPrivateAuthFields(obj) {
+      if (!obj || typeof obj !== 'object') return {};
+      const copy = { ...obj };
+      delete copy.googleUid;
+      delete copy.googleEmail;
+      delete copy.googleName;
+      delete copy.googlePhoto;
+      return copy;
+    }
+
+    function saveLocalProfile(nextProfile = localProfile) {
+      localProfile = {
+        mode: nextProfile.mode || 'local',
+        name: nextProfile.name || '',
+        email: nextProfile.email || '',
+        photo: nextProfile.photo || '',
+        uid: nextProfile.uid || ''
+      };
+      try {
+        localStorage.setItem(LOCAL_PROFILE_KEY, JSON.stringify(localProfile));
+      } catch (e) { }
+    }
+
+    function loadLocalProfile() {
+      let loaded = null;
+      try {
+        const raw = localStorage.getItem(LOCAL_PROFILE_KEY);
+        if (raw) loaded = JSON.parse(raw);
+      } catch (e) { }
+      if (loaded && typeof loaded === 'object') {
+        localProfile = { ...localProfile, ...loaded };
+      } else if (household && (household.googleEmail || household.googleName)) {
+        const legacyEmail = household.googleEmail && household.googleEmail !== 'user@example.com' ? household.googleEmail : '';
+        const legacyName = household.googleName && household.googleName !== 'Household User' ? household.googleName : '';
+        if (legacyEmail || legacyName) {
+          localProfile = {
+            mode: household.googleUid ? 'google' : 'local',
+            name: legacyName || (legacyEmail ? legacyEmail.split('@')[0] : ''),
+            email: legacyEmail,
+            photo: household.googlePhoto || '',
+            uid: household.googleUid || ''
+          };
+          saveLocalProfile(localProfile);
+        }
+      }
+      // Always keep shared household object free of PII auth fields (GDPR data minimization)
+      if (household && ('googleUid' in household || 'googleEmail' in household || 'googleName' in household || 'googlePhoto' in household)) {
+        household = stripPrivateAuthFields(household);
+        try {
+          localStorage.setItem(SETTINGS_KEY, JSON.stringify(household));
+        } catch (e) { }
+      }
+    }
 
     let household = {
       p1Name: (window.DUOSPEND_LOCAL_SECRETS && window.DUOSPEND_LOCAL_SECRETS.p1Name) || 'Member 1',
       p2Name: (window.DUOSPEND_LOCAL_SECRETS && window.DUOSPEND_LOCAL_SECRETS.p2Name) || 'Member 2',
       p1Badge: (window.DUOSPEND_LOCAL_SECRETS && window.DUOSPEND_LOCAL_SECRETS.p1Badge) || 'M1',
       p2Badge: (window.DUOSPEND_LOCAL_SECRETS && window.DUOSPEND_LOCAL_SECRETS.p2Badge) || 'M2',
-      googleName: (window.DUOSPEND_LOCAL_SECRETS && window.DUOSPEND_LOCAL_SECRETS.userName) || 'Household User',
-      googleEmail: (window.DUOSPEND_LOCAL_SECRETS && window.DUOSPEND_LOCAL_SECRETS.userEmail) || 'user@example.com',
       currency: '€',
       monthlyBudget: 500, // Item 5: €500/month default
       categoryBudgets: {  // v0.11 Item 3: Category-Specific Monthly Sub-Budgets
@@ -2980,6 +3184,7 @@
         'settle-up-modal',
         'receipt-image-modal',
         'firebase-config-modal',
+        'account-auth-modal',
         'user-tutorial-modal-backdrop'
       ];
       return modals.some(id => {
@@ -2999,6 +3204,7 @@
         'settle-up-modal',
         'receipt-image-modal',
         'firebase-config-modal',
+        'account-auth-modal',
         'user-tutorial-modal-backdrop'
       ];
       modals.forEach(id => {
@@ -3992,6 +4198,7 @@
       household.p2Name = household.members[1] ? household.members[1].name : 'Member 2';
       household.p1Badge = household.members[0] ? household.members[0].badge : 'M1';
       household.p2Badge = household.members[1] ? household.members[1].badge : 'M2';
+      loadLocalProfile();
       updateAccountCardUI();
     }
 
@@ -5897,8 +6104,8 @@
       deleteExpense(targetId);
     }
 
-    // LIVE GOOGLE ACCOUNT LOGIN VIA FIREBASE AUTH (Step 2 / Item 7)
-    function updateAccountCardUI(authUser = null) {
+    // 3-MODE ACCOUNT & PRIVACY CONTROLS (Local Account, Email & Password, Google Sign-In)
+    function updateAccountCardUI(authUser) {
       const statusBadge = document.getElementById('account-status-badge');
       const emailEl = document.getElementById('user-account-email');
       const nameEl = document.getElementById('user-account-name');
@@ -5906,55 +6113,82 @@
       const imgEl = document.getElementById('user-avatar-img');
       const btnSwitch = document.getElementById('btn-switch-account');
       const btnSignOut = document.getElementById('btn-signout-account');
+      const modalBadge = document.getElementById('auth-modal-current-badge');
+      const cloudFooter = document.getElementById('auth-modal-cloud-footer');
 
-      const isGoogleUser = !!(authUser && !authUser.isAnonymous && (authUser.email || authUser.displayName));
-      if (isGoogleUser) {
-        household.googleUid = authUser.uid || '';
-        household.googleEmail = authUser.email || household.googleEmail || '';
-        household.googleName = authUser.displayName || (household.googleEmail ? household.googleEmail.split('@')[0] : 'Household User');
-        household.googlePhoto = authUser.photoURL || '';
-        localStorage.setItem(SETTINGS_KEY, JSON.stringify(household));
+      if (authUser === undefined && window.firebase && firebase.apps && firebase.apps.length && firebase.auth) {
+        try {
+          authUser = firebase.auth().currentUser;
+        } catch (e) {
+          authUser = null;
+        }
+      }
 
-        if (statusBadge) statusBadge.innerHTML = '<i class="fa-brands fa-google text-emerald-400"></i> Google Verified';
-        if (nameEl) nameEl.innerText = household.googleName;
-        if (emailEl) emailEl.innerText = household.googleEmail;
-        if (imgEl && household.googlePhoto) {
-          imgEl.src = household.googlePhoto;
+      const isCloudUser = !!(authUser && !authUser.isAnonymous && (authUser.email || authUser.displayName));
+      if (isCloudUser) {
+        const providerId = (authUser.providerData && authUser.providerData[0] && authUser.providerData[0].providerId) || '';
+        const isGoogle = providerId === 'google.com';
+        const displayEmail = authUser.email || localProfile.email || '';
+        const displayName = authUser.displayName || localProfile.name || (displayEmail ? displayEmail.split('@')[0] : 'Household User');
+        const displayPhoto = authUser.photoURL || '';
+
+        saveLocalProfile({
+          mode: isGoogle ? 'google' : 'email',
+          uid: authUser.uid || '',
+          email: displayEmail,
+          name: displayName,
+          photo: displayPhoto
+        });
+
+        if (statusBadge) {
+          statusBadge.innerHTML = isGoogle
+            ? '<i class="fa-brands fa-google text-emerald-400"></i> Google Verified'
+            : '<i class="fa-solid fa-envelope-circle-check text-emerald-400"></i> Email Verified';
+        }
+        if (nameEl) nameEl.innerText = displayName;
+        if (emailEl) emailEl.innerText = displayEmail;
+        if (imgEl && displayPhoto) {
+          imgEl.src = displayPhoto;
           imgEl.classList.remove('hidden');
           if (initEl) initEl.classList.add('hidden');
         } else if (initEl) {
           if (imgEl) imgEl.classList.add('hidden');
           initEl.classList.remove('hidden');
-          initEl.innerText = computeBadge(household.googleName);
+          initEl.innerText = computeBadge(displayName);
         }
-        if (btnSwitch) btnSwitch.innerText = 'Switch';
+        if (btnSwitch) btnSwitch.innerText = 'Account Options';
         if (btnSignOut) btnSignOut.classList.remove('hidden');
+        if (modalBadge) modalBadge.innerText = isGoogle ? `Signed in via Google (${displayEmail})` : `Signed in via Email (${displayEmail})`;
+        if (cloudFooter) cloudFooter.classList.remove('hidden');
         return;
       }
 
-      if (household.googleEmail) {
-        if (statusBadge) statusBadge.innerHTML = '<i class="fa-brands fa-google text-cyan-400"></i> Local Profile';
-        if (nameEl) nameEl.innerText = household.googleName || 'Household User';
-        if (emailEl) emailEl.innerText = household.googleEmail;
+      if (cloudFooter) cloudFooter.classList.add('hidden');
+      if (localProfile && (localProfile.name || localProfile.email)) {
+        if (statusBadge) statusBadge.innerHTML = '<i class="fa-solid fa-mobile-screen-button text-cyan-400"></i> Local Account';
+        if (nameEl) nameEl.innerText = localProfile.name || 'Local User';
+        if (emailEl) emailEl.innerText = localProfile.email || 'On-device profile only';
         if (imgEl) imgEl.classList.add('hidden');
         if (initEl) {
           initEl.classList.remove('hidden');
-          initEl.innerText = computeBadge(household.googleName || 'Member 1');
+          initEl.innerText = computeBadge(localProfile.name || 'Local');
         }
-        if (btnSwitch) btnSwitch.innerText = 'Google Sign-In';
-        if (btnSignOut) btnSignOut.classList.remove('hidden');
+        if (btnSwitch) btnSwitch.innerText = 'Account Options';
+        if (btnSignOut) btnSignOut.classList.add('hidden');
+        if (modalBadge) modalBadge.innerText = `Local Account (${localProfile.name || 'On-device only'})`;
       } else {
         const primaryMember = (household.members && household.members[0]) || { name: 'Household User', badge: 'M1' };
         if (statusBadge) statusBadge.innerHTML = '<i class="fa-solid fa-user-shield text-slate-400"></i> Local Guest';
         if (nameEl) nameEl.innerText = primaryMember.name || 'Household User';
-        if (emailEl) emailEl.innerText = 'Sign in with Google';
+        if (emailEl) emailEl.innerText = 'On-device profile only';
         if (imgEl) imgEl.classList.add('hidden');
         if (initEl) {
           initEl.classList.remove('hidden');
           initEl.innerText = escapeHtml(primaryMember.badge || computeBadge(primaryMember.name));
         }
-        if (btnSwitch) btnSwitch.innerText = 'Google Sign-In';
+        if (btnSwitch) btnSwitch.innerText = 'Account Options';
         if (btnSignOut) btnSignOut.classList.add('hidden');
+        if (modalBadge) modalBadge.innerText = 'Choose how you sign in';
       }
     }
 
@@ -5969,59 +6203,255 @@
           authDomain: `${projId}.firebaseapp.com`
         });
       }
-      return firebase.apps.length ? firebase.auth() : null;
+      if (firebase.apps.length) {
+        bindFirebaseAuthListener();
+        return firebase.auth();
+      }
+      return null;
     }
 
-    async function toggleAccountLogin() {
-      const auth = ensureFirebaseAuthApp();
-      if (auth && navigator.onLine) {
-        try {
-          const provider = new firebase.auth.GoogleAuthProvider();
-          provider.setCustomParameters({ prompt: 'select_account' });
-          const cred = await auth.signInWithPopup(provider);
-          if (cred && cred.user) {
-            updateAccountCardUI(cred.user);
-            showToast(`Signed in as ${cred.user.displayName || cred.user.email}`);
-            return;
-          }
-        } catch (err) {
-          const code = (err && err.code) || '';
-          if (code === 'auth/popup-blocked' || code === 'auth/operation-not-supported-in-this-environment') {
-            try {
-              const provider = new firebase.auth.GoogleAuthProvider();
-              provider.setCustomParameters({ prompt: 'select_account' });
-              await auth.signInWithRedirect(provider);
-              return;
-            } catch (redirErr) {
-              console.warn('Google Sign-In redirect notice:', redirErr);
-            }
-          } else if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
-            showToast('Google Sign-In cancelled.', 'info');
-            return;
-          } else if (code === 'auth/operation-not-allowed' || code === 'auth/unauthorized-domain') {
-            showToast('Enable Google Sign-In & add this domain in Firebase Console > Authentication.', 'info');
-          } else {
-            console.warn('Google Sign-In notice:', err);
-          }
-        }
+    function toggleAccountLogin() {
+      openAccountAuthModal();
+    }
+
+    function openAccountAuthModal(preferredTab = null) {
+      hideAllModals();
+      pushModalHistoryState();
+
+      const primaryName = (household.members && household.members[0] && household.members[0].name) || '';
+      const localNameEl = document.getElementById('local-account-name-input');
+      const localEmailEl = document.getElementById('local-account-email-input');
+      const emailNameEl = document.getElementById('auth-email-name-input');
+      const emailEl = document.getElementById('auth-email-input');
+      const passEl = document.getElementById('auth-password-input');
+      const feedbackEl = document.getElementById('auth-email-feedback');
+
+      if (localNameEl) localNameEl.value = localProfile.name || primaryName;
+      if (localEmailEl) localEmailEl.value = localProfile.email || '';
+      if (emailNameEl) emailNameEl.value = localProfile.name || '';
+      if (emailEl) emailEl.value = localProfile.email || '';
+      if (passEl) passEl.value = '';
+      if (feedbackEl) {
+        feedbackEl.innerText = '';
+        feedbackEl.classList.add('hidden');
       }
 
-      // Offline / non-Firebase local profile fallback
-      const email = prompt("Enter Google Account Email for local profile (enable Google provider in Firebase Auth for popup sign-in):", household.googleEmail || "");
-      if (email && email.trim()) {
-        household.googleEmail = email.trim();
-        const namePart = email.split('@')[0].replace(/[._]/g, ' ');
-        household.googleName = namePart.charAt(0).toUpperCase() + namePart.slice(1);
-        household.googlePhoto = '';
-        localStorage.setItem(SETTINGS_KEY, JSON.stringify(household));
+      const activeTab = preferredTab || (localProfile.mode === 'email' ? 'email' : (localProfile.mode === 'google' ? 'google' : 'local'));
+      switchAuthModalTab(activeTab);
+      updateAccountCardUI();
+      const modal = document.getElementById('account-auth-modal');
+      if (modal) modal.classList.remove('hidden');
+    }
+
+    function switchAuthModalTab(tab) {
+      const tabs = ['local', 'email', 'google'];
+      tabs.forEach(t => {
+        const btn = document.getElementById(`tab-auth-${t}`);
+        const panel = document.getElementById(`auth-panel-${t}`);
+        if (btn) {
+          btn.className = t === tab
+            ? 'py-2 px-2 rounded-lg transition cursor-pointer flex items-center justify-center gap-1.5 bg-brand-600 text-white shadow-sm'
+            : 'py-2 px-2 rounded-lg transition cursor-pointer flex items-center justify-center gap-1.5 text-slate-400 hover:text-white';
+        }
+        if (panel) panel.classList.toggle('hidden', t !== tab);
+      });
+    }
+
+    async function saveLocalAccountProfile(e) {
+      e.preventDefault();
+      const name = (document.getElementById('local-account-name-input')?.value || '').trim();
+      const labelOrEmail = (document.getElementById('local-account-email-input')?.value || '').trim();
+      if (!name) {
+        showToast('Please enter a display name.', 'error');
+        return;
+      }
+
+      try {
+        if (window.firebase && firebase.apps && firebase.apps.length && firebase.auth) {
+          const auth = firebase.auth();
+          if (auth.currentUser && !auth.currentUser.isAnonymous) {
+            await auth.signOut();
+            if (firebaseConfig.roomCode) ensureAuth().catch(() => { });
+          }
+        }
+      } catch (err) {
+        console.warn('Local mode sign-out notice:', err);
+      }
+
+      saveLocalProfile({
+        mode: 'local',
+        name: name,
+        email: labelOrEmail,
+        photo: '',
+        uid: ''
+      });
+      updateAccountCardUI(null);
+      closeAllModals();
+      showToast(`Saved local-only account profile: ${name}`);
+    }
+
+    function formatAuthErrorMessage(err) {
+      const code = (err && err.code) || '';
+      if (code === 'auth/invalid-credential' || code === 'auth/wrong-password' || code === 'auth/user-not-found') {
+        return 'Invalid email or password. Check credentials or click "Create Account".';
+      }
+      if (code === 'auth/email-already-in-use') {
+        return 'An account with this email already exists. Click "Sign In" or reset password.';
+      }
+      if (code === 'auth/weak-password') {
+        return 'Password must be at least 6 characters long.';
+      }
+      if (code === 'auth/invalid-email') {
+        return 'Please enter a valid email address.';
+      }
+      if (code === 'auth/operation-not-allowed') {
+        return 'Enable Email/Password (or Google) under Firebase Console > Authentication > Sign-in method.';
+      }
+      if (code === 'auth/too-many-requests') {
+        return 'Too many attempts. Please wait a moment and try again.';
+      }
+      if (code === 'auth/requires-recent-login') {
+        return 'For security, please sign in again right before deleting your cloud account.';
+      }
+      if (code === 'auth/network-request-failed') {
+        return 'Network error. Please check your internet connection.';
+      }
+      return (err && err.message) || 'Authentication error. Please try again.';
+    }
+
+    function showEmailAuthFeedback(msg, isSuccess = false) {
+      const el = document.getElementById('auth-email-feedback');
+      if (!el) return;
+      el.innerText = msg;
+      el.className = isSuccess
+        ? 'text-[11px] text-emerald-300 bg-emerald-500/10 border border-emerald-500/30 rounded-lg px-2.5 py-2'
+        : 'text-[11px] text-amber-300 bg-amber-500/10 border border-amber-500/30 rounded-lg px-2.5 py-2';
+    }
+
+    async function handleEmailPasswordAuth(action = 'signin') {
+      const email = (document.getElementById('auth-email-input')?.value || '').trim();
+      const password = document.getElementById('auth-password-input')?.value || '';
+      const displayName = (document.getElementById('auth-email-name-input')?.value || '').trim();
+
+      if (!email || !email.includes('@')) {
+        showEmailAuthFeedback('Please enter a valid email address.');
+        return;
+      }
+      if (password.length < 6) {
+        showEmailAuthFeedback('Password must be at least 6 characters.');
+        return;
+      }
+
+      const auth = ensureFirebaseAuthApp();
+      if (!auth) {
+        showEmailAuthFeedback('Firebase Auth SDK not loaded or offline.');
+        return;
+      }
+
+      try {
+        let cred;
+        if (action === 'signup') {
+          cred = await auth.createUserWithEmailAndPassword(email, password);
+          if (cred && cred.user && displayName) {
+            await cred.user.updateProfile({ displayName }).catch(() => { });
+          }
+          showToast(`Account created for ${email}!`);
+        } else {
+          cred = await auth.signInWithEmailAndPassword(email, password);
+          showToast(`Signed in as ${email}`);
+        }
+        if (cred && cred.user) {
+          saveLocalProfile({
+            mode: 'email',
+            uid: cred.user.uid || '',
+            email: cred.user.email || email,
+            name: displayName || cred.user.displayName || email.split('@')[0],
+            photo: ''
+          });
+          updateAccountCardUI(cred.user);
+          closeAllModals();
+        }
+      } catch (err) {
+        const msg = formatAuthErrorMessage(err);
+        showEmailAuthFeedback(msg);
+      }
+    }
+
+    async function handlePasswordReset() {
+      const email = (document.getElementById('auth-email-input')?.value || '').trim();
+      if (!email || !email.includes('@')) {
+        showEmailAuthFeedback('Enter your email address above first to receive a reset link.');
+        return;
+      }
+      const auth = ensureFirebaseAuthApp();
+      if (!auth) {
+        showEmailAuthFeedback('Firebase Auth unavailable while offline.');
+        return;
+      }
+      try {
+        await auth.sendPasswordResetEmail(email);
+        showEmailAuthFeedback(`Password reset email sent to ${email}.`, true);
+        showToast(`Reset link sent to ${email}`);
+      } catch (err) {
+        showEmailAuthFeedback(formatAuthErrorMessage(err));
+      }
+    }
+
+    async function signInWithGooglePopup() {
+      const auth = ensureFirebaseAuthApp();
+      if (!auth || !navigator.onLine) {
+        showToast('Internet connection & Firebase config required for Google Sign-In. Use Local Account offline.', 'info');
+        return;
+      }
+      try {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        provider.setCustomParameters({ prompt: 'select_account' });
+        const cred = await auth.signInWithPopup(provider);
+        if (cred && cred.user) {
+          updateAccountCardUI(cred.user);
+          closeAllModals();
+          showToast(`Signed in as ${cred.user.displayName || cred.user.email}`);
+        }
+      } catch (err) {
+        const code = (err && err.code) || '';
+        if (code === 'auth/popup-blocked' || code === 'auth/operation-not-supported-in-this-environment') {
+          try {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            provider.setCustomParameters({ prompt: 'select_account' });
+            await auth.signInWithRedirect(provider);
+          } catch (redirErr) {
+            showToast(formatAuthErrorMessage(redirErr), 'error');
+          }
+        } else if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
+          showToast('Google Sign-In cancelled.', 'info');
+        } else {
+          showToast(formatAuthErrorMessage(err), 'info');
+        }
+      }
+    }
+
+    async function deleteCurrentAuthAccount() {
+      const auth = ensureFirebaseAuthApp();
+      const user = auth && auth.currentUser;
+      if (!user || user.isAnonymous) return;
+      try {
+        await user.delete();
+        try {
+          localStorage.removeItem(LOCAL_PROFILE_KEY);
+        } catch (e) { }
+        localProfile = { mode: 'local', name: '', email: '', photo: '', uid: '' };
         updateAccountCardUI(null);
-        showToast(`Saved local profile: ${household.googleEmail}`);
+        closeAllModals();
+        if (firebaseConfig.roomCode) ensureAuth().catch(() => { });
+        showToast('Cloud auth account erased (GDPR Right to Erasure).');
+      } catch (err) {
+        showToast(formatAuthErrorMessage(err), 'error');
       }
     }
 
     async function signOutGoogleAccount() {
       try {
-        if (window.firebase && firebase.apps.length && firebase.auth) {
+        if (window.firebase && firebase.apps && firebase.apps.length && firebase.auth) {
           const auth = firebase.auth();
           if (auth.currentUser && !auth.currentUser.isAnonymous) {
             await auth.signOut();
@@ -6033,13 +6463,12 @@
       } catch (err) {
         console.warn('Sign out notice:', err);
       }
-      delete household.googleUid;
-      delete household.googleEmail;
-      delete household.googleName;
-      delete household.googlePhoto;
-      localStorage.setItem(SETTINGS_KEY, JSON.stringify(household));
+      try {
+        localStorage.removeItem(LOCAL_PROFILE_KEY);
+      } catch (e) { }
+      localProfile = { mode: 'local', name: '', email: '', photo: '', uid: '' };
       updateAccountCardUI(null);
-      showToast('Signed out of Google Account.', 'info');
+      showToast('Signed out cleanly.', 'info');
     }
 
     // EXPORT UTILITIES & JSON IMPORT
@@ -6200,16 +6629,16 @@
     function exportToJSON() {
       const backupData = {
         app: 'DuoSpend',
-        version: 'v0.13.18',
+        version: 'v0.13.19',
         exportedAt: new Date().toISOString(),
-        household,
+        household: stripPrivateAuthFields(household),
         settlements,
         expenses
       };
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
       const downloadAnchor = document.createElement('a');
       downloadAnchor.setAttribute("href", dataStr);
-      downloadAnchor.setAttribute("download", `DuoSpend_Backup_v0.13.18_${new Date().toISOString().split('T')[0]}.json`);
+      downloadAnchor.setAttribute("download", `DuoSpend_Backup_v0.13.19_${new Date().toISOString().split('T')[0]}.json`);
       document.body.appendChild(downloadAnchor);
       downloadAnchor.click();
       downloadAnchor.remove();
@@ -6544,7 +6973,7 @@
                   saveSettlementsToStorage();
                 }
                 if (data.household && data.updatedBy !== window._clientId) {
-                  household = { ...household, ...data.household };
+                  household = stripPrivateAuthFields({ ...household, ...stripPrivateAuthFields(data.household) });
                   localStorage.setItem(SETTINGS_KEY, JSON.stringify(household));
                 }
                 populateLedgerMonthFilter();
@@ -6691,7 +7120,7 @@
         const payload = {
           updatedAt: new Date().toISOString(),
           updatedBy: window._clientId,
-          household: household,
+          household: stripPrivateAuthFields(household),
           expenses: cloudSafeExpenses,
           deletedExpenseIds: deletedExpenseIds.slice(-500),
           settlements: settlements
