@@ -1,5 +1,5 @@
-// DuoSpend Service Worker v0.13.19
-const CACHE_NAME = 'duospend-cache-v0.13.19';
+// DuoSpend Service Worker v0.13.20
+const CACHE_NAME = 'duospend-cache-v0.13.20';
 const LOCAL_ASSETS = [
   './duospend.html',
   './manifest.json',
