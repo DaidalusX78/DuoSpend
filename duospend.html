@@ -8,7 +8,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#324069" />
-  <title>DuoSpend v0.13.16 — Household Receipt & Expense Tracker</title>
+  <title>DuoSpend v0.13.17 — Household Receipt & Expense Tracker</title>
 
   <!-- Private Local API Keys Vault (git-ignored, never pushed to public repo) -->
   <script src="./secrets.local.js" onerror="window._noLocalSecrets=true"></script>
@@ -20,7 +20,10 @@
   <!-- Chart.js for interactive analytics -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link rel="manifest" href="./manifest.json">
+  <link rel="icon" href="./favicon.ico" sizes="48x48 32x32 16x16" />
   <link rel="icon" href="./src/images/duospend_icon.svg" type="image/svg+xml" />
+  <link rel="icon" type="image/png" sizes="32x32" href="./src/images/favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="./src/images/favicon-16x16.png" />
   <link rel="apple-touch-icon" href="./src/images/icon-192.png" />
   <!-- Firebase App & Firestore SDKs (v9 compat for zero-build vanilla JS) -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -210,10 +213,6 @@
       background-color: rgba(95, 204, 242, 0.25) !important;
     }
 
-    html.dark #brand-logo-pill {
-      background-color: #5fccf2 !important;
-    }
-
     html.dark #app-version-badge,
     html.dark #drawer-version-badge {
       background-color: rgba(95, 204, 242, 0.16) !important;
@@ -259,28 +258,29 @@
       color: #1b2544 !important;
     }
 
-    /* Light Mode (Day Theme) */
+    /* Light Mode (Day Theme) — Unified DuoSpend Teal & Navy Identity */
     html:not(.dark) body {
-      background-color: #f8fafc;
+      background-color: #f4fafd;
       color: #0f172a;
     }
 
     html:not(.dark) .glass-card {
-      background: rgba(255, 255, 255, 0.92);
+      background: rgba(255, 255, 255, 0.94);
       backdrop-filter: blur(12px);
-      border: 1px solid rgba(226, 232, 240, 0.9);
-      box-shadow: 0 4px 18px -2px rgba(0, 0, 0, 0.05);
+      border: 1px solid rgba(8, 145, 178, 0.16);
+      box-shadow: 0 6px 22px -4px rgba(8, 145, 178, 0.08), 0 2px 6px rgba(15, 23, 42, 0.04);
     }
 
     html:not(.dark) .glass-modal {
       background: #ffffff;
-      border: 1px solid #e2e8f0;
+      border: 1px solid rgba(8, 145, 178, 0.22);
+      box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
       color: #0f172a;
     }
 
     html:not(.dark) header {
-      background: rgba(255, 255, 255, 0.95) !important;
-      border-bottom-color: #e2e8f0 !important;
+      background: rgba(255, 255, 255, 0.96) !important;
+      border-bottom-color: rgba(95, 204, 242, 0.45) !important;
     }
 
     html:not(.dark) input,
@@ -289,6 +289,14 @@
       background-color: #f1f5f9 !important;
       color: #0f172a !important;
       border-color: #cbd5e1 !important;
+    }
+
+    html:not(.dark) input:focus,
+    html:not(.dark) select:focus,
+    html:not(.dark) textarea:focus {
+      border-color: #0891b2 !important;
+      outline: none !important;
+      box-shadow: 0 0 0 2px rgba(95, 204, 242, 0.35) !important;
     }
 
     html:not(.dark) input::placeholder,
@@ -320,12 +328,12 @@
     html:not(.dark) .bg-slate-900\/90,
     html:not(.dark) .bg-slate-950,
     html:not(.dark) .bg-slate-900 {
-      border-color: #e2e8f0 !important;
+      border-color: rgba(8, 145, 178, 0.18) !important;
     }
 
     html:not(.dark) #hamburger-drawer-panel {
       background-color: #ffffff !important;
-      border-color: #cbd5e1 !important;
+      border-color: rgba(8, 145, 178, 0.25) !important;
     }
 
     /* Subtle custom scrollbar */
@@ -365,8 +373,8 @@
       left: 0;
       right: 0;
       height: 3px;
-      background: linear-gradient(90deg, transparent, #6366f1, #06b6d4, transparent);
-      box-shadow: 0 0 15px #6366f1;
+      background: linear-gradient(90deg, transparent, #0891b2, #5fccf2, transparent);
+      box-shadow: 0 0 15px #5fccf2;
       animation: scanAnim 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
     }
 
@@ -387,13 +395,145 @@
       }
     }
 
-    /* Enforced #ffffff font-color for required buttons in Light Mode (Item 6 & 7) */
+    @keyframes splashProgress {
+      0% {
+        width: 12%;
+      }
+
+      65% {
+        width: 82%;
+      }
+
+      100% {
+        width: 100%;
+      }
+    }
+
+    /* Brand Splash Screen (#324069 Navy + #5fccf2 Teal across all theme modes) */
+    #app-splash-screen {
+      background: radial-gradient(circle at 50% 35%, #3d4d7c 0%, #324069 58%, #242f50 100%);
+      color: #ffffff;
+    }
+
+    #app-splash-screen .splash-wordmark-duo {
+      color: #ffffff !important;
+    }
+
+    #app-splash-screen .splash-wordmark-spend,
+    #app-splash-screen .splash-author {
+      color: #5fccf2 !important;
+    }
+
+    #app-splash-screen .splash-subtitle,
+    #app-splash-screen .splash-credits-label {
+      color: rgba(255, 255, 255, 0.82) !important;
+    }
+
+    #app-splash-screen .splash-version-pill {
+      background-color: rgba(95, 204, 242, 0.16) !important;
+      border: 1px solid rgba(95, 204, 242, 0.48) !important;
+      color: #ffffff !important;
+    }
+
+    #splash-progress-bar {
+      background: linear-gradient(90deg, #5fccf2, #ffffff);
+      animation: splashProgress 1.05s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    /* Light Mode Teal Accents (mirrors Dark Mode #5fccf2 / #324069 identity) */
+    html:not(.dark) .text-brand-600,
+    html:not(.dark) .text-brand-500,
+    html:not(.dark) .text-brand-400,
+    html:not(.dark) .text-brand-300,
+    html:not(.dark) .text-indigo-500,
+    html:not(.dark) .text-indigo-400,
+    html:not(.dark) .text-indigo-300,
+    html:not(.dark) #heading-spend-by-category i,
+    html:not(.dark) #heading-spending-distribution i,
+    html:not(.dark) #heading-ledger-title i,
+    html:not(.dark) #label-budget-target i,
+    html:not(.dark) #firebase-room-label,
+    html:not(.dark) #firebase-sync-spinner,
+    html:not(.dark) #firebase-sync-pct-text,
+    html:not(.dark) #menu-credits-text~i,
+    html:not(.dark) #hamburger-drawer-panel .fa-copyright {
+      color: #0891b2 !important;
+    }
+
+    html:not(.dark) .bg-brand-50,
+    html:not(.dark) .bg-brand-500\/10,
+    html:not(.dark) .bg-brand-500\/20,
+    html:not(.dark) .bg-indigo-500\/10,
+    html:not(.dark) .bg-indigo-500\/20,
+    html:not(.dark) .bg-indigo-600\/10,
+    html:not(.dark) .bg-indigo-600\/30 {
+      background-color: rgba(95, 204, 242, 0.22) !important;
+      border-color: rgba(8, 145, 178, 0.38) !important;
+      color: #0e7490 !important;
+    }
+
+    html:not(.dark) .bg-indigo-600\/10:hover,
+    html:not(.dark) .hover\:bg-indigo-600\/20:hover {
+      background-color: rgba(95, 204, 242, 0.34) !important;
+    }
+
+    html:not(.dark) .border-brand-500,
+    html:not(.dark) .border-brand-200 {
+      border-color: rgba(8, 145, 178, 0.45) !important;
+    }
+
+    html:not(.dark) #app-version-badge,
+    html:not(.dark) #drawer-version-badge {
+      background-color: rgba(95, 204, 242, 0.24) !important;
+      border-color: rgba(8, 145, 178, 0.42) !important;
+      color: #0e7490 !important;
+    }
+
+    html:not(.dark) #firebase-sync-progress-bar,
+    html:not(.dark) #budget-progress-bar {
+      background: linear-gradient(90deg, #0891b2, #5fccf2) !important;
+    }
+
+    /* Enforced teal action buttons & #ffffff font-color in Light Mode */
     html:not(.dark) #btn-add-expense-manual,
-    html:not(.dark) #btn-scan-receipt,
     html:not(.dark) #btn-settle-up,
     html:not(.dark) #chart-mode-toggle-group button.active-chart-mode,
     html:not(.dark) #chart-mode-toggle-group button.bg-brand-600,
-    #btn-reset-filters {
+    html:not(.dark) .glass-modal button[type="submit"],
+    html:not(.dark) button.bg-brand-600,
+    html:not(.dark) button.bg-indigo-600,
+    html:not(.dark) button[onclick*="syncFirebaseNow"],
+    html:not(.dark) #user-tutorial-modal-backdrop button[onclick*="closeTutorialModal"] {
+      background: #0891b2 !important;
+      background-color: #0891b2 !important;
+      border-color: #0e7490 !important;
+      color: #ffffff !important;
+      box-shadow: 0 4px 14px rgba(8, 145, 178, 0.24) !important;
+    }
+
+    html:not(.dark) #btn-add-expense-manual:hover,
+    html:not(.dark) #btn-settle-up:hover,
+    html:not(.dark) .glass-modal button[type="submit"]:hover,
+    html:not(.dark) button[onclick*="syncFirebaseNow"]:hover {
+      background: #0e7490 !important;
+      background-color: #0e7490 !important;
+    }
+
+    html:not(.dark) #btn-scan-receipt {
+      background: linear-gradient(135deg, #0891b2 0%, #324069 100%) !important;
+      color: #ffffff !important;
+      box-shadow: 0 4px 14px rgba(8, 145, 178, 0.28) !important;
+    }
+
+    html:not(.dark) #btn-scan-receipt:hover {
+      background: linear-gradient(135deg, #0e7490 0%, #273356 100%) !important;
+    }
+
+    html:not(.dark) #btn-add-expense-manual *,
+    html:not(.dark) #btn-scan-receipt *,
+    html:not(.dark) #btn-settle-up *,
+    html:not(.dark) .glass-modal button[type="submit"] *,
+    html:not(.dark) button[onclick*="syncFirebaseNow"] * {
       color: #ffffff !important;
     }
 
@@ -409,12 +549,13 @@
     }
 
     html:not(.dark) #btn-reset-filters {
-      background-color: #334155 !important;
-      border-color: #475569 !important;
+      background-color: #324069 !important;
+      border-color: #273356 !important;
+      color: #ffffff !important;
     }
 
     html:not(.dark) #btn-reset-filters:hover {
-      background-color: #1e293b !important;
+      background-color: #273356 !important;
     }
 
     /* Restored Left Border Accents on Member Cards (Item 5) */
@@ -426,7 +567,6 @@
       border-left: 4px solid #ec4899 !important;
     }
 
-
     /* Light mode: remove grey backgrounds on legends and cards (v0.13 Item 3) */
     html:not(.dark) #category-chart-legend,
     html:not(.dark) #category-chart-legend>div {
@@ -436,7 +576,6 @@
     }
 
     /* Dark mode: match drawer icons to #5fccf2 highlight */
-    html.dark #icon-toggle-fullscreen,
     html.dark #btn-menu-settings i,
     html.dark #btn-menu-settings .fa-sliders,
     html.dark #btn-menu-guide i {
@@ -444,29 +583,27 @@
     }
 
     /* Enforced #ffffff for closeAllModals buttons and split badges in all modes (Item 1) */
-    button[onclick*="closeAllModals()"]:not(#btn-toggle-fullscreen):not(#btn-menu-settings):not(#btn-menu-guide),
+    button[onclick*="closeAllModals()"]:not(#btn-menu-settings):not(#btn-menu-guide),
     .btn-modal-close,
     .badge-white-text {
       color: #ffffff !important;
     }
 
-    /* Item 6: In light mode make icons and text dark for btn-toggle-fullscreen, btn-menu-settings, and btn-menu-guide */
-    html:not(.dark) #btn-toggle-fullscreen,
-    html:not(.dark) #btn-toggle-fullscreen span,
-    html:not(.dark) #btn-toggle-fullscreen i,
+    /* Drawer items in Light Mode: dark readable labels + DuoSpend teal icons */
     html:not(.dark) #btn-menu-settings,
     html:not(.dark) #btn-menu-settings span,
-    html:not(.dark) #btn-menu-settings i,
     html:not(.dark) #btn-menu-guide,
-    html:not(.dark) #btn-menu-guide span,
-    html:not(.dark) #btn-menu-guide i {
+    html:not(.dark) #btn-menu-guide span {
       color: #0f172a !important;
     }
 
-    /* Item 7: In light mode make text and icons #ffffff for firebase-sync-badge, fa-solid fa-gear, syncFirebaseNow() */
+    html:not(.dark) #btn-menu-settings i,
+    html:not(.dark) #btn-menu-guide i {
+      color: #0891b2 !important;
+    }
+
+    /* Item 7: In light mode make text and icons #ffffff for firebase-sync-badge, fa-solid fa-gear */
     #firebase-sync-badge,
-    html:not(.dark) button[onclick*="syncFirebaseNow"],
-    html:not(.dark) button[onclick*="syncFirebaseNow"] *,
     button[onclick*="configureFirebaseModal"],
     button[onclick*="configureFirebaseModal"] *,
     button .fa-solid.fa-gear {
@@ -474,7 +611,7 @@
     }
 
     html:not(.dark) #firebase-sync-badge {
-      background-color: #334155 !important;
+      background-color: #324069 !important;
       color: #ffffff !important;
     }
 
@@ -484,12 +621,7 @@
     }
 
     html:not(.dark) button[onclick*="configureFirebaseModal"] {
-      background-color: #334155 !important;
-      color: #ffffff !important;
-    }
-
-    html:not(.dark) button[onclick*="syncFirebaseNow"] {
-      background-color: #4f46e5 !important;
+      background-color: #324069 !important;
       color: #ffffff !important;
     }
 
@@ -504,6 +636,39 @@
 <body class="min-h-screen flex flex-col antialiased selection:bg-brand-500 selection:text-white relative">
 
   <!-- ========================================== -->
+  <!-- LAUNCH SPLASH SCREEN                       -->
+  <!-- ========================================== -->
+  <div id="app-splash-screen" onclick="dismissSplashScreen()"
+    class="fixed inset-0 z-[100] flex flex-col items-center justify-between px-6 py-12 transition-opacity duration-500 cursor-pointer"
+    role="status" aria-label="Loading DuoSpend">
+    <div class="h-4"></div>
+
+    <div class="flex flex-col items-center text-center gap-5 max-w-sm">
+      <div class="w-24 h-24 sm:w-28 sm:h-28 rounded-3xl overflow-hidden shadow-2xl shadow-[#5fccf2]/30 ring-2 ring-[#5fccf2]/50 bg-[#5fccf2] flex items-center justify-center">
+        <img src="./src/images/duospend_icon.svg" alt="DuoSpend Logo" class="h-full w-full object-cover" />
+      </div>
+
+      <div class="space-y-1.5">
+        <h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight leading-none">
+          <span class="splash-wordmark-duo">Duo</span><span class="splash-wordmark-spend">Spend</span>
+        </h1>
+        <p class="splash-subtitle text-sm sm:text-base font-medium">Household Receipt &amp; Expense Tracker</p>
+      </div>
+
+      <div class="w-48 h-1.5 rounded-full bg-white/15 overflow-hidden mt-1">
+        <div id="splash-progress-bar" class="h-full rounded-full"></div>
+      </div>
+    </div>
+
+    <div class="flex flex-col items-center gap-2 text-center">
+      <p class="splash-credits-label text-xs sm:text-sm tracking-wide">
+        Designed &amp; Created by <strong class="splash-author font-bold">Marc Bailey</strong>
+      </p>
+      <span class="splash-version-pill text-[11px] font-bold px-2.5 py-0.5 rounded-full">v0.13.17</span>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
   <!-- TOP NAVIGATION BAR                         -->
   <!-- ========================================== -->
   <header id="app-top-header"
@@ -514,12 +679,15 @@
       <!-- Top Row on Mobile / Left Group on Desktop: Brand Logo + Mobile Hamburger -->
       <div id="brand-header-row" class="flex items-center justify-between w-full md:w-auto">
         <!-- Left Group: Brand Logo -->
-        <div id="brand-logo-section" class="flex items-center space-x-3">
-          <div id="brand-logo-pill" class="h-11 px-2.5 sm:px-3 rounded-xl bg-white dark:bg-[#5fccf2] flex items-center justify-center shadow-sm">
-            <img src="./src/images/DuoSpend_Theme_Logo.svg" alt="DuoSpend" class="h-8 w-auto object-contain rounded-lg" />
+        <div id="brand-logo-section" class="flex items-center gap-2.5">
+          <div class="h-10 w-10 rounded-xl overflow-hidden flex items-center justify-center shadow-md ring-1 ring-slate-200 dark:ring-white/20 flex-shrink-0">
+            <img src="./src/images/duospend_icon.svg" alt="DuoSpend Logo" class="h-full w-full object-cover" />
           </div>
-          <span id="app-version-badge"
-            class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-brand-50 text-brand-600 border border-brand-200 dark:bg-slate-800 dark:!text-white dark:border-brand-500/40">v0.13.16</span>
+          <div class="flex items-center gap-2">
+            <span class="text-xl sm:text-2xl font-extrabold tracking-tight text-[#324069] dark:text-white leading-none">Duo<span class="text-[#0891b2] dark:text-[#5fccf2]">Spend</span></span>
+            <span id="app-version-badge"
+              class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-brand-50 text-brand-600 border border-brand-200 dark:bg-slate-800 dark:!text-white dark:border-brand-500/40">v0.13.17</span>
+          </div>
         </div>
 
         <!-- Mobile Hamburger Button (inline to brand logo on mobile right) -->
@@ -607,10 +775,10 @@
               <img src="./src/images/duospend_icon.svg" alt="DuoSpend Logo" class="h-full w-full object-cover" />
             </div>
             <div>
-              <span class="text-xl sm:text-2xl font-extrabold text-white">Duo<span
-                  class="text-brand-500">Spend</span></span>
+              <span class="text-xl sm:text-2xl font-extrabold text-[#324069] dark:text-white">Duo<span
+                  class="text-[#0891b2] dark:text-[#5fccf2]">Spend</span></span>
               <span id="drawer-version-badge"
-                class="text-xs font-bold px-2 py-0.5 rounded-full bg-brand-50 text-brand-600 border border-brand-200 dark:bg-slate-800 dark:!text-white dark:border-brand-500/40 ml-1">v0.13.16</span>
+                class="text-xs font-bold px-2 py-0.5 rounded-full bg-brand-50 text-brand-600 border border-brand-200 dark:bg-slate-800 dark:!text-white dark:border-brand-500/40 ml-1">v0.13.17</span>
             </div>
           </div>
           <button onclick="closeAllModals()"
@@ -671,14 +839,6 @@
 
         <!-- Menu Navigation Items (Double Font Size) -->
         <nav class="space-y-3">
-          <!-- Fullscreen Option -->
-          <button id="btn-toggle-fullscreen" onclick="toggleFullscreen(); closeAllModals();"
-            class="w-full flex items-center gap-4 px-4 py-3.5 text-base sm:text-lg font-semibold text-slate-900 dark:text-slate-100 hover:text-slate-950 dark:hover:text-white bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200/80 dark:hover:bg-slate-700/80 border border-slate-200 dark:border-slate-700/80 rounded-2xl transition cursor-pointer shadow-sm">
-            <i id="icon-toggle-fullscreen"
-              class="fa-solid fa-expand text-slate-900 dark:text-sky-300 text-xl w-6 text-center"></i>
-            <span id="text-toggle-fullscreen">Fullscreen</span>
-          </button>
-
           <!-- Household Settings Option (Item 9: Opens Manage Household Members) -->
           <button id="btn-menu-settings" onclick="openSettingsModal('members');"
             class="w-full flex items-center gap-4 px-4 py-3.5 text-base sm:text-lg font-semibold text-slate-900 dark:text-slate-100 hover:text-slate-950 dark:hover:text-white bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200/80 dark:hover:bg-slate-700/80 border border-slate-200 dark:border-slate-700/80 rounded-2xl transition cursor-pointer shadow-sm">
@@ -846,7 +1006,7 @@
           <span id="menu-credits-text">Designed & created by <strong class="text-white font-semibold">Marc Bailey
               2026</strong></span>
         </div>
-        <div class="text-xs text-slate-500 mt-1">DuoSpend v0.13.16 — Android Ready Architecture</div>
+        <div class="text-xs text-slate-500 mt-1">DuoSpend v0.13.17 — Android Ready Architecture</div>
       </div>
 
     </div>
@@ -2513,6 +2673,16 @@
       return d.toISOString().split('T')[0];
     }
 
+    function dismissSplashScreen() {
+      const splash = document.getElementById('app-splash-screen');
+      if (!splash || splash.dataset.dismissed === 'true') return;
+      splash.dataset.dismissed = 'true';
+      splash.classList.add('opacity-0', 'pointer-events-none');
+      setTimeout(() => {
+        splash.style.display = 'none';
+      }, 500);
+    }
+
     // INITIALIZATION
     window.addEventListener('DOMContentLoaded', () => {
       // Register Service Worker for 100% offline caching (Item 11)
@@ -2538,11 +2708,14 @@
       fetchLiveExchangeRates(); // v0.11 Item 5: Live FX rates with offline cache
       initFirebaseSync(); // Item 4 & 6: Auto-connect & smart merge sync
 
+      // Dismiss launch splash screen smoothly once UI is hydrated
+      setTimeout(dismissSplashScreen, 1100);
+
       // Check first-time launch tutorial (v0.13 Item 1)
       if (!localStorage.getItem('duospend_tutorial_seen')) {
         setTimeout(() => {
           openTutorialModal();
-        }, 500);
+        }, 1450);
       }
     });
 
@@ -2635,7 +2808,6 @@
       document.getElementById('text-btn-add').innerText = t.addExpense;
       document.getElementById('text-btn-add-short').innerText = t.add;
       document.getElementById('text-btn-scan').innerText = t.scan; // Just "Scan" (Item 10)
-      document.getElementById('text-toggle-fullscreen').innerText = (document.fullscreenElement ? t.exitFullscreen : t.fullscreen);
       document.getElementById('text-menu-settings').innerText = t.householdSettings;
       document.getElementById('label-menu-language').innerText = t.langLabel;
       document.getElementById('menu-credits-text').innerHTML = `${t.createdCredits} <strong class="text-white font-semibold">Marc Bailey 2026</strong>`;
@@ -2900,25 +3072,6 @@
         closeAllModals();
       }
     });
-
-    function toggleFullscreen() {
-      const root = document.documentElement;
-      if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-        if (root.requestFullscreen) {
-          root.requestFullscreen().catch(() => {
-            showToast('Fullscreen mode not permitted in current frame.', 'info');
-          });
-        } else if (root.webkitRequestFullscreen) {
-          root.webkitRequestFullscreen();
-        }
-      } else {
-        if (document.exitFullscreen) {
-          document.exitFullscreen();
-        } else if (document.webkitExitFullscreen) {
-          document.webkitExitFullscreen();
-        }
-      }
-    }
 
     // REAL CLIENT-SIDE OCR SCANNING WITH TESSERACT.JS (Item 2)
     function triggerDirectScan() {
@@ -4874,7 +5027,9 @@
             datasets: [{
               label: currentLang === 'es' ? `Gasto Total (${cur})` : `Total Spent (${cur})`,
               data: amounts.length ? amounts : [0],
-              backgroundColor: ['#6366f1', '#06b6d4', '#ec4899', '#10b981', '#f59e0b', '#a855f7', '#0ea5e9'],
+              backgroundColor: currentTheme === 'dark'
+                ? ['#5fccf2', '#06b6d4', '#ec4899', '#10b981', '#f59e0b', '#a855f7', '#0ea5e9']
+                : ['#0891b2', '#324069', '#ec4899', '#10b981', '#f59e0b', '#06b6d4', '#0284c7'],
               borderRadius: 6
             }]
           },
@@ -4937,7 +5092,9 @@
             datasets: [{
               label: currentLang === 'es' ? `Gasto Mensual (${cur})` : `Monthly Spend (${cur})`,
               data: monthData.length ? monthData : [0],
-              backgroundColor: sortedMonths.map(m => m === curM ? '#5fccf2' : 'rgba(255, 255, 255, 0.35)'),
+              backgroundColor: sortedMonths.map(m => m === curM
+                ? (currentTheme === 'dark' ? '#5fccf2' : '#0891b2')
+                : (currentTheme === 'dark' ? 'rgba(255, 255, 255, 0.35)' : 'rgba(50, 64, 105, 0.22)')),
               borderRadius: 6
             }]
           },
@@ -5613,7 +5770,7 @@
     function exportToJSON() {
       const backupData = {
         app: 'DuoSpend',
-        version: 'v0.13.16',
+        version: 'v0.13.17',
         exportedAt: new Date().toISOString(),
         household,
         settlements,
@@ -5622,7 +5779,7 @@
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
       const downloadAnchor = document.createElement('a');
       downloadAnchor.setAttribute("href", dataStr);
-      downloadAnchor.setAttribute("download", `DuoSpend_Backup_v0.13.16_${new Date().toISOString().split('T')[0]}.json`);
+      downloadAnchor.setAttribute("download", `DuoSpend_Backup_v0.13.17_${new Date().toISOString().split('T')[0]}.json`);
       document.body.appendChild(downloadAnchor);
       downloadAnchor.click();
       downloadAnchor.remove();

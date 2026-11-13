@@ -1,10 +1,13 @@
-// DuoSpend Service Worker v0.13.16
-const CACHE_NAME = 'duospend-cache-v0.13.16';
+// DuoSpend Service Worker v0.13.17
+const CACHE_NAME = 'duospend-cache-v0.13.17';
 const LOCAL_ASSETS = [
   './duospend.html',
   './manifest.json',
+  './favicon.ico',
   './src/images/duospend_icon.svg',
   './src/images/DuoSpend_Theme_Logo.svg',
+  './src/images/favicon-32x32.png',
+  './src/images/favicon-16x16.png',
   './src/images/icon-192.png',
   './src/images/icon-512.png'
 ];
