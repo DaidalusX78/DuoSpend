@@ -1,5 +1,5 @@
-// DuoSpend Service Worker v0.13.20
-const CACHE_NAME = 'duospend-cache-v0.13.20';
+// DuoSpend Service Worker v0.13.21
+const CACHE_NAME = 'duospend-cache-v0.13.21';
 const LOCAL_ASSETS = [
   './duospend.html',
   './manifest.json',
@@ -21,11 +21,18 @@ const CDN_ASSETS = [
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(async (cache) => {
-      try {
-        await cache.addAll(LOCAL_ASSETS);
-      } catch (err) {
-        console.warn('Pre-caching local assets warning:', err);
-      }
+      await Promise.all(
+        LOCAL_ASSETS.map(async (url) => {
+          try {
+            const res = await fetch(url, { cache: 'reload' });
+            if (res && res.ok) {
+              await cache.put(url, res);
+            }
+          } catch (err) {
+            console.warn('Pre-caching local asset warning:', url, err);
+          }
+        })
+      );
       await Promise.all(
         CDN_ASSETS.map(url =>
           fetch(url, { mode: 'no-cors' })
@@ -53,6 +60,22 @@ self.addEventListener('fetch', (event) => {
   // Ignore chrome extensions or non-http/https
   if (!event.request.url.startsWith('http')) return;
 
+  // Network-first for manifest.json so PWA icon/theme metadata updates reliably
+  if (event.request.url.includes('manifest.json')) {
+    event.respondWith(
+      fetch(event.request, { cache: 'no-cache' }).then((networkRes) => {
+        if (networkRes && networkRes.ok) {
+          const clone = networkRes.clone();
+          caches.open(CACHE_NAME).then(c => c.put(event.request, clone));
+        }
+        return networkRes;
+      }).catch(() =>
+        caches.match(event.request).then(cached => cached || caches.match(event.request, { ignoreSearch: true }))
+      )
+    );
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request).then((cached) => {
       if (cached) return cached;
@@ -69,12 +92,14 @@ self.addEventListener('fetch', (event) => {
         caches.open(CACHE_NAME).then(c => c.put(event.request, clone));
         return networkRes;
       }).catch(() => {
-        // Fallback to duospend.html if navigation request fails offline
-        if (event.request.mode === 'navigate') {
-          return caches.match('./duospend.html');
-        }
+        return caches.match(event.request, { ignoreSearch: true }).then((fallback) => {
+          if (fallback) return fallback;
+          // Fallback to duospend.html if navigation request fails offline
+          if (event.request.mode === 'navigate') {
+            return caches.match('./duospend.html');
+          }
+        });
       });
     })
   );
 });
-

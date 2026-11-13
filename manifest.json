@@ -1,29 +1,43 @@
 {
+  "id": "./duospend.html",
   "name": "DuoSpend",
   "short_name": "DuoSpend",
   "description": "Household Receipt & Expense Tracker with Smart OCR and Multi-Device Sync",
   "start_url": "./duospend.html",
   "display": "standalone",
-  "background_color": "#5fccf2",
-  "theme_color": "#5fccf2",
+  "background_color": "#324069",
+  "theme_color": "#324069",
   "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "./src/images/duospend_icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "./src/images/icon-192.png",
+      "src": "./src/images/icon-192.png?v=0.13.21",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
-      "src": "./src/images/icon-512.png",
+      "src": "./src/images/icon-512.png?v=0.13.21",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./src/images/icon-192.png?v=0.13.21",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "./src/images/icon-512.png?v=0.13.21",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "./src/images/duospend_icon.svg?v=0.13.21",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
     }
   ]
 }
-

@@ -8,7 +8,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#324069" />
-  <title>DuoSpend v0.13.20 — Household Receipt & Expense Tracker</title>
+  <title>DuoSpend v0.13.21 — Household Receipt & Expense Tracker</title>
 
   <!-- Private Local API Keys Vault (git-ignored, never pushed to public repo) -->
   <script src="./secrets.local.js" onerror="window._noLocalSecrets=true"></script>
@@ -19,12 +19,12 @@
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
   <!-- Chart.js for interactive analytics -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <link rel="manifest" href="./manifest.json">
-  <link rel="icon" href="./favicon.ico" sizes="48x48 32x32 16x16" />
-  <link rel="icon" href="./src/images/duospend_icon.svg" type="image/svg+xml" />
-  <link rel="icon" type="image/png" sizes="32x32" href="./src/images/favicon-32x32.png" />
-  <link rel="icon" type="image/png" sizes="16x16" href="./src/images/favicon-16x16.png" />
-  <link rel="apple-touch-icon" href="./src/images/icon-192.png" />
+  <link rel="manifest" href="./manifest.json?v=0.13.21">
+  <link rel="icon" href="./favicon.ico?v=0.13.21" sizes="48x48 32x32 16x16" />
+  <link rel="icon" href="./src/images/duospend_icon.svg?v=0.13.21" type="image/svg+xml" />
+  <link rel="icon" type="image/png" sizes="32x32" href="./src/images/favicon-32x32.png?v=0.13.21" />
+  <link rel="icon" type="image/png" sizes="16x16" href="./src/images/favicon-16x16.png?v=0.13.21" />
+  <link rel="apple-touch-icon" sizes="192x192" href="./src/images/icon-192.png?v=0.13.21" />
   <!-- Firebase App & Firestore SDKs (v9 compat for zero-build vanilla JS) -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
@@ -675,7 +675,7 @@
       <p class="splash-credits-label text-xs sm:text-sm tracking-wide">
         Designed &amp; Created by <strong class="splash-author font-bold">Marc Bailey</strong>
       </p>
-      <span class="splash-version-pill text-[11px] font-bold px-2.5 py-0.5 rounded-full">v0.13.20</span>
+      <span class="splash-version-pill text-[11px] font-bold px-2.5 py-0.5 rounded-full">v0.13.21</span>
     </div>
   </div>
 
@@ -697,7 +697,7 @@
           <div class="flex items-center gap-2">
             <span class="text-xl sm:text-2xl font-extrabold tracking-tight text-[#324069] dark:text-white leading-none">Duo<span class="text-[#0891b2] dark:text-[#5fccf2]">Spend</span></span>
             <span id="app-version-badge"
-              class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-brand-50 text-brand-600 border border-brand-200 dark:bg-slate-800 dark:!text-white dark:border-brand-500/40">v0.13.20</span>
+              class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-brand-50 text-brand-600 border border-brand-200 dark:bg-slate-800 dark:!text-white dark:border-brand-500/40">v0.13.21</span>
           </div>
         </div>
 
@@ -789,7 +789,7 @@
               <span class="text-xl sm:text-2xl font-extrabold text-[#324069] dark:text-white">Duo<span
                   class="text-[#0891b2] dark:text-[#5fccf2]">Spend</span></span>
               <span id="drawer-version-badge"
-                class="text-xs font-bold px-2 py-0.5 rounded-full bg-brand-50 text-brand-600 border border-brand-200 dark:bg-slate-800 dark:!text-white dark:border-brand-500/40 ml-1">v0.13.20</span>
+                class="text-xs font-bold px-2 py-0.5 rounded-full bg-brand-50 text-brand-600 border border-brand-200 dark:bg-slate-800 dark:!text-white dark:border-brand-500/40 ml-1">v0.13.21</span>
             </div>
           </div>
           <button onclick="closeAllModals()"
@@ -1025,7 +1025,7 @@
           <span id="menu-credits-text">Designed & created by <strong class="text-white font-semibold">Marc Bailey
               2026</strong></span>
         </div>
-        <div class="text-xs text-slate-500 mt-1">DuoSpend v0.13.20 — Android Ready Architecture</div>
+        <div class="text-xs text-slate-500 mt-1">DuoSpend v0.13.21 — Android Ready Architecture</div>
       </div>
 
     </div>
@@ -2193,7 +2193,7 @@
   </div>
 
   <!-- ========================================== -->
-  <!-- ACCOUNT & PRIVACY SELECTOR MODAL (v0.13.20)-->
+  <!-- ACCOUNT & PRIVACY SELECTOR MODAL (v0.13.21)-->
   <!-- ========================================== -->
   <div id="account-auth-modal" onclick="closeAllModals()"
     class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
@@ -6635,7 +6635,7 @@
     function exportToJSON() {
       const backupData = {
         app: 'DuoSpend',
-        version: 'v0.13.20',
+        version: 'v0.13.21',
         exportedAt: new Date().toISOString(),
         household: stripPrivateAuthFields(household),
         settlements,
@@ -6644,7 +6644,7 @@
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
       const downloadAnchor = document.createElement('a');
       downloadAnchor.setAttribute("href", dataStr);
-      downloadAnchor.setAttribute("download", `DuoSpend_Backup_v0.13.20_${new Date().toISOString().split('T')[0]}.json`);
+      downloadAnchor.setAttribute("download", `DuoSpend_Backup_v0.13.21_${new Date().toISOString().split('T')[0]}.json`);
       document.body.appendChild(downloadAnchor);
       downloadAnchor.click();
       downloadAnchor.remove();
