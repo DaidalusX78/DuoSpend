@@ -7,8 +7,8 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="theme-color" content="#5fccf2" />
-  <title>DuoSpend v0.13.13 — Household Receipt & Expense Tracker</title>
+  <meta name="theme-color" content="#324069" />
+  <title>DuoSpend v0.13.14 — Household Receipt & Expense Tracker</title>
 
   <!-- Private Local API Keys Vault (git-ignored, never pushed to public repo) -->
   <script src="./secrets.local.js" onerror="window._noLocalSecrets=true"></script>
@@ -72,10 +72,14 @@
       background-image: none !important;
       backdrop-filter: blur(12px);
       color: #ffffff;
-      box-shadow: 0 10px 28px rgba(18, 26, 51, 0.25);
-      border-top-color: rgba(255, 255, 255, 0.16) !important;
-      border-right-color: rgba(255, 255, 255, 0.16) !important;
-      border-bottom-color: rgba(255, 255, 255, 0.16) !important;
+      box-shadow: 0 14px 36px rgba(15, 23, 42, 0.42), 0 4px 12px rgba(15, 23, 42, 0.24) !important;
+      border-top-color: rgba(255, 255, 255, 0.18) !important;
+      border-right-color: rgba(255, 255, 255, 0.18) !important;
+      border-bottom-color: rgba(255, 255, 255, 0.18) !important;
+    }
+
+    html.dark #app-top-header {
+      padding-top: max(0.75rem, env(safe-area-inset-top));
     }
 
     html.dark .glass-modal,
@@ -85,8 +89,8 @@
       background-image: none !important;
       backdrop-filter: blur(12px);
       color: #ffffff;
-      box-shadow: 0 12px 32px rgba(18, 26, 51, 0.35);
-      border-color: rgba(255, 255, 255, 0.16) !important;
+      box-shadow: 0 16px 40px rgba(15, 23, 42, 0.48), 0 6px 16px rgba(15, 23, 42, 0.28) !important;
+      border-color: rgba(255, 255, 255, 0.18) !important;
     }
 
     /* Clean up mismatched slate-800/900/950 inner card backgrounds in Dark Mode */
@@ -95,6 +99,7 @@
     html.dark .glass-card .bg-slate-900\/80,
     html.dark .glass-card .bg-slate-900\/60,
     html.dark .glass-card .bg-slate-900\/50,
+    html.dark .glass-card .bg-slate-900\/40,
     html.dark .glass-card .dark\:bg-slate-900\/50,
     html.dark .glass-modal .bg-slate-900,
     html.dark .glass-modal .bg-slate-900\/90,
@@ -506,9 +511,11 @@
       <div id="brand-header-row" class="flex items-center justify-between w-full md:w-auto">
         <!-- Left Group: Brand Logo -->
         <div id="brand-logo-section" class="flex items-center space-x-3">
-          <img src="./src/images/DuoSpend_Theme_Logo.svg" alt="DuoSpend" class="h-10 w-auto object-contain" />
+          <div class="h-11 px-2.5 sm:px-3 rounded-xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 flex items-center justify-center shadow-sm">
+            <img src="./src/images/DuoSpend_Theme_Logo.svg" alt="DuoSpend" class="h-8 w-auto object-contain rounded-lg" />
+          </div>
           <span id="app-version-badge"
-            class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-brand-50 text-brand-600 border border-brand-200 dark:bg-slate-800 dark:!text-white dark:border-brand-500/40">v0.13.13</span>
+            class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-brand-50 text-brand-600 border border-brand-200 dark:bg-slate-800 dark:!text-white dark:border-brand-500/40">v0.13.14</span>
         </div>
 
         <!-- Mobile Hamburger Button (inline to brand logo on mobile right) -->
@@ -599,7 +606,7 @@
               <span class="text-xl sm:text-2xl font-extrabold text-white">Duo<span
                   class="text-brand-500">Spend</span></span>
               <span id="drawer-version-badge"
-                class="text-xs font-bold px-2 py-0.5 rounded-full bg-brand-50 text-brand-600 border border-brand-200 dark:bg-slate-800 dark:!text-white dark:border-brand-500/40 ml-1">v0.13.13</span>
+                class="text-xs font-bold px-2 py-0.5 rounded-full bg-brand-50 text-brand-600 border border-brand-200 dark:bg-slate-800 dark:!text-white dark:border-brand-500/40 ml-1">v0.13.14</span>
             </div>
           </div>
           <button onclick="closeAllModals()"
@@ -835,7 +842,7 @@
           <span id="menu-credits-text">Designed & created by <strong class="text-white font-semibold">Marc Bailey
               2026</strong></span>
         </div>
-        <div class="text-xs text-slate-500 mt-1">DuoSpend v0.13.13 — Android Ready Architecture</div>
+        <div class="text-xs text-slate-500 mt-1">DuoSpend v0.13.14 — Android Ready Architecture</div>
       </div>
 
     </div>
@@ -4585,7 +4592,7 @@
           type: 'doughnut',
           data: {
             labels: ['No Data'],
-            datasets: [{ data: [1], backgroundColor: ['#1e293b'], borderWidth: 0 }]
+            datasets: [{ data: [1], backgroundColor: [currentTheme === 'dark' ? '#273356' : '#e2e8f0'], borderWidth: 0 }]
           },
           options: {
             cutout: '75%',
@@ -4605,7 +4612,7 @@
           datasets: [{
             data: dataValues,
             backgroundColor: bgColors,
-            borderColor: currentTheme === 'dark' ? '#0f172a' : '#ffffff',
+            borderColor: '#ffffff',
             borderWidth: 2,
             hoverOffset: 4
           }]
@@ -4695,7 +4702,8 @@
       if (barChartInstance) barChartInstance.destroy();
       const cur = household.currency;
       const t = TRANSLATIONS[currentLang];
-      const textColor = currentTheme === 'dark' ? '#94a3b8' : '#64748b';
+      const textColor = currentTheme === 'dark' ? '#ffffff' : '#64748b';
+      const gridColor = currentTheme === 'dark' ? 'rgba(255, 255, 255, 0.14)' : 'rgba(15, 23, 42, 0.08)';
       const activeExpenses = getActiveFilteredExpenses();
       const members = household.members || [
         { id: 'p1', name: 'Member 1', badge: 'M1', color: '#06b6d4' },
@@ -4752,7 +4760,7 @@
             scales: {
               x: { grid: { display: false }, ticks: { color: textColor, font: { size: 10 } } },
               y: {
-                grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                grid: { color: gridColor },
                 ticks: { color: textColor, callback: val => cur + val, font: { size: 10 } }
               }
             },
@@ -4803,7 +4811,7 @@
             scales: {
               x: { grid: { display: false }, ticks: { color: textColor, font: { size: 10 } } },
               y: {
-                grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                grid: { color: gridColor },
                 ticks: { color: textColor, callback: val => cur + val, font: { size: 10 } }
               }
             },
@@ -4847,7 +4855,7 @@
             datasets: [{
               label: currentLang === 'es' ? `Gasto Mensual (${cur})` : `Monthly Spend (${cur})`,
               data: monthData.length ? monthData : [0],
-              backgroundColor: sortedMonths.map(m => m === curM ? '#6366f1' : '#475569'),
+              backgroundColor: sortedMonths.map(m => m === curM ? '#5fccf2' : 'rgba(255, 255, 255, 0.35)'),
               borderRadius: 6
             }]
           },
@@ -4867,7 +4875,7 @@
             scales: {
               x: { grid: { display: false }, ticks: { color: textColor, font: { size: 10 } } },
               y: {
-                grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                grid: { color: gridColor },
                 ticks: { color: textColor, callback: val => cur + val, font: { size: 10 } }
               }
             },
@@ -4931,7 +4939,7 @@
             scales: {
               x: { grid: { display: false }, ticks: { color: textColor, font: { size: 10 } } },
               y: {
-                grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                grid: { color: gridColor },
                 ticks: { color: textColor, callback: val => cur + val, font: { size: 10 } }
               }
             },
@@ -5523,7 +5531,7 @@
     function exportToJSON() {
       const backupData = {
         app: 'DuoSpend',
-        version: 'v0.13.13',
+        version: 'v0.13.14',
         exportedAt: new Date().toISOString(),
         household,
         settlements,
@@ -5532,7 +5540,7 @@
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
       const downloadAnchor = document.createElement('a');
       downloadAnchor.setAttribute("href", dataStr);
-      downloadAnchor.setAttribute("download", `DuoSpend_Backup_v0.13.13_${new Date().toISOString().split('T')[0]}.json`);
+      downloadAnchor.setAttribute("download", `DuoSpend_Backup_v0.13.14_${new Date().toISOString().split('T')[0]}.json`);
       document.body.appendChild(downloadAnchor);
       downloadAnchor.click();
       downloadAnchor.remove();
