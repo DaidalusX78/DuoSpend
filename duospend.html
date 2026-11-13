@@ -8,7 +8,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#324069" />
-  <title>DuoSpend v0.13.17 — Household Receipt & Expense Tracker</title>
+  <title>DuoSpend v0.13.18 — Household Receipt & Expense Tracker</title>
 
   <!-- Private Local API Keys Vault (git-ignored, never pushed to public repo) -->
   <script src="./secrets.local.js" onerror="window._noLocalSecrets=true"></script>
@@ -558,13 +558,21 @@
       background-color: #273356 !important;
     }
 
-    /* Restored Left Border Accents on Member Cards (Item 5) */
+    /* Restored Left Border Accents on Member Cards & Settlement Card */
     #card-person1-paid {
       border-left: 4px solid #06b6d4 !important;
     }
 
     #card-person2-paid {
       border-left: 4px solid #ec4899 !important;
+    }
+
+    #settlement-card {
+      border-left: 4px solid #5fccf2 !important;
+    }
+
+    html:not(.dark) #settlement-card {
+      border-left: 4px solid #0891b2 !important;
     }
 
     /* Light mode: remove grey backgrounds on legends and cards (v0.13 Item 3) */
@@ -664,7 +672,7 @@
       <p class="splash-credits-label text-xs sm:text-sm tracking-wide">
         Designed &amp; Created by <strong class="splash-author font-bold">Marc Bailey</strong>
       </p>
-      <span class="splash-version-pill text-[11px] font-bold px-2.5 py-0.5 rounded-full">v0.13.17</span>
+      <span class="splash-version-pill text-[11px] font-bold px-2.5 py-0.5 rounded-full">v0.13.18</span>
     </div>
   </div>
 
@@ -686,7 +694,7 @@
           <div class="flex items-center gap-2">
             <span class="text-xl sm:text-2xl font-extrabold tracking-tight text-[#324069] dark:text-white leading-none">Duo<span class="text-[#0891b2] dark:text-[#5fccf2]">Spend</span></span>
             <span id="app-version-badge"
-              class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-brand-50 text-brand-600 border border-brand-200 dark:bg-slate-800 dark:!text-white dark:border-brand-500/40">v0.13.17</span>
+              class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-brand-50 text-brand-600 border border-brand-200 dark:bg-slate-800 dark:!text-white dark:border-brand-500/40">v0.13.18</span>
           </div>
         </div>
 
@@ -778,7 +786,7 @@
               <span class="text-xl sm:text-2xl font-extrabold text-[#324069] dark:text-white">Duo<span
                   class="text-[#0891b2] dark:text-[#5fccf2]">Spend</span></span>
               <span id="drawer-version-badge"
-                class="text-xs font-bold px-2 py-0.5 rounded-full bg-brand-50 text-brand-600 border border-brand-200 dark:bg-slate-800 dark:!text-white dark:border-brand-500/40 ml-1">v0.13.17</span>
+                class="text-xs font-bold px-2 py-0.5 rounded-full bg-brand-50 text-brand-600 border border-brand-200 dark:bg-slate-800 dark:!text-white dark:border-brand-500/40 ml-1">v0.13.18</span>
             </div>
           </div>
           <button onclick="closeAllModals()"
@@ -793,27 +801,35 @@
           <div class="flex items-center justify-end text-xs">
             <span class="text-[10px] px-1 py-0.5 text-emerald-400 font-semibold flex items-center gap-1.5"
               id="account-status-badge">
-              <i class="fa-brands fa-google text-red-400"></i> Connected
+              <i class="fa-brands fa-google text-red-400"></i> Local Profile
             </span>
           </div>
           <div class="flex items-center gap-3">
+            <img id="user-avatar-img" src="" alt="Google Avatar"
+              class="hidden w-10 h-10 rounded-full object-cover border border-brand-500/50 flex-shrink-0" />
             <div
-              class="w-10 h-10 rounded-full bg-indigo-600/30 border border-indigo-500/50 flex items-center justify-center font-bold text-sm text-indigo-300"
+              class="w-10 h-10 rounded-full bg-indigo-600/30 border border-indigo-500/50 flex items-center justify-center font-bold text-sm text-indigo-300 flex-shrink-0"
               id="user-avatar-initials">
               M1
             </div>
             <div class="truncate">
               <div class="font-bold text-white text-sm" id="user-account-name">Household User</div>
-              <div class="text-xs text-slate-400 truncate" id="user-account-email">user@example.com</div>
+              <div class="text-xs text-slate-400 truncate" id="user-account-email">Sign in with Google</div>
             </div>
           </div>
-          <div class="pt-2 border-t border-slate-800/80 flex items-center justify-between text-xs">
-            <span class="text-slate-400 text-[11px]" id="storage-status-text"><i
+          <div class="pt-2 border-t border-slate-800/80 flex items-center justify-between gap-2 text-xs">
+            <span class="text-slate-400 text-[11px] truncate" id="storage-status-text"><i
                 class="fa-solid fa-shield-halved text-cyan-400 mr-1"></i> Local Encrypted Storage</span>
-            <button onclick="toggleAccountLogin()"
-              class="text-xs text-brand-400 hover:underline font-semibold cursor-pointer" id="btn-switch-account">
-              Switch
-            </button>
+            <div class="flex items-center gap-2 flex-shrink-0">
+              <button type="button" onclick="toggleAccountLogin()"
+                class="text-xs text-brand-400 hover:underline font-semibold cursor-pointer" id="btn-switch-account">
+                Google Sign-In
+              </button>
+              <button type="button" onclick="signOutGoogleAccount()"
+                class="hidden text-xs text-rose-400 hover:underline font-semibold cursor-pointer" id="btn-signout-account">
+                Sign Out
+              </button>
+            </div>
           </div>
         </div>
 
@@ -1006,7 +1022,7 @@
           <span id="menu-credits-text">Designed & created by <strong class="text-white font-semibold">Marc Bailey
               2026</strong></span>
         </div>
-        <div class="text-xs text-slate-500 mt-1">DuoSpend v0.13.17 — Android Ready Architecture</div>
+        <div class="text-xs text-slate-500 mt-1">DuoSpend v0.13.18 — Android Ready Architecture</div>
       </div>
 
     </div>
@@ -1101,7 +1117,7 @@
 
       <!-- Who Owes Who Settlement Card with Settle Up Action -->
       <div id="settlement-card"
-        class="hidden glass-card rounded-2xl p-4 sm:p-5 relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950/60 border border-indigo-500/30 min-w-0 flex flex-col justify-between">
+        class="glass-card rounded-2xl p-4 sm:p-5 relative overflow-hidden border-l-4 border-l-[#5fccf2] min-w-0 flex flex-col justify-between">
         <div>
           <div id="settlement-card-header" class="flex items-center justify-between text-slate-400 mb-1">
             <span id="text-settlement-title"
@@ -1113,11 +1129,11 @@
               Share</span>
           </div>
           <div id="settlement-verdict-text"
-            class="text-xl sm:text-2xl font-bold text-white mt-1 flex items-baseline gap-1">
+            class="text-xl sm:text-2xl font-bold text-white mt-1 flex items-baseline gap-1 flex-wrap">
             All squared up!
           </div>
           <p id="settlement-detail-text" class="text-xs text-slate-300 mt-1.5 line-clamp-2">
-            Shared expenses are fully balanced between both roommates.
+            Shared expenses are fully balanced between household members.
           </p>
         </div>
 
@@ -1533,7 +1549,12 @@
                   On-Device OCR
                 </span>
               </div>
-              <div class="flex items-center gap-1.5">
+              <div class="flex flex-wrap items-center gap-1.5">
+                <button type="button" id="btn-test-sample-receipt" onclick="testSampleReceiptOcr()"
+                  class="px-2 py-1 rounded-lg bg-cyan-500/15 hover:bg-cyan-500/25 text-cyan-300 border border-cyan-500/30 text-[10px] font-semibold transition cursor-pointer"
+                  title="Generate and scan a realistic sample supermarket ticket">
+                  <i class="fa-solid fa-wand-magic-sparkles mr-0.5"></i> Sample Ticket
+                </button>
                 <button type="button" onclick="syncTotalFromLineItems()"
                   class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-[10px] text-cyan-300 border border-slate-700 font-semibold transition cursor-pointer"
                   title="Set total expense amount to the sum of extracted items">
@@ -1759,6 +1780,19 @@
           </p>
         </div>
 
+        <!-- Split Settlement Card Visibility Toggle -->
+        <div id="settings-field-wrapper-settlement"
+          class="p-3 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between gap-3">
+          <div>
+            <label for="settings-show-settlement-checkbox" class="block text-xs font-semibold text-slate-200 cursor-pointer">
+              <i class="fa-solid fa-scale-balanced text-cyan-400 mr-1"></i> Show Split Settlement Card
+            </label>
+            <p class="text-[10px] text-slate-400 mt-0.5">Display live fair-share balances &amp; Settle Up card on the dashboard.</p>
+          </div>
+          <input type="checkbox" id="settings-show-settlement-checkbox" checked
+            class="w-4 h-4 rounded bg-slate-900 border-slate-700 text-cyan-500 focus:ring-0 cursor-pointer flex-shrink-0">
+        </div>
+
         <div id="settings-modal-actions" class="pt-3 border-t border-slate-800 flex justify-end gap-2">
           <button type="button" onclick="closeAllModals()"
             class="px-3 py-1.5 rounded-xl text-xs bg-slate-800 hover:bg-slate-700 !text-white font-semibold bg-slate-800 cursor-pointer">
@@ -1959,6 +1993,16 @@
           </button>
         </div>
       </form>
+
+      <!-- Recent Settlements History -->
+      <div id="settle-history-section" class="hidden px-5 pb-4 pt-2 border-t border-slate-800/80 space-y-2">
+        <div class="text-[11px] font-semibold uppercase tracking-wider text-slate-400 flex items-center justify-between">
+          <span><i class="fa-solid fa-clock-rotate-left text-cyan-400 mr-1"></i> Recent Settlements</span>
+        </div>
+        <div id="settle-history-list" class="space-y-1.5 max-h-36 overflow-y-auto pr-1">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
     </div>
   </div>
 
@@ -2268,19 +2312,21 @@
         `).join('');
       }
 
-      // Sync user profile avatar in menu drawer with primary member
-      const userInitialsEl = document.getElementById('user-avatar-initials');
-      if (userInitialsEl && members[0]) {
-        userInitialsEl.style.backgroundColor = members[0].color || '#06b6d4';
-        userInitialsEl.style.color = '#ffffff';
-        userInitialsEl.innerText = escapeHtml(members[0].badge || computeBadge(members[0].name));
+      // Sync user profile avatar in menu drawer when no Google account is connected
+      if (!household.googleEmail) {
+        updateAccountCardUI(null);
       }
 
       // 2. Dynamic Summary Cards Grid (Item 7)
       const summaryGrid = document.getElementById('summary-cards-grid');
+      const settleCard = document.getElementById('settlement-card');
+      const showSettle = household.showSettlementCard !== false;
+      if (settleCard) {
+        settleCard.classList.toggle('hidden', !showSettle);
+      }
       if (summaryGrid) {
-        // Adjust grid columns dynamically
-        const totalCards = 1 + members.length; // 1 for Total Spend + members
+        // Adjust grid columns dynamically (1 Total Spend + members + optional Settlement Card)
+        const totalCards = 1 + members.length + (showSettle ? 1 : 0);
         if (totalCards >= 4) {
           summaryGrid.className = 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 min-w-0';
         } else if (totalCards === 3) {
@@ -2289,11 +2335,7 @@
           summaryGrid.className = 'grid grid-cols-1 sm:grid-cols-2 gap-4 min-w-0';
         }
 
-        // Keep #card-total-spend as first child, remove prior member cards, re-render dynamically
-        const totalCard = document.getElementById('card-total-spend');
-        const settleCard = document.getElementById('settlement-card');
-
-        // Remove existing dynamic member cards
+        // Remove existing dynamic member cards and insert fresh ones before settlement card
         const existingMemberCards = summaryGrid.querySelectorAll('.dynamic-member-card');
         existingMemberCards.forEach(c => c.remove());
 
@@ -2419,7 +2461,8 @@
           { id: 'p2', name: 'Member 2', badge: 'M2', color: '#ec4899' }
         ],
       quickMerchants: ['AlCash', 'Lidl', 'Aldi', 'Mercadona', 'Deza'], // Item 9
-      customCategories: [] // Item 9: e.g. Pharmacy, Pets, DIY, Holiday
+      customCategories: [], // Item 9: e.g. Pharmacy, Pets, DIY, Holiday
+      showSettlementCard: true
     };
 
     let firebaseConfig = {
@@ -3100,7 +3143,7 @@
     }
 
     function parseReceiptText(rawText) {
-      if (!rawText || typeof rawText !== 'string') return { merchant: '', amount: null, date: '', category: 'Groceries', notes: '' };
+      if (!rawText || typeof rawText !== 'string') return { merchant: '', amount: null, date: '', category: 'Groceries', notes: '', items: [], engine: 'On-Device OCR' };
       const lines = rawText.split('\n').map(l => l.trim()).filter(Boolean);
       const upper = rawText.toUpperCase();
 
@@ -3112,10 +3155,18 @@
         { name: 'AlCash', keys: ['ALCASH', 'AL CASH', 'AL-CASH'] },
         { name: 'Deza', keys: ['DEZA'] },
         { name: 'Carrefour', keys: ['CARREFOUR', 'EXPRESS'] },
+        { name: 'Alcampo', keys: ['ALCAMPO'] },
+        { name: 'Supercor', keys: ['SUPERCOR'] },
         { name: 'Dia', keys: ['DIA ', 'SUPERMERCADOS DIA', '% DIA'] },
         { name: 'Eroski', keys: ['EROSKI'] },
         { name: 'Consum', keys: ['CONSUM'] },
+        { name: 'Spar', keys: [' SPAR', 'EUROSPAR', 'SUPERSPAR'] },
+        { name: 'Coviran', keys: ['COVIRAN'] },
+        { name: 'Bonpreu', keys: ['BONPREU', 'ESCLAT'] },
         { name: 'Hipercor', keys: ['HIPERCOR', 'CORTE INGLES', 'CORTE INGLÉS'] },
+        { name: 'Rossmann', keys: ['ROSSMANN'] },
+        { name: 'Druni', keys: ['DRUNI'] },
+        { name: 'Amazon', keys: ['AMAZON'] },
         { name: 'Repsol', keys: ['REPSOL'] },
         { name: 'Cepsa', keys: ['CEPSA'] },
         { name: 'BP', keys: [' BP ', 'ESTACION BP'] },
@@ -3141,38 +3192,53 @@
       }
       if (!merchant && lines.length > 0) {
         for (const l of lines.slice(0, 5)) {
-          const clean = l.replace(/[^a-zA-Z0-9\s]/g, '').trim();
-          if (clean.length >= 3 && clean.length <= 25 && !/\d{5}/.test(clean) && !/FECHA|TOTAL|FACTURA|TICKET/i.test(clean)) {
+          const clean = l.replace(/[^a-zA-Z0-9ÁÉÍÓÚÑáéíóúñ\s'-]/g, '').trim();
+          if (clean.length >= 3 && clean.length <= 28 && !/\d{5}/.test(clean) && !/FECHA|TOTAL|FACTURA|TICKET/i.test(clean)) {
             merchant = clean;
             break;
           }
         }
       }
 
-      // 2. Date Detection
+      // 2. Date Detection (supports YYYY-MM-DD and DD/MM/YYYY with calendar validation)
       let date = '';
-      const dateMatch = rawText.match(/\b(\d{1,2})[/.-](\d{1,2})[/.-](\d{2,4})\b/);
-      if (dateMatch) {
-        let day = dateMatch[1].padStart(2, '0');
-        let month = dateMatch[2].padStart(2, '0');
-        let year = dateMatch[3];
-        if (year.length === 2) year = '20' + year;
-        const yNum = parseInt(year, 10);
-        if (yNum >= 2020 && yNum <= 2035) {
-          date = `${year}-${month}-${day}`;
+      const isoMatches = [...rawText.matchAll(/\b(20\d{2})[/.-](\d{1,2})[/.-](\d{1,2})\b/g)];
+      for (const m of isoMatches) {
+        const y = parseInt(m[1], 10);
+        const mo = parseInt(m[2], 10);
+        const d = parseInt(m[3], 10);
+        if (y >= 2020 && y <= 2035 && mo >= 1 && mo <= 12 && d >= 1 && d <= 31) {
+          date = `${y}-${String(mo).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+          break;
+        }
+      }
+      if (!date) {
+        const euMatches = [...rawText.matchAll(/\b(\d{1,2})[/.-](\d{1,2})[/.-](\d{2,4})\b/g)];
+        for (const m of euMatches) {
+          const d = parseInt(m[1], 10);
+          const mo = parseInt(m[2], 10);
+          const yRaw = m[3].length === 2 ? '20' + m[3] : m[3];
+          const y = parseInt(yRaw, 10);
+          if (y >= 2020 && y <= 2035 && mo >= 1 && mo <= 12 && d >= 1 && d <= 31) {
+            date = `${y}-${String(mo).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+            break;
+          }
         }
       }
       if (!date) {
         date = new Date().toISOString().split('T')[0];
       }
 
-      // 3. Amount Detection
+      // 3. Amount Detection (pick the last non-SUBTOTAL total line across the ticket)
       let amount = null;
-      const totalRegex = /(?:TOTAL(?:\s*\(€\))?|TOTAL\s*EUR|IMPORTE(?:\s*TOTAL)?|A\s*PAGAR|TOTAL\s*A\s*PAGAR|TARJETA|SUMA)[\s\S]{0,25}?(\d{1,4}[,.]\d{2})/i;
-      const totalMatch = rawText.match(totalRegex);
-      if (totalMatch) {
-        amount = parseFloat(totalMatch[1].replace(',', '.'));
-      } else {
+      const totalRegex = /(?:^|[\s\n])(?!SUBTOTAL\b)(?:TOTAL(?:\s*(?:\(€\)|EUR|A\s*PAGAR))?|IMPORTE\s*TOTAL|A\s*PAGAR|TARJETA)[\s:€]*?(\d{1,4}[,.]\d{2})\b/gim;
+      const totalMatches = [...rawText.matchAll(totalRegex)];
+      if (totalMatches.length > 0) {
+        const lastMatch = totalMatches[totalMatches.length - 1];
+        const val = parseFloat(lastMatch[1].replace(',', '.'));
+        if (!isNaN(val) && val > 0) amount = val;
+      }
+      if (amount === null) {
         const numRegex = /\b(\d{1,4}[,.]\d{2})\b/g;
         const allNums = [...rawText.matchAll(numRegex)]
           .map(m => parseFloat(m[1].replace(',', '.')))
@@ -3191,7 +3257,7 @@
         category = 'Dining Out';
       } else if (/zara|primark|mango|stradivarius|pull|bershka|hm|moda|ropa/.test(mLower)) {
         category = 'Clothes';
-      } else if (/farmacia|ikea|leroy|decathlon|bazar/.test(mLower)) {
+      } else if (/farmacia|druni|rossmann|ikea|leroy|decathlon|bazar|amazon/.test(mLower)) {
         category = 'Other';
       } else {
         category = 'Groceries';
@@ -3226,8 +3292,8 @@
         // Skip header/footer lines with addresses or phone numbers
         if (/\b\d{5}\b|\b\d{9}\b|C\/|AVDA|POLIGONO/i.test(line)) continue;
 
-        // Pattern: Optional leading Qty (e.g. "2 " or "2x ") + Item Name + trailing price (e.g. "1,85" or "12.50" with optional unit price before it)
-        const match = line.match(/^(?:(\d{1,2})(?:\s*[xX*]|\s+))?([A-Za-zÁÉÍÓÚÑáéíóúñ0-9\s.,/%&-]{3,38}?)\s+(?:(\d{1,3}[,.]\d{2})\s+)?(\d{1,4}[,.]\d{2})\s*[€EAB]?$/);
+        // Pattern: Optional Qty (integer or decimal weight/unit prefix like "2 ", "2x ") + Item Name + trailing price (optional unit price before line total + tax code)
+        const match = line.match(/^(?:(\d{1,2})(?:\s*[xX*]|\s+))?([A-Za-zÁÉÍÓÚÑáéíóúñ0-9\s.,/%&-]{3,40}?)\s+(?:(\d{1,3}[,.]\d{2})\s+)?(\d{1,4}[,.]\d{2})\s*[€EAB*]?$/);
         if (match) {
           const qty = match[1] ? parseInt(match[1], 10) : 1;
           let name = match[2].replace(/\s+/g, ' ').replace(/[.,-]+\s*$/, '').trim();
@@ -3235,7 +3301,7 @@
 
           // Filter out non-product lines or the receipt grand total itself
           if (!name || name.length < 2 || /^\d+$/.test(name)) continue;
-          if (/TOTAL|PAGAR|TARJETA|IVA|SUBTOTAL|DESCUENTO/i.test(name)) continue;
+          if (/\b(?:TOTAL|PAGAR|TARJETA|IVA|SUBTOTAL|DESCUENTO)\b/i.test(name)) continue;
           if (isNaN(linePrice) || linePrice <= 0 || linePrice > 2000) continue;
           if (detectedTotal && Math.abs(linePrice - detectedTotal) < 0.01 && items.length > 0) continue;
 
@@ -3663,7 +3729,138 @@
     function toggleLineItemPersonal(idx) {
       if (!currentFormLineItems[idx]) return;
       currentFormLineItems[idx].personal = !currentFormLineItems[idx].personal;
+      if (currentFormLineItems[idx].personal) {
+        const splitSel = document.getElementById('expense-split-policy-select');
+        if (splitSel && splitSel.value === 'home_account') {
+          splitSel.value = '50/50';
+          showToast('Switched split to 50/50 so personal item deduction applies to settlement.', 'info');
+        }
+      }
       renderReceiptLineItemsForm();
+    }
+
+    window._sampleReceiptIdx = 0;
+
+    function testSampleReceiptOcr() {
+      const today = new Date();
+      const dd = String(today.getDate()).padStart(2, '0');
+      const mm = String(today.getMonth() + 1).padStart(2, '0');
+      const yyyy = today.getFullYear();
+      const dateStr = `${dd}/${mm}/${yyyy}`;
+
+      const samples = [
+        {
+          store: 'MERCADONA S.A.',
+          address: 'AVDA. GRAN CAPITAN 14, CORDOBA',
+          personalIdx: 4,
+          rawText: [
+            'MERCADONA S.A.',
+            `FECHA: ${dateStr} 18:42`,
+            'ACEITE OLIVA VIRGEN 8,95',
+            '2x LECHE ENTERA 1L 1,90',
+            'PECHUGA POLLO 500G 4,25',
+            'PAN RUSTICO MASA 1,35',
+            'HELADO CHOCOLATE PRO 3,40',
+            'SUBTOTAL 19,85',
+            'TOTAL (€) 19,85'
+          ].join('\n')
+        },
+        {
+          store: 'LIDL SUPERMERCADOS',
+          address: 'POL. IND. CHINALES 8, CORDOBA',
+          personalIdx: 3,
+          rawText: [
+            'LIDL SUPERMERCADOS',
+            `FECHA: ${dateStr} 11:15`,
+            'PLATANOS CANARIAS 2,15 A',
+            'QUESO MANCHEGO CURADO 4,60 B',
+            '2x YOGUR GRIEGO NAT 2,80 A',
+            'CERVEZA ARTESANA IPA 2,95 B',
+            'PAPEL COCINA HOGAR 2,50 E',
+            'TOTAL EUR 15,00'
+          ].join('\n')
+        },
+        {
+          store: 'ALDI SUPERMERCADOS',
+          address: 'C/ RONDA DE TEJARES 22',
+          personalIdx: 4,
+          rawText: [
+            'ALDI SUPERMERCADOS',
+            `FECHA: ${dateStr} 19:20`,
+            'SALMON NORUEGO FRESCO 6,80 A',
+            'TOMATES PERA 1KG 1,75 A',
+            'ARROZ BASMATI 1KG 2,10 A',
+            'DETERGENTE LIQUIDO 5,45 E',
+            'TABLETA CHOC 85% BIO 1,90 B',
+            'TOTAL A PAGAR 18,00'
+          ].join('\n')
+        }
+      ];
+
+      const sample = samples[window._sampleReceiptIdx % samples.length];
+      window._sampleReceiptIdx++;
+
+      // Render a thermal receipt photo onto an offscreen canvas for thumbnail preview testing
+      const canvas = document.createElement('canvas');
+      canvas.width = 420;
+      canvas.height = 520;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#f8f7f2';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#1e293b';
+      ctx.textAlign = 'center';
+      ctx.font = 'bold 20px monospace';
+      ctx.fillText(sample.store, 210, 44);
+      ctx.font = '12px monospace';
+      ctx.fillStyle = '#475569';
+      ctx.fillText(sample.address, 210, 68);
+      ctx.textAlign = 'left';
+      ctx.fillStyle = '#0f172a';
+      ctx.font = '13px monospace';
+      const lines = sample.rawText.split('\n').slice(1);
+      let y = 112;
+      lines.forEach((ln, i) => {
+        if (i === lines.length - 1) {
+          ctx.font = 'bold 16px monospace';
+          y += 12;
+        }
+        ctx.fillText(ln, 28, y);
+        y += 30;
+      });
+      ctx.font = '11px monospace';
+      ctx.fillStyle = '#64748b';
+      ctx.textAlign = 'center';
+      ctx.fillText('*** GRACIAS POR SU COMPRA ***', 210, canvas.height - 32);
+
+      const samplePhotoUrl = canvas.toDataURL('image/jpeg', 0.85);
+      const parsed = parseReceiptText(sample.rawText);
+      if (parsed.items && parsed.items[sample.personalIdx]) {
+        parsed.items[sample.personalIdx].personal = true;
+      }
+
+      window._lastCapturedPhoto = samplePhotoUrl;
+      if (parsed.merchant) document.getElementById('expense-merchant-input').value = parsed.merchant;
+      if (parsed.amount !== null) document.getElementById('expense-amount-input').value = parsed.amount.toFixed(2);
+      if (parsed.date) document.getElementById('expense-date-input').value = parsed.date;
+      document.getElementById('expense-category-select').value = parsed.category || 'Groceries';
+      document.getElementById('expense-split-policy-select').value = '50/50';
+      if (parsed.notes) document.getElementById('expense-notes-textarea').value = parsed.notes;
+
+      currentFormLineItems = Array.isArray(parsed.items) ? parsed.items : [];
+      renderReceiptLineItemsForm('Sample Ticket OCR');
+
+      const previewBox = document.getElementById('form-receipt-photo-preview');
+      const previewImg = document.getElementById('form-receipt-thumbnail-img');
+      const ocrBadge = document.getElementById('ocr-detected-badge');
+      if (previewBox && previewImg) {
+        previewImg.src = samplePhotoUrl;
+        previewBox.classList.remove('hidden');
+      }
+      if (ocrBadge) ocrBadge.classList.remove('hidden');
+
+      updateTravelCurrencyPreview();
+      checkDuplicateReceiptLive();
+      showToast(`Sample OCR test loaded: ${parsed.merchant} (${household.currency}${(parsed.amount || 0).toFixed(2)}, ${currentFormLineItems.length} items)`);
     }
 
     function removeLineItemRow(idx) {
@@ -3781,6 +3978,9 @@
       if (!Array.isArray(household.customCategories)) {
         household.customCategories = [];
       }
+      if (household.showSettlementCard === undefined) {
+        household.showSettlementCard = true;
+      }
       // Guarantee dynamic members array
       if (!Array.isArray(household.members) || household.members.length === 0) {
         household.members = [
@@ -3792,16 +3992,7 @@
       household.p2Name = household.members[1] ? household.members[1].name : 'Member 2';
       household.p1Badge = household.members[0] ? household.members[0].badge : 'M1';
       household.p2Badge = household.members[1] ? household.members[1].badge : 'M2';
-      if (household.googleEmail) {
-        const elEmail = document.getElementById('user-account-email');
-        if (elEmail) elEmail.innerText = household.googleEmail;
-      }
-      if (household.googleName) {
-        const elName = document.getElementById('user-account-name');
-        const elInit = document.getElementById('user-avatar-initials');
-        if (elName) elName.innerText = household.googleName;
-        if (elInit) elInit.innerText = computeBadge(household.googleName);
-      }
+      updateAccountCardUI();
     }
 
     function addSettingsMemberRow(name = '', badge = '', color = '#10b981') {
@@ -3939,6 +4130,12 @@
         household.customCategories = catCsv.split(',').map(c => c.trim()).filter(Boolean);
       }
 
+      // Split Settlement Card visibility
+      const settleChk = document.getElementById('settings-show-settlement-checkbox');
+      if (settleChk) {
+        household.showSettlementCard = !!settleChk.checked;
+      }
+
       localStorage.setItem(SETTINGS_KEY, JSON.stringify(household));
       applyTranslations();
       updateHouseholdUI();
@@ -3981,6 +4178,10 @@
       // Populate Custom Categories
       const cInput = document.getElementById('settings-custom-categories-input');
       if (cInput) cInput.value = (household.customCategories || []).join(', ');
+
+      // Populate Settlement Card visibility toggle
+      const settleChk = document.getElementById('settings-show-settlement-checkbox');
+      if (settleChk) settleChk.checked = household.showSettlementCard !== false;
 
       // Populate Members list
       const container = document.getElementById('settings-members-list-container');
@@ -4510,9 +4711,19 @@
     }
 
 
+    function getActiveFilteredSettlements() {
+      const monthFilter = document.getElementById('ledger-month-filter') ? document.getElementById('ledger-month-filter').value : 'CURRENT';
+      if (monthFilter === 'ALL') return settlements;
+      if (monthFilter === 'CURRENT') {
+        return settlements.filter(s => isCurrentMonth(s.date));
+      }
+      return settlements.filter(s => s.date && s.date.startsWith(monthFilter));
+    }
+
     function calculateMetricsAndSettlement() {
       // Item 2: Filter by active #ledger-month-filter (CURRENT by default, or specific selected month)
       const activeExpenses = getActiveFilteredExpenses();
+      const activeSettlements = getActiveFilteredSettlements();
       const members = household.members || [
         { id: 'p1', name: 'Member 1', badge: 'M1', color: '#06b6d4' },
         { id: 'p2', name: 'Member 2', badge: 'M2', color: '#ec4899' }
@@ -4520,31 +4731,46 @@
 
       let total = 0;
       const paidByMember = {};
+      const settlePaidByMember = {};
       const fairShareByMember = {};
+      const netByMember = {};
       members.forEach(m => {
         paidByMember[m.id] = 0;
+        settlePaidByMember[m.id] = 0;
         fairShareByMember[m.id] = 0;
+        netByMember[m.id] = 0;
       });
 
       activeExpenses.forEach(e => {
         const amt = parseFloat(e.amount) || 0;
         total += amt;
 
-        if (paidByMember[e.purchaser] !== undefined) {
-          paidByMember[e.purchaser] += amt;
-        } else if (members[0]) {
-          paidByMember[members[0].id] += amt;
-        }
+        const payerId = paidByMember[e.purchaser] !== undefined
+          ? e.purchaser
+          : (members[0] ? members[0].id : 'p1');
+        paidByMember[payerId] = (paidByMember[payerId] || 0) + amt;
 
-        // Split policy calculation
+        // Split policy & Personal Line-Item deduction calculation (excludes joint home_account from member debt)
         if (e.split !== 'home_account') {
+          settlePaidByMember[payerId] = (settlePaidByMember[payerId] || 0) + amt;
+
+          const lineItems = Array.isArray(e.lineItems) ? e.lineItems : [];
+          const rawPersonal = lineItems
+            .filter(it => it && it.personal)
+            .reduce((sum, it) => sum + (parseFloat(it.price) || 0), 0);
+          const personalSum = Math.min(amt, Math.max(0, rawPersonal));
+          const sharedAmt = Math.max(0, amt - personalSum);
+
           if (e.split === '50/50' || e.split === 'shared') {
-            const share = amt / members.length;
-            members.forEach(m => fairShareByMember[m.id] += share);
-          } else if (e.split.startsWith('100_')) {
+            fairShareByMember[payerId] = (fairShareByMember[payerId] || 0) + personalSum;
+            const share = members.length > 0 ? (sharedAmt / members.length) : sharedAmt;
+            members.forEach(m => fairShareByMember[m.id] = (fairShareByMember[m.id] || 0) + share);
+          } else if (e.split && e.split.startsWith('100_')) {
             const targetP = e.split.replace('100_', '');
             if (fairShareByMember[targetP] !== undefined) {
               fairShareByMember[targetP] += amt;
+            } else {
+              fairShareByMember[payerId] += amt;
             }
           }
         }
@@ -4611,33 +4837,61 @@
         }
       }
 
-      // Net settlement balance between first two members
+      // Net settlement balance across all household members (pairs top debtor -> top creditor)
+      window._settleRecommendedPayload = null;
+      window._currentP1Net = 0;
+
       if (members.length >= 2) {
-        const p1Paid = paidByMember[members[0].id] || 0;
-        const p1Fair = fairShareByMember[members[0].id] || 0;
-        let settledP1ToP2 = 0;
-        let settledP2ToP1 = 0;
-        settlements.forEach(s => {
-          if (s.from === members[0].id) settledP1ToP2 += s.amount;
-          else if (s.from === members[1].id) settledP2ToP1 += s.amount;
+        const settledOut = {};
+        const settledIn = {};
+        members.forEach(m => {
+          settledOut[m.id] = 0;
+          settledIn[m.id] = 0;
         });
-        const p1Net = (p1Paid - p1Fair) + settledP1ToP2 - settledP2ToP1;
-        window._currentP1Net = p1Net;
+
+        activeSettlements.forEach(s => {
+          const sAmt = parseFloat(s.amount) || 0;
+          if (settledOut[s.from] !== undefined) settledOut[s.from] += sAmt;
+          if (settledIn[s.to] !== undefined) settledIn[s.to] += sAmt;
+        });
+
+        members.forEach(m => {
+          netByMember[m.id] = (settlePaidByMember[m.id] || 0) - (fairShareByMember[m.id] || 0) + (settledOut[m.id] || 0) - (settledIn[m.id] || 0);
+        });
+        window._currentP1Net = netByMember[members[0].id] || 0;
+
+        let topCreditor = members[0];
+        let topDebtor = members[1];
+        members.forEach(m => {
+          if ((netByMember[m.id] || 0) > (netByMember[topCreditor.id] || 0)) topCreditor = m;
+          if ((netByMember[m.id] || 0) < (netByMember[topDebtor.id] || 0)) topDebtor = m;
+        });
+
+        const creditorVal = netByMember[topCreditor.id] || 0;
+        const debtorVal = Math.abs(netByMember[topDebtor.id] || 0);
+        const transferAmt = Math.min(creditorVal, debtorVal);
 
         const verdictEl = document.getElementById('settlement-verdict-text');
         const detailEl = document.getElementById('settlement-detail-text');
         if (verdictEl && detailEl) {
-          if (Math.abs(p1Net) < 0.05) {
+          if (transferAmt < 0.05 || topCreditor.id === topDebtor.id) {
             verdictEl.innerHTML = `<span class="text-emerald-400"><i class="fa-solid fa-check-circle mr-1"></i> ${t.allSquaredUp}</span>`;
-            detailEl.innerText = `${members[0].name} & ${members[1].name} ${t.exactFairShareMsg}`;
-          } else if (p1Net > 0) {
-            const debt = p1Net.toFixed(2);
-            verdictEl.innerHTML = `<span style="color: ${members[1].color}">${members[1].name}</span> ${t.owesText} <span class="text-cyan-400">${cur}${debt}</span>`;
-            detailEl.innerText = `${members[1].name} ${t.transferText} ${cur}${debt} to ${members[0].name} ${t.toEqualize}`;
+            detailEl.innerText = members.length === 2
+              ? `${members[0].name} & ${members[1].name} ${t.exactFairShareMsg}`
+              : (currentLang === 'es' ? 'Todos los miembros están al día en gastos compartidos.' : 'All household members are squared up on shared expenses.');
           } else {
-            const debt = Math.abs(p1Net).toFixed(2);
-            verdictEl.innerHTML = `<span style="color: ${members[0].color}">${members[0].name}</span> ${t.owesText} <span style="color: ${members[1].color}">${cur}${debt}</span>`;
-            detailEl.innerText = `${members[0].name} ${t.transferText} ${cur}${debt} to ${members[1].name} ${t.toEqualize}`;
+            const debtStr = transferAmt.toFixed(2);
+            window._settleRecommendedPayload = {
+              from: topDebtor.id,
+              to: topCreditor.id,
+              fromName: topDebtor.name,
+              toName: topCreditor.name,
+              fromColor: topDebtor.color || '#ec4899',
+              toColor: topCreditor.color || '#06b6d4',
+              amount: parseFloat(debtStr)
+            };
+            verdictEl.innerHTML = `<span style="color: ${topDebtor.color || '#ec4899'}">${escapeHtml(topDebtor.name)}</span> <span>${t.owesText}</span> <span style="color: ${topCreditor.color || '#5fccf2'}">${cur}${debtStr}</span>`;
+            detailEl.innerText = `${topDebtor.name} ${t.transferText} ${cur}${debtStr} to ${topCreditor.name} ${t.toEqualize}`;
           }
         }
       }
@@ -5397,39 +5651,84 @@
     // POPUP: SETTLE UP MODAL & TRANSACTION HANDLING (Item 16)
     function openSettleUpModal() {
       hideAllModals();
+      pushModalHistoryState();
       const modal = document.getElementById('settle-up-modal');
-      const cur = household.currency;
+      const cur = household.currency || '€';
       const amtDisplay = document.getElementById('settle-amount-display');
       const dirText = document.getElementById('settle-direction-text');
       const btnConfirm = document.getElementById('btn-confirm-settle');
 
       document.getElementById('settle-date-input').value = new Date().toISOString().split('T')[0];
 
-      const p1Net = window._currentP1Net || 0;
-      if (Math.abs(p1Net) < 0.05) {
+      const rec = window._settleRecommendedPayload;
+      if (!rec || rec.amount < 0.05) {
         amtDisplay.innerText = `${cur}0.00`;
         dirText.innerText = 'All shared expenses are fully squared up!';
         btnConfirm.disabled = true;
         btnConfirm.className = 'px-4 py-1.5 rounded-xl text-xs font-semibold text-slate-500 bg-slate-800 cursor-not-allowed';
-      } else if (p1Net > 0) {
-        // P2 owes P1
-        const debt = p1Net.toFixed(2);
-        amtDisplay.innerText = `${cur}${debt}`;
-        dirText.innerHTML = `<span class="text-pink-400 font-bold">${household.p2Name}</span> will pay <span class="text-cyan-400 font-bold">${household.p1Name}</span>`;
-        btnConfirm.disabled = false;
-        btnConfirm.className = 'px-4 py-1.5 rounded-xl text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-500 shadow-md cursor-pointer';
-        window._settlePayload = { from: 'p2', to: 'p1', amount: parseFloat(debt) };
+        window._settlePayload = null;
       } else {
-        // P1 owes P2
-        const debt = Math.abs(p1Net).toFixed(2);
+        const debt = rec.amount.toFixed(2);
         amtDisplay.innerText = `${cur}${debt}`;
-        dirText.innerHTML = `<span class="text-cyan-400 font-bold">${household.p1Name}</span> will pay <span class="text-pink-400 font-bold">${household.p2Name}</span>`;
+        dirText.innerHTML = `<span class="font-bold" style="color: ${rec.fromColor || '#ec4899'}">${escapeHtml(rec.fromName)}</span> will pay <span class="font-bold" style="color: ${rec.toColor || '#06b6d4'}">${escapeHtml(rec.toName)}</span>`;
         btnConfirm.disabled = false;
         btnConfirm.className = 'px-4 py-1.5 rounded-xl text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-500 shadow-md cursor-pointer';
-        window._settlePayload = { from: 'p1', to: 'p2', amount: parseFloat(debt) };
+        window._settlePayload = { from: rec.from, to: rec.to, amount: parseFloat(debt) };
       }
 
+      renderSettleHistoryList();
       modal.classList.remove('hidden');
+    }
+
+    function renderSettleHistoryList() {
+      const section = document.getElementById('settle-history-section');
+      const listEl = document.getElementById('settle-history-list');
+      if (!section || !listEl) return;
+
+      if (!Array.isArray(settlements) || settlements.length === 0) {
+        section.classList.add('hidden');
+        listEl.innerHTML = '';
+        return;
+      }
+
+      const cur = household.currency || '€';
+      const members = household.members || [
+        { id: 'p1', name: household.p1Name || 'Member 1' },
+        { id: 'p2', name: household.p2Name || 'Member 2' }
+      ];
+      const nameFor = (id) => {
+        const m = members.find(x => x.id === id);
+        return m ? m.name : id;
+      };
+
+      const sorted = [...settlements].sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0)).slice(0, 10);
+      section.classList.remove('hidden');
+      listEl.innerHTML = sorted.map(s => `
+        <div class="flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-lg bg-slate-950/70 border border-slate-800/80 text-[11px]">
+          <div class="min-w-0 truncate">
+            <span class="font-semibold text-slate-200">${escapeHtml(nameFor(s.from))} &rarr; ${escapeHtml(nameFor(s.to))}</span>
+            <span class="text-slate-400 ml-1">${formatShortDate(s.date)} &bull; ${escapeHtml(s.method || 'Transfer')}</span>
+          </div>
+          <div class="flex items-center gap-2 flex-shrink-0">
+            <span class="font-bold text-emerald-400">${cur}${Number(s.amount || 0).toFixed(2)}</span>
+            <button type="button" onclick="deleteSettlement('${escapeHtml(s.id)}')"
+              class="text-slate-500 hover:text-rose-400 p-0.5 cursor-pointer" title="Undo / Remove Settlement">
+              <i class="fa-solid fa-trash-can text-[10px]"></i>
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function deleteSettlement(id) {
+      const idx = settlements.findIndex(s => s.id === id);
+      if (idx === -1) return;
+      settlements.splice(idx, 1);
+      saveSettlementsToStorage();
+      refreshDashboard();
+      renderSettleHistoryList();
+      if (firestoreDb) syncFirebaseNow(true);
+      showToast('Settlement record removed.', 'info');
     }
 
     function handleSettleUp(e) {
@@ -5455,6 +5754,7 @@
       saveSettlementsToStorage();
       closeAllModals();
       refreshDashboard();
+      if (firestoreDb) syncFirebaseNow(true);
       showToast(`Settlement payment of ${household.currency}${record.amount.toFixed(2)} recorded via ${method}!`);
     }
 
@@ -5597,19 +5897,149 @@
       deleteExpense(targetId);
     }
 
-    // GOOGLE ACCOUNT LOGIN SIMULATION & CONTROLS (Item 7)
-    function toggleAccountLogin() {
-      const email = prompt("Enter Google Account Email to connect / switch:", household.googleEmail || "user@example.com");
+    // LIVE GOOGLE ACCOUNT LOGIN VIA FIREBASE AUTH (Step 2 / Item 7)
+    function updateAccountCardUI(authUser = null) {
+      const statusBadge = document.getElementById('account-status-badge');
+      const emailEl = document.getElementById('user-account-email');
+      const nameEl = document.getElementById('user-account-name');
+      const initEl = document.getElementById('user-avatar-initials');
+      const imgEl = document.getElementById('user-avatar-img');
+      const btnSwitch = document.getElementById('btn-switch-account');
+      const btnSignOut = document.getElementById('btn-signout-account');
+
+      const isGoogleUser = !!(authUser && !authUser.isAnonymous && (authUser.email || authUser.displayName));
+      if (isGoogleUser) {
+        household.googleUid = authUser.uid || '';
+        household.googleEmail = authUser.email || household.googleEmail || '';
+        household.googleName = authUser.displayName || (household.googleEmail ? household.googleEmail.split('@')[0] : 'Household User');
+        household.googlePhoto = authUser.photoURL || '';
+        localStorage.setItem(SETTINGS_KEY, JSON.stringify(household));
+
+        if (statusBadge) statusBadge.innerHTML = '<i class="fa-brands fa-google text-emerald-400"></i> Google Verified';
+        if (nameEl) nameEl.innerText = household.googleName;
+        if (emailEl) emailEl.innerText = household.googleEmail;
+        if (imgEl && household.googlePhoto) {
+          imgEl.src = household.googlePhoto;
+          imgEl.classList.remove('hidden');
+          if (initEl) initEl.classList.add('hidden');
+        } else if (initEl) {
+          if (imgEl) imgEl.classList.add('hidden');
+          initEl.classList.remove('hidden');
+          initEl.innerText = computeBadge(household.googleName);
+        }
+        if (btnSwitch) btnSwitch.innerText = 'Switch';
+        if (btnSignOut) btnSignOut.classList.remove('hidden');
+        return;
+      }
+
+      if (household.googleEmail) {
+        if (statusBadge) statusBadge.innerHTML = '<i class="fa-brands fa-google text-cyan-400"></i> Local Profile';
+        if (nameEl) nameEl.innerText = household.googleName || 'Household User';
+        if (emailEl) emailEl.innerText = household.googleEmail;
+        if (imgEl) imgEl.classList.add('hidden');
+        if (initEl) {
+          initEl.classList.remove('hidden');
+          initEl.innerText = computeBadge(household.googleName || 'Member 1');
+        }
+        if (btnSwitch) btnSwitch.innerText = 'Google Sign-In';
+        if (btnSignOut) btnSignOut.classList.remove('hidden');
+      } else {
+        const primaryMember = (household.members && household.members[0]) || { name: 'Household User', badge: 'M1' };
+        if (statusBadge) statusBadge.innerHTML = '<i class="fa-solid fa-user-shield text-slate-400"></i> Local Guest';
+        if (nameEl) nameEl.innerText = primaryMember.name || 'Household User';
+        if (emailEl) emailEl.innerText = 'Sign in with Google';
+        if (imgEl) imgEl.classList.add('hidden');
+        if (initEl) {
+          initEl.classList.remove('hidden');
+          initEl.innerText = escapeHtml(primaryMember.badge || computeBadge(primaryMember.name));
+        }
+        if (btnSwitch) btnSwitch.innerText = 'Google Sign-In';
+        if (btnSignOut) btnSignOut.classList.add('hidden');
+      }
+    }
+
+    function ensureFirebaseAuthApp() {
+      if (!window.firebase || !firebase.auth) return null;
+      const projId = firebaseConfig.projectId || 'duospend-ef62c';
+      const apiKey = firebaseConfig.apiKey || DEFAULT_FIREBASE_API_KEY;
+      if (!firebase.apps.length && apiKey) {
+        firebase.initializeApp({
+          projectId: projId,
+          apiKey: apiKey,
+          authDomain: `${projId}.firebaseapp.com`
+        });
+      }
+      return firebase.apps.length ? firebase.auth() : null;
+    }
+
+    async function toggleAccountLogin() {
+      const auth = ensureFirebaseAuthApp();
+      if (auth && navigator.onLine) {
+        try {
+          const provider = new firebase.auth.GoogleAuthProvider();
+          provider.setCustomParameters({ prompt: 'select_account' });
+          const cred = await auth.signInWithPopup(provider);
+          if (cred && cred.user) {
+            updateAccountCardUI(cred.user);
+            showToast(`Signed in as ${cred.user.displayName || cred.user.email}`);
+            return;
+          }
+        } catch (err) {
+          const code = (err && err.code) || '';
+          if (code === 'auth/popup-blocked' || code === 'auth/operation-not-supported-in-this-environment') {
+            try {
+              const provider = new firebase.auth.GoogleAuthProvider();
+              provider.setCustomParameters({ prompt: 'select_account' });
+              await auth.signInWithRedirect(provider);
+              return;
+            } catch (redirErr) {
+              console.warn('Google Sign-In redirect notice:', redirErr);
+            }
+          } else if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
+            showToast('Google Sign-In cancelled.', 'info');
+            return;
+          } else if (code === 'auth/operation-not-allowed' || code === 'auth/unauthorized-domain') {
+            showToast('Enable Google Sign-In & add this domain in Firebase Console > Authentication.', 'info');
+          } else {
+            console.warn('Google Sign-In notice:', err);
+          }
+        }
+      }
+
+      // Offline / non-Firebase local profile fallback
+      const email = prompt("Enter Google Account Email for local profile (enable Google provider in Firebase Auth for popup sign-in):", household.googleEmail || "");
       if (email && email.trim()) {
         household.googleEmail = email.trim();
         const namePart = email.split('@')[0].replace(/[._]/g, ' ');
         household.googleName = namePart.charAt(0).toUpperCase() + namePart.slice(1);
+        household.googlePhoto = '';
         localStorage.setItem(SETTINGS_KEY, JSON.stringify(household));
-        document.getElementById('user-account-email').innerText = household.googleEmail;
-        document.getElementById('user-account-name').innerText = household.googleName;
-        document.getElementById('user-avatar-initials').innerText = household.googleName.slice(0, 2).toUpperCase();
-        showToast(`Connected Google Account: ${household.googleEmail}`);
+        updateAccountCardUI(null);
+        showToast(`Saved local profile: ${household.googleEmail}`);
       }
+    }
+
+    async function signOutGoogleAccount() {
+      try {
+        if (window.firebase && firebase.apps.length && firebase.auth) {
+          const auth = firebase.auth();
+          if (auth.currentUser && !auth.currentUser.isAnonymous) {
+            await auth.signOut();
+            if (firebaseConfig.roomCode) {
+              ensureAuth().catch(() => { });
+            }
+          }
+        }
+      } catch (err) {
+        console.warn('Sign out notice:', err);
+      }
+      delete household.googleUid;
+      delete household.googleEmail;
+      delete household.googleName;
+      delete household.googlePhoto;
+      localStorage.setItem(SETTINGS_KEY, JSON.stringify(household));
+      updateAccountCardUI(null);
+      showToast('Signed out of Google Account.', 'info');
     }
 
     // EXPORT UTILITIES & JSON IMPORT
@@ -5770,7 +6200,7 @@
     function exportToJSON() {
       const backupData = {
         app: 'DuoSpend',
-        version: 'v0.13.17',
+        version: 'v0.13.18',
         exportedAt: new Date().toISOString(),
         household,
         settlements,
@@ -5779,7 +6209,7 @@
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
       const downloadAnchor = document.createElement('a');
       downloadAnchor.setAttribute("href", dataStr);
-      downloadAnchor.setAttribute("download", `DuoSpend_Backup_v0.13.17_${new Date().toISOString().split('T')[0]}.json`);
+      downloadAnchor.setAttribute("download", `DuoSpend_Backup_v0.13.18_${new Date().toISOString().split('T')[0]}.json`);
       document.body.appendChild(downloadAnchor);
       downloadAnchor.click();
       downloadAnchor.remove();
@@ -6044,6 +6474,28 @@
       return cloned;
     }
 
+    let isAuthListenerBound = false;
+    function bindFirebaseAuthListener() {
+      if (isAuthListenerBound || !window.firebase || !firebase.auth || !firebase.apps.length) return;
+      isAuthListenerBound = true;
+      try {
+        const auth = firebase.auth();
+        if (typeof auth.getRedirectResult === 'function') {
+          auth.getRedirectResult().then(res => {
+            if (res && res.user && !res.user.isAnonymous) {
+              updateAccountCardUI(res.user);
+              showToast(`Signed in as ${res.user.displayName || res.user.email}`);
+            }
+          }).catch(() => { });
+        }
+        auth.onAuthStateChanged(user => {
+          updateAccountCardUI(user);
+        });
+      } catch (e) {
+        console.warn('Auth state listener notice:', e);
+      }
+    }
+
     function initFirebaseSync(manual = false) {
       if (!window.firebase || !firebaseConfig.projectId || !(firebaseConfig.apiKey || DEFAULT_FIREBASE_API_KEY)) {
         updateFirebaseStatus('Offline', false);
@@ -6058,6 +6510,7 @@
           };
           firebase.initializeApp(cfg);
         }
+        bindFirebaseAuthListener();
         firestoreDb = firebase.firestore();
         updateFirebaseStatus('Connected', true);
 

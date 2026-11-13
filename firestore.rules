@@ -1,14 +1,29 @@
 rules_version = '2';
 
-// DuoSpend Firestore Security Rules (v0.13.6)
+// DuoSpend Firestore Security Rules (v0.13.18)
 // Paste into Firebase Console > Firestore Database > Rules, then Publish.
 service cloud.firestore {
   match /databases/{database}/documents {
 
     match /households/{roomId} {
-      // Room codes must be at least 10 characters (cryptographically random unguessable token)
-      // Any authorized device possessing the private room code can read and write to their household ledger
-      allow get, write: if roomId.size() >= 10;
+      // Room codes must be at least 10 characters (cryptographically random unguessable token).
+      // Devices holding the private room code can read and write allowed household ledger fields,
+      // and respect an optional per-room `requireGoogleAuth` flag when enabled.
+      allow get: if roomId.size() >= 10
+        && (resource == null
+            || !resource.data.get('requireGoogleAuth', false)
+            || (request.auth != null && request.auth.token.firebase.sign_in_provider != 'anonymous'));
+
+      allow create, update: if roomId.size() >= 10
+        && (resource == null
+            || !resource.data.get('requireGoogleAuth', false)
+            || (request.auth != null && request.auth.token.firebase.sign_in_provider != 'anonymous'))
+        && request.resource.data.keys().hasOnly([
+          'updatedAt', 'updatedBy', 'household', 'expenses',
+          'deletedExpenseIds', 'settlements', 'members', 'requireGoogleAuth'
+        ]);
+
+      allow delete: if false; // Disallow deleting shared household rooms from client
       allow list: if false; // Disallow enumerating/listing all households
     }
 
