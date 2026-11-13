@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="512"
+   height="512"
+   viewBox="0 0 135.46667 135.46666"
+   version="1.1"
+   id="svg3"
+   sodipodi:docname="duospend_ic_launcher_foreground.svg"
+   inkscape:version="1.4.4 (dcaf3e7, 2026-05-05)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview3"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="1.6338034"
+     inkscape:cx="129.14651"
+     inkscape:cy="293.48697"
+     inkscape:window-width="3440"
+     inkscape:window-height="1385"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg3" />
+  <defs
+     id="defs2">
+    <radialGradient
+       id="bgGlow"
+       cx="2.13"
+       cy="128.53"
+       r="165"
+       gradientUnits="userSpaceOnUse">
+      <stop
+         offset="0"
+         stop-color="#ffffff"
+         stop-opacity="0.22"
+         id="stop1" />
+      <stop
+         offset="0.65"
+         stop-color="#ffffff"
+         stop-opacity="0"
+         id="stop2" />
+    </radialGradient>
+  </defs>
+  <!-- Base cyan background + subtle glow -->
+  <!-- DuoSpend double-walled D monogram -->
+  <path
+     fill="#324069"
+     stroke="#324069"
+     stroke-width="0.525065"
+     stroke-linejoin="round"
+     d="m 41.288396,34.129198 v 67.208272 h 18.190771 c 7.051991,0 13.180576,-1.503781 18.387251,-4.512111 5.27245,-3.0084 9.293236,-7.072895 12.061286,-12.193531 2.83397,-5.120645 4.250565,-10.81801 4.250565,-17.090785 0,-6.208766 -1.416595,-11.841016 -4.250565,-16.897631 -2.76805,-5.120647 -6.788836,-9.153437 -12.061286,-12.097819 -5.20668,-2.944384 -11.33526,-4.416395 -18.387251,-4.416395 z m 9.090606,13.435386 h 10.5634 c 4.095176,0 7.654501,0.873067 10.678071,2.620018 3.061765,1.747015 5.3964,4.10749 7.00384,7.08109 1.64571,2.97361 2.4684,6.282336 2.4684,9.925011 0,3.60548 -0.822685,6.876065 -2.4684,9.812475 -1.60744,2.97361 -3.942075,5.31558 -7.00384,7.02541 -3.02358,1.709845 -6.58291,2.564335 -10.678071,2.564335 h -10.5634 v -4.981355 h 9.081645 c 3.520696,0 6.580161,-0.64371 9.179601,-1.93094 2.632245,-1.287225 4.63943,-3.050125 6.02137,-5.288765 1.41486,-2.210655 2.122595,-4.67302 2.122595,-7.38736 0,-2.742345 -0.707735,-5.232796 -2.122595,-7.471451 -1.38194,-2.238635 -3.389125,-4.015895 -6.02137,-5.331115 -2.59943,-1.31517 -5.65889,-1.972695 -9.179601,-1.972695 h -9.081645 z"
+     id="path3" />
+  <g
+     inkscape:groupmode="layer"
+     id="layer3"
+     inkscape:label="ic_launcher_foreground" />
+</svg>

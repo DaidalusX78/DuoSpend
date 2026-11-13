@@ -1,12 +1,11 @@
-// DuoSpend Service Worker v0.13.11
-const CACHE_NAME = 'duospend-cache-v0.13.11';
+// DuoSpend Service Worker v0.13.12
+const CACHE_NAME = 'duospend-cache-v0.13.12';
 const ASSETS_TO_CACHE = [
   './duospend.html',
   './manifest.json',
   './src/images/duospend_icon.svg',
   './src/images/icon-192.png',
   './src/images/icon-512.png',
-  './src/images/logo-1024x1024.png',
   'https://cdn.tailwindcss.com',
   'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js',
   'https://cdn.jsdelivr.net/npm/chart.js',
