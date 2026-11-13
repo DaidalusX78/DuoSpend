@@ -8,7 +8,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#5fccf2" />
-  <title>DuoSpend v0.13.12 — Household Receipt & Expense Tracker</title>
+  <title>DuoSpend v0.13.13 — Household Receipt & Expense Tracker</title>
 
   <!-- Private Local API Keys Vault (git-ignored, never pushed to public repo) -->
   <script src="./secrets.local.js" onerror="window._noLocalSecrets=true"></script>
@@ -61,28 +61,32 @@
       transition: background-color 0.25s ease, color 0.25s ease;
     }
 
-    /* Dark Mode Defaults — Unified Surfaces (#0b0f19 bg, rgb(24,24,24) cards, #FFD230 highlights) */
+    /* Dark Mode Defaults — DuoSpend Navy & Cyan (#5fccf2 bg, #324069 cards, #5fccf2 highlights, #ffffff text) */
     html.dark body {
-      background-color: #0b0f19;
-      color: #e2e8f0;
+      background-color: #5fccf2 !important;
+      color: #ffffff;
     }
 
     html.dark .glass-card {
-      background: rgb(24, 24, 24) !important;
+      background: #324069 !important;
       background-image: none !important;
       backdrop-filter: blur(12px);
-      border-top-color: rgba(255, 255, 255, 0.09) !important;
-      border-right-color: rgba(255, 255, 255, 0.09) !important;
-      border-bottom-color: rgba(255, 255, 255, 0.09) !important;
+      color: #ffffff;
+      box-shadow: 0 10px 28px rgba(18, 26, 51, 0.25);
+      border-top-color: rgba(255, 255, 255, 0.16) !important;
+      border-right-color: rgba(255, 255, 255, 0.16) !important;
+      border-bottom-color: rgba(255, 255, 255, 0.16) !important;
     }
 
     html.dark .glass-modal,
     html.dark #hamburger-drawer-panel,
     html.dark #settlement-card {
-      background: rgb(24, 24, 24) !important;
+      background: #324069 !important;
       background-image: none !important;
       backdrop-filter: blur(12px);
-      border-color: rgba(255, 255, 255, 0.09) !important;
+      color: #ffffff;
+      box-shadow: 0 12px 32px rgba(18, 26, 51, 0.35);
+      border-color: rgba(255, 255, 255, 0.16) !important;
     }
 
     /* Clean up mismatched slate-800/900/950 inner card backgrounds in Dark Mode */
@@ -98,8 +102,8 @@
     html.dark .glass-modal .bg-slate-900\/60,
     html.dark #hamburger-drawer-panel .dark\:bg-slate-900,
     html.dark #hamburger-drawer-panel .bg-slate-900 {
-      background-color: rgb(32, 32, 32) !important;
-      border-color: rgba(255, 255, 255, 0.08) !important;
+      background-color: #273356 !important;
+      border-color: rgba(255, 255, 255, 0.12) !important;
     }
 
     html.dark .glass-card .bg-slate-950,
@@ -109,14 +113,20 @@
     html.dark input,
     html.dark select,
     html.dark textarea {
-      background-color: rgb(16, 16, 16) !important;
-      border-color: rgba(255, 255, 255, 0.12) !important;
+      background-color: #1f2947 !important;
+      border-color: rgba(255, 255, 255, 0.18) !important;
+      color: #ffffff !important;
+    }
+
+    html.dark input::placeholder,
+    html.dark textarea::placeholder {
+      color: rgba(255, 255, 255, 0.6) !important;
     }
 
     html.dark input:focus,
     html.dark select:focus,
     html.dark textarea:focus {
-      border-color: #FFD230 !important;
+      border-color: #5fccf2 !important;
     }
 
     html.dark .dark\:bg-slate-800,
@@ -124,8 +134,9 @@
     html.dark .dark\:bg-slate-800\/60,
     html.dark .bg-slate-800,
     html.dark .bg-slate-800\/80 {
-      background-color: rgb(36, 36, 36) !important;
-      border-color: rgba(255, 255, 255, 0.1) !important;
+      background-color: #3d4d7c !important;
+      border-color: rgba(255, 255, 255, 0.16) !important;
+      color: #ffffff !important;
     }
 
     html.dark .border-slate-800,
@@ -133,20 +144,32 @@
     html.dark .border-slate-700\/80,
     html.dark .dark\:border-slate-800,
     html.dark .dark\:border-slate-700 {
-      border-color: rgba(255, 255, 255, 0.08) !important;
+      border-color: rgba(255, 255, 255, 0.14) !important;
     }
 
-    /* Dark Mode Highlights & Primary Buttons (#FFD230) */
+    html.dark .glass-card .text-slate-300,
+    html.dark .glass-card .text-slate-400,
+    html.dark .glass-card .text-slate-500,
+    html.dark .glass-modal .text-slate-300,
+    html.dark .glass-modal .text-slate-400,
+    html.dark .glass-modal .text-slate-500,
+    html.dark #hamburger-drawer-panel .text-slate-300,
+    html.dark #hamburger-drawer-panel .text-slate-400,
+    html.dark #hamburger-drawer-panel .text-slate-500 {
+      color: rgba(255, 255, 255, 0.85) !important;
+    }
+
+    /* Dark Mode Highlights & Primary Buttons (#5fccf2) */
     html.dark #hamburger-drawer-panel .bg-gradient-to-tr,
     html.dark #user-tutorial-modal-backdrop .bg-gradient-to-tr {
-      background: #FFD230 !important;
-      color: #0b0f19 !important;
-      box-shadow: 0 4px 16px rgba(255, 210, 48, 0.25) !important;
+      background: #5fccf2 !important;
+      color: #1b2544 !important;
+      box-shadow: 0 4px 16px rgba(95, 204, 242, 0.3) !important;
     }
 
     html.dark #hamburger-drawer-panel .bg-gradient-to-tr i,
     html.dark #user-tutorial-modal-backdrop .bg-gradient-to-tr i {
-      color: #0b0f19 !important;
+      color: #1b2544 !important;
     }
 
     html.dark .text-brand-500,
@@ -164,7 +187,7 @@
     html.dark #firebase-sync-pct-text,
     html.dark #menu-credits-text~i,
     html.dark #hamburger-drawer-panel .fa-copyright {
-      color: #FFD230 !important;
+      color: #5fccf2 !important;
     }
 
     html.dark .bg-indigo-500\/10,
@@ -172,29 +195,29 @@
     html.dark .bg-indigo-600\/10,
     html.dark .bg-indigo-600\/30,
     html.dark .bg-indigo-950\/60 {
-      background-color: rgba(255, 210, 48, 0.12) !important;
-      border-color: rgba(255, 210, 48, 0.35) !important;
-      color: #FFD230 !important;
+      background-color: rgba(95, 204, 242, 0.16) !important;
+      border-color: rgba(95, 204, 242, 0.4) !important;
+      color: #5fccf2 !important;
     }
 
     html.dark .bg-indigo-600\/10:hover,
     html.dark .hover\:bg-indigo-600\/20:hover {
-      background-color: rgba(255, 210, 48, 0.2) !important;
+      background-color: rgba(95, 204, 242, 0.25) !important;
     }
 
     html.dark #app-version-badge,
     html.dark #drawer-version-badge {
-      background-color: rgba(255, 210, 48, 0.12) !important;
-      border-color: rgba(255, 210, 48, 0.45) !important;
-      color: #FFD230 !important;
+      background-color: rgba(95, 204, 242, 0.16) !important;
+      border-color: rgba(95, 204, 242, 0.5) !important;
+      color: #ffffff !important;
     }
 
     html.dark #firebase-sync-progress-bar,
     html.dark #budget-progress-bar {
-      background: #FFD230 !important;
+      background: #5fccf2 !important;
     }
 
-    /* Primary Action Buttons in Dark Mode (#FFD230 bg + crisp dark text) */
+    /* Primary Action Buttons in Dark Mode (#5fccf2 bg + crisp dark navy text) */
     html.dark #btn-add-expense-manual,
     html.dark #btn-scan-receipt,
     html.dark #btn-settle-up,
@@ -203,10 +226,10 @@
     html.dark #chart-mode-toggle-group button.bg-brand-600,
     html.dark .glass-modal button[type="submit"],
     html.dark #user-tutorial-modal-backdrop button[onclick*="closeTutorialModal"] {
-      background: #FFD230 !important;
-      background-color: #FFD230 !important;
-      color: #0b0f19 !important;
-      box-shadow: 0 4px 14px rgba(255, 210, 48, 0.2) !important;
+      background: #5fccf2 !important;
+      background-color: #5fccf2 !important;
+      color: #1b2544 !important;
+      box-shadow: 0 4px 14px rgba(95, 204, 242, 0.25) !important;
     }
 
     html.dark #btn-add-expense-manual:hover,
@@ -214,9 +237,9 @@
     html.dark #btn-settle-up:hover,
     html.dark #btn-firebase-sync-now:hover,
     html.dark .glass-modal button[type="submit"]:hover {
-      background: #ffe066 !important;
-      background-color: #ffe066 !important;
-      color: #0b0f19 !important;
+      background: #7ed8f6 !important;
+      background-color: #7ed8f6 !important;
+      color: #1b2544 !important;
     }
 
     html.dark #btn-add-expense-manual *,
@@ -224,7 +247,7 @@
     html.dark #btn-settle-up *,
     html.dark #btn-firebase-sync-now *,
     html.dark .glass-modal button[type="submit"] * {
-      color: #0b0f19 !important;
+      color: #1b2544 !important;
     }
 
     /* Light Mode (Day Theme) */
@@ -366,13 +389,13 @@
     }
 
     #btn-reset-filters {
-      background-color: rgb(36, 36, 36) !important;
+      background-color: #3d4d7c !important;
       color: #ffffff !important;
-      border-color: rgba(255, 255, 255, 0.12) !important;
+      border-color: rgba(255, 255, 255, 0.16) !important;
     }
 
     #btn-reset-filters:hover {
-      background-color: rgb(48, 48, 48) !important;
+      background-color: #4a5c91 !important;
       color: #ffffff !important;
     }
 
@@ -403,12 +426,12 @@
       border-color: #f1f5f9 !important;
     }
 
-    /* Dark mode: match drawer icons to #FFD230 highlight */
+    /* Dark mode: match drawer icons to #5fccf2 highlight */
     html.dark #icon-toggle-fullscreen,
     html.dark #btn-menu-settings i,
     html.dark #btn-menu-settings .fa-sliders,
     html.dark #btn-menu-guide i {
-      color: #FFD230 !important;
+      color: #5fccf2 !important;
     }
 
     /* Enforced #ffffff for closeAllModals buttons and split badges in all modes (Item 1) */
@@ -483,20 +506,9 @@
       <div id="brand-header-row" class="flex items-center justify-between w-full md:w-auto">
         <!-- Left Group: Brand Logo -->
         <div id="brand-logo-section" class="flex items-center space-x-3">
-          <div id="brand-logo-icon"
-            class="h-10 w-10 rounded-xl overflow-hidden flex items-center justify-center shadow-lg shadow-brand-500/25 flex-shrink-0">
-            <img src="./src/images/duospend_icon.svg" alt="DuoSpend Logo" class="h-full w-full object-cover" />
-          </div>
-          <div id="brand-title-group">
-            <div id="brand-title-row" class="flex items-center gap-2">
-              <span class="font-extrabold text-xl tracking-tight text-slate-900 dark:text-white">Duo<span
-                  class="text-brand-500">Spend</span></span>
-              <span id="app-version-badge"
-                class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-brand-50 text-brand-600 border border-brand-200 dark:bg-slate-800 dark:!text-white dark:border-brand-500/40">v0.13.12</span>
-            </div>
-            <p id="brand-subtitle" class="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">Receipt scanning &
-              balanced expense splitting</p>
-          </div>
+          <img src="./src/images/DuoSpend_Theme_Logo.svg" alt="DuoSpend" class="h-10 w-auto object-contain" />
+          <span id="app-version-badge"
+            class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-brand-50 text-brand-600 border border-brand-200 dark:bg-slate-800 dark:!text-white dark:border-brand-500/40">v0.13.13</span>
         </div>
 
         <!-- Mobile Hamburger Button (inline to brand logo on mobile right) -->
@@ -587,7 +599,7 @@
               <span class="text-xl sm:text-2xl font-extrabold text-white">Duo<span
                   class="text-brand-500">Spend</span></span>
               <span id="drawer-version-badge"
-                class="text-xs font-bold px-2 py-0.5 rounded-full bg-brand-50 text-brand-600 border border-brand-200 dark:bg-slate-800 dark:!text-white dark:border-brand-500/40 ml-1">v0.13.12</span>
+                class="text-xs font-bold px-2 py-0.5 rounded-full bg-brand-50 text-brand-600 border border-brand-200 dark:bg-slate-800 dark:!text-white dark:border-brand-500/40 ml-1">v0.13.13</span>
             </div>
           </div>
           <button onclick="closeAllModals()"
@@ -762,11 +774,6 @@
               class="px-3 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 dark:bg-slate-800/80 dark:hover:bg-slate-700/90 dark:text-slate-100 dark:border-slate-700/80 font-semibold flex items-center justify-center gap-2 transition cursor-pointer shadow-sm">
               <i class="fa-solid fa-upload text-cyan-500"></i> <span id="text-btn-import-json">Import JSON</span>
             </button>
-            <button onclick="invoiceToJSON()"
-              class="col-span-2 px-3 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 dark:bg-slate-800/80 dark:hover:bg-slate-700/90 dark:text-slate-100 dark:border-slate-700/80 font-semibold flex items-center justify-center gap-2 transition cursor-pointer shadow-sm"
-              title="Export all receipts and invoices as JSON">
-              <i class="fa-solid fa-receipt text-amber-500"></i> <span id="text-btn-invoice-json">Invoices JSON</span>
-            </button>
           </div>
           <input type="file" id="json-import-input" accept=".json,application/json" class="hidden"
             onchange="handleJSONImport(event)">
@@ -828,7 +835,7 @@
           <span id="menu-credits-text">Designed & created by <strong class="text-white font-semibold">Marc Bailey
               2026</strong></span>
         </div>
-        <div class="text-xs text-slate-500 mt-1">DuoSpend v0.13.12 — Android Ready Architecture</div>
+        <div class="text-xs text-slate-500 mt-1">DuoSpend v0.13.13 — Android Ready Architecture</div>
       </div>
 
     </div>
@@ -2625,9 +2632,6 @@
       document.getElementById('text-btn-export-csv').innerText = t.exportCSV;
       document.getElementById('text-btn-backup-json').innerText = t.backupJSON;
       document.getElementById('text-btn-import-json').innerText = t.importJSON;
-      const invBtn = document.getElementById('text-btn-invoice-json');
-      if (invBtn) invBtn.innerText = t.invoicesJSON || 'Invoices JSON';
-
       document.getElementById('ledger-search-input').placeholder = t.searchPlaceholder;
       document.getElementById('text-btn-clear-filters').innerText = t.clearFilters;
 
@@ -3568,49 +3572,6 @@
           modal.classList.remove('hidden');
         }
       }
-    }
-
-    // INVOICE / RECEIPT DATA TO JSON EXPORT (Item 4)
-    function invoiceToJSON() {
-      const invoices = expenses.map(exp => ({
-        id: exp.id,
-        date: exp.date,
-        merchant: exp.merchant,
-        amount: exp.amount,
-        currency: household.currency,
-        category: exp.category,
-        purchaser: exp.purchaser === 'p1' ? household.p1Name : household.p2Name,
-        splitPolicy: exp.split,
-        notes: exp.notes || '',
-        hasReceiptImage: !!exp.receiptImage,
-        receiptImage: exp.receiptImage || null
-      }));
-
-      const exportPayload = {
-        app: 'DuoSpend',
-        version: 'v0.11',
-        exportType: 'invoices_and_receipts',
-        exportTimestamp: new Date().toISOString(),
-        totalExpensesCount: invoices.length,
-        household: {
-          currency: household.currency,
-          members: [household.p1Name, household.p2Name]
-        },
-        invoices: invoices
-      };
-
-      const jsonStr = JSON.stringify(exportPayload, null, 2);
-      const blob = new Blob([jsonStr], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `duospend_invoices_${new Date().toISOString().split('T')[0]}.json`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-
-      showToast(`Exported ${invoices.length} invoices to JSON!`);
     }
 
     // SETTINGS MANAGEMENT (Items 5, 7, 9 & v0.11 Item 3)
@@ -5562,7 +5523,7 @@
     function exportToJSON() {
       const backupData = {
         app: 'DuoSpend',
-        version: 'v0.13.12',
+        version: 'v0.13.13',
         exportedAt: new Date().toISOString(),
         household,
         settlements,
@@ -5571,7 +5532,7 @@
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
       const downloadAnchor = document.createElement('a');
       downloadAnchor.setAttribute("href", dataStr);
-      downloadAnchor.setAttribute("download", `DuoSpend_Backup_v0.13.12_${new Date().toISOString().split('T')[0]}.json`);
+      downloadAnchor.setAttribute("download", `DuoSpend_Backup_v0.13.13_${new Date().toISOString().split('T')[0]}.json`);
       document.body.appendChild(downloadAnchor);
       downloadAnchor.click();
       downloadAnchor.remove();
