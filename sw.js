@@ -5,7 +5,6 @@ const LOCAL_ASSETS = [
   './manifest.json',
   './favicon.ico',
   './src/images/duospend_icon.svg',
-  './src/images/DuoSpend_Theme_Logo.svg',
   './src/images/favicon-32x32.png',
   './src/images/favicon-16x16.png',
   './src/images/icon-192.png',
